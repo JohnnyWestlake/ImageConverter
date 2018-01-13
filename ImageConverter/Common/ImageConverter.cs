@@ -47,8 +47,8 @@ namespace ImageConverter.Common
                                 decoder.OrientedPixelHeight, 
                                 decoder.DpiX, 
                                 decoder.DpiY, 
-                                (await decoder.GetPixelDataAsync().AsTask().ConfigureAwait(false)).DetachPixelData())
-                                ;
+                                (await decoder.GetPixelDataAsync().AsTask().ConfigureAwait(false)).DetachPixelData());
+
                             await encoder.FlushAsync().AsTask().ConfigureAwait(false);
                         }
                     }

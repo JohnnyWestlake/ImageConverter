@@ -38,5 +38,7 @@ namespace ImageConverter
             appView.TitleBar.ButtonBackgroundColor = Colors.Transparent;
             appView.TitleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
         }
+
+        public bool Invert(bool b) => !b;
     }
 }

@@ -36,11 +36,18 @@
                     Margin="10 0 30 0"
                     VerticalAlignment="Bottom"
                     Click="{x:Bind ViewModel.DestinationClick}"
-                    Content="..." />
+                    Content="..."
+                    IsEnabled="{x:Bind Invert(ViewModel.IsBusy), Mode=OneWay}" />
 
-            <ComboBox Grid.Column="2" Margin="10 0 0 0" Header="Output Format" />
+            <ComboBox Grid.Column="2"
+                      Margin="10 0 0 0"
+                      Header="Output Format"
+                      IsEnabled="{x:Bind Invert(ViewModel.IsBusy), Mode=OneWay}" />
 
-            <ComboBox Grid.Column="3" Margin="10 0 0 0" Header="Output Quality" />
+            <ComboBox Grid.Column="3"
+                      Margin="10 0 0 0"
+                      Header="Output Quality"
+                      IsEnabled="{x:Bind Invert(ViewModel.IsBusy), Mode=OneWay}" />
 
         </Grid>
 
@@ -58,16 +65,26 @@
             <Button Grid.Column="0"
                     Margin="0 0 10 0"
                     Click="{x:Bind ViewModel.AddFilesClick}"
-                    Content="Add Files" />
-            <Button Grid.Column="1" Margin="0 0 10 0" Content="Remove Files" />
-            <Button Grid.Column="2" Margin="0 0 10 0" Content="Clear Files" />
+                    Content="Add Files"
+                    IsEnabled="{x:Bind Invert(ViewModel.IsBusy), Mode=OneWay}" />
+            <Button Grid.Column="1"
+                    Margin="0 0 10 0"
+                    Content="Remove Files"
+                    IsEnabled="{x:Bind Invert(ViewModel.IsBusy), Mode=OneWay}" />
+            <Button Grid.Column="2"
+                    Margin="0 0 10 0"
+                    Content="Clear Files"
+                    IsEnabled="{x:Bind Invert(ViewModel.IsBusy), Mode=OneWay}" />
 
-            <Button Grid.Column="5" Click="{x:Bind ViewModel.ConvertClick}" Content="Convert" />
+            <Button Grid.Column="5"
+                    Click="{x:Bind ViewModel.ConvertClick}"
+                    Content="Convert"
+                    IsEnabled="{x:Bind Invert(ViewModel.IsBusy), Mode=OneWay}" />
 
         </Grid>
 
         <!--  FILES VIEW  -->
-        <ListView Grid.Row="3" ItemsSource="{x:Bind ViewModel.FileList}">
+        <ListView Grid.Row="3" IsEnabled="{x:Bind Invert(ViewModel.IsBusy), Mode=OneWay}" ItemsSource="{x:Bind ViewModel.FileList}">
             <ListView.Resources>
                 <Style TargetType="ListViewItem">
                     <Setter Property="HorizontalAlignment" Value="Stretch" />

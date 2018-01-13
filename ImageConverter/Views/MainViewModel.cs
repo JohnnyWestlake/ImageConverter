@@ -16,6 +16,8 @@ namespace ImageConverter.Views
     {
         public ObservableCollection<ImageViewModel> FileList { get; }
 
+        public bool IsBusy { get => GetV(false); set => Set(value); }
+
         public StorageFolder ExportFolder
         {
             get => Get<StorageFolder>();
@@ -85,6 +87,8 @@ namespace ImageConverter.Views
             if (FileList.Count == 0)
                 return;
 
+            IsBusy = true;
+
             var options = new ConversionOptions
             {
                 EncoderId = BitmapEncoder.JpegXREncoderId,
@@ -93,6 +97,8 @@ namespace ImageConverter.Views
 
             options.EncodingOptions.Add(new JpegQualityOption { ImageQuality = 0.9f });
             await Common.ImageConverter.ConvertAsync(FileList.ToList(), ExportFolder, options);
+
+            IsBusy = false;
         }
     }
 }
