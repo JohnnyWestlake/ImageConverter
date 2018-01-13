@@ -30,7 +30,7 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <TextBox Header="Output Directory" IsEnabled="False" Text="{x:Bind ViewModel.ExportFolder.Path, FallbackValue='', TargetNullValue=''}" />
+            <TextBox Header="Output Directory" IsEnabled="False" Text="{x:Bind ViewModel.ExportFolder.Path, FallbackValue='', TargetNullValue='', Mode=OneWay}" />
 
             <Button Grid.Column="1"
                     Margin="10 0 30 0"
