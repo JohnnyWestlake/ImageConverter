@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ImageConverter.Bitmap;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,6 +12,7 @@ namespace ImageConverter.Common
     {
         public Guid EncoderId { get; set; }
         public string FileExtention { get; set; }
-        public CreationCollisionOption CollisionOption { get; set; }
+        public CreationCollisionOption CollisionOption { get; set; } = CreationCollisionOption.ReplaceExisting;
+        public List<IBitmapEncodingOption> EncodingOptions { get; set; } = new List<IBitmapEncodingOption>();
     }
 }

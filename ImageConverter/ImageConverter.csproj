@@ -17,7 +17,8 @@
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{A5A43C5B-DE2A-4C0C-9213-0A381AF9435A};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WindowsXamlEnableOverview>true</WindowsXamlEnableOverview>
-    <PackageCertificateKeyFile>ImageConverter_TemporaryKey.pfx</PackageCertificateKeyFile>
+    <PackageCertificateKeyFile>ImageConverter_StoreKey.pfx</PackageCertificateKeyFile>
+    <PackageCertificateThumbprint>CAC48E38632496A1487477B8CFE54A9966FAF45A</PackageCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
@@ -102,9 +103,10 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="Common\BindableBase.cs" />
+    <Compile Include="Common\BitmapEncodingOption.cs" />
     <Compile Include="Common\ConversionOptions.cs" />
     <Compile Include="Common\HostBackdropBrush.cs" />
-    <Compile Include="Common\ImageLoader.cs" />
+    <Compile Include="Common\ImageConverter.cs" />
     <Compile Include="Common\ImageViewModel.cs" />
     <Compile Include="Common\Logger.cs" />
     <Compile Include="Common\ObservableFileDictionary.cs" />
@@ -118,9 +120,11 @@
     <AppxManifest Include="Package.appxmanifest">
       <SubType>Designer</SubType>
     </AppxManifest>
+    <None Include="ImageConverter_StoreKey.pfx" />
     <None Include="ImageConverter_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Package.StoreAssociation.xml" />
     <Content Include="Properties\Default.rd.xml" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />
     <Content Include="Assets\SplashScreen.scale-200.png" />

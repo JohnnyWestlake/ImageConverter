@@ -12,15 +12,15 @@ namespace ImageConverter.Common
     {
         public StorageFile File { get; private set; }
         public string Size { get; private set; }
+        public string Status { get; set; }
+        public string ExtendedStatus { get; set; }
 
         private ImageViewModel(StorageFile file, double filesize)
         {
             File = file;
-            Size = $"{file} MB";
+            Size = $"{filesize:0.00} MB";
         }
     }
-
-
 
     public partial class ImageViewModel
     {

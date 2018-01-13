@@ -1,4 +1,5 @@
-﻿using ImageConverter.Common;
+﻿using ImageConverter.Bitmap;
+using ImageConverter.Common;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -59,7 +60,7 @@ namespace ImageConverter.Views
                 CommitButtonText = "Select"
             };
 
-            foreach (var type in ImageLoader.SupportedFileTypes)
+            foreach (var type in Common.ImageConverter.SupportedFileTypes)
                 picker.FileTypeFilter.Add(type);
 
             var files = await picker.PickMultipleFilesAsync();
@@ -84,12 +85,14 @@ namespace ImageConverter.Views
             if (FileList.Count == 0)
                 return;
 
-            await ImageLoader.ConvertAsync(FileList.ToList(), ExportFolder, new ConversionOptions
+            var options = new ConversionOptions
             {
-                EncoderId = BitmapEncoder.PngEncoderId,
-                CollisionOption = CreationCollisionOption.ReplaceExisting,
-                FileExtention = ".png"
-            });
+                EncoderId = BitmapEncoder.JpegXREncoderId,
+                FileExtention = ".wdp"
+            };
+
+            options.EncodingOptions.Add(new JpegQualityOption { ImageQuality = 0.9f });
+            await Common.ImageConverter.ConvertAsync(FileList.ToList(), ExportFolder, options);
         }
     }
 }
