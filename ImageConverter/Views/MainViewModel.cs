@@ -1,5 +1,6 @@
 ﻿using ImageConverter.Bitmap;
 using ImageConverter.Common;
+using ImageConverter.Core;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -14,20 +15,80 @@ namespace ImageConverter.Views
 {
     public class MainViewModel : BindableBase
     {
-        public ObservableCollection<ImageViewModel> FileList { get; }
+        public List<ImageFormat> ImageFormats { get; }
 
-        public bool IsBusy { get => GetV(false); set => Set(value); }
+        public ObservableCollection<ImageViewModel> FileList { get; }
+        public ObservableCollection<object> SelectedFiles { get; }
+
+        public bool IsBusy { get => GetV(false); private set => Set(value); }
+        public bool HasSelectedItems => SelectedFiles.Count > 0;
+        public bool HasItems => FileList.Count > 0;
+        public bool HasExportFolder => ExportFolder != null;
 
         public StorageFolder ExportFolder
         {
             get => Get<StorageFolder>();
+            private set => Set(value, nameof(ExportFolder), nameof(HasExportFolder));
+        }
+
+        public ImageFormat SelectedFormat
+        {
+            get => Get<ImageFormat>();
             set => Set(value);
         }
+
+
+
 
         public MainViewModel()
         {
             FileList = new ObservableCollection<ImageViewModel>();
+            SelectedFiles = new ObservableCollection<object>();
+
+            SelectedFiles.CollectionChanged += SelectedFiles_CollectionChanged;
+            ImageFormats = ImageConverterCore.GetImageFormats();
+            SelectedFormat = ImageFormats.FirstOrDefault();
         }
+
+        private void SelectedFiles_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            OnPropertyChanged(nameof(HasSelectedItems));
+        }
+
+
+
+
+
+
+        public void AddFilesClick()
+        {
+            Task _ = AddFilesAsync();
+        }
+
+        public void RemoveFilesClick()
+        {
+            RemoveFiles();
+        }
+
+        public void DestinationClick()
+        {
+            Task _ = ChooseExportFolderAsync();
+        }
+
+        public void ClearClick()
+        {
+            FileList.Clear();
+            OnPropertyChanged(nameof(HasItems));
+        }
+
+        public void ConvertClick()
+        {
+            Task _ = ConvertAsync();
+        }
+
+
+
+
 
         private async Task ChooseExportFolderAsync()
         {
@@ -40,21 +101,6 @@ namespace ImageConverter.Views
             }
         }
 
-        public void AddFilesClick()
-        {
-            Task _ = AddFilesAsync();
-        }
-
-        public void DestinationClick()
-        {
-            Task _ = ChooseExportFolderAsync();
-        }
-
-        public void ConvertClick()
-        {
-            Task _ = ConvertAsync();
-        }
-
         async Task AddFilesAsync()
         {
             var picker = new FileOpenPicker
@@ -62,10 +108,13 @@ namespace ImageConverter.Views
                 CommitButtonText = "Select"
             };
 
-            foreach (var type in Common.ImageConverter.SupportedFileTypes)
+            foreach (var type in ImageConverterCore.SupportedFileTypes)
                 picker.FileTypeFilter.Add(type);
 
+            IsBusy = true;
+
             var files = await picker.PickMultipleFilesAsync();
+
 
             List<StorageFile> _tooAdd = new List<StorageFile>();
             foreach( var file in files)
@@ -80,6 +129,9 @@ namespace ImageConverter.Views
             {
                 FileList.Add(item);
             }
+
+            OnPropertyChanged(nameof(HasItems));
+            IsBusy = false;
         }
 
         async Task ConvertAsync()
@@ -91,14 +143,25 @@ namespace ImageConverter.Views
 
             var options = new ConversionOptions
             {
-                EncoderId = BitmapEncoder.JpegXREncoderId,
-                FileExtention = ".wdp"
+                EncoderId = SelectedFormat.CodecInfo.CodecId,
+                FileExtention = SelectedFormat.DefaultFileExtension,
             };
 
-            options.EncodingOptions.Add(new JpegQualityOption { ImageQuality = 0.9f });
-            await Common.ImageConverter.ConvertAsync(FileList.ToList(), ExportFolder, options);
+            if (JpegQualityOption.SupportedEncoders.Contains(options.EncoderId))
+                options.EncodingOptions.Add(new JpegQualityOption { ImageQuality = 0.9f });
+
+            await ImageConverterCore.ConvertAsync(FileList.ToList(), ExportFolder, options);
 
             IsBusy = false;
+        }
+
+        void RemoveFiles()
+        {
+            var files = SelectedFiles.ToList();
+            SelectedFiles.Clear();
+
+            foreach (var file in files.Cast<ImageViewModel>())
+                FileList.Remove(file);
         }
     }
 }

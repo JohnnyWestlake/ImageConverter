@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ImageConverter.Core;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,12 +8,38 @@ using Windows.Storage;
 
 namespace ImageConverter.Common
 {
-    public static class ImageConverter
+    public static class ImageConverterCore
     {
         public static List<string> SupportedFileTypes = new List<string>
         {
             ".jpg", ".jpeg", ".jxr", ".gif", ".tiff", ".png", ".wdp", ".hdp", ".bmp"
         };
+
+        public static string GetPrefferedFileExtension(BitmapCodecInformation info)
+        {
+            if (info.CodecId == BitmapEncoder.JpegEncoderId)
+                return ".jpg";
+
+            if (info.CodecId == BitmapEncoder.JpegXREncoderId)
+                return ".wdp";
+
+            return info.FileExtensions.FirstOrDefault();
+        }
+
+        public static string GetPrefferedDisplayName(BitmapCodecInformation info)
+        {
+            if (info.CodecId == BitmapEncoder.JpegXREncoderId)
+                return "JPEG-XR";
+
+            return info.FriendlyName.Split(' ').FirstOrDefault();
+        }
+
+        public static List<ImageFormat> GetImageFormats()
+        {
+            return BitmapEncoder.GetEncoderInformationEnumerator()
+                .Select(e => new ImageFormat(e))
+                .ToList();
+        }
 
         public static async Task ConvertAsync(List<ImageViewModel> images, StorageFolder targetFolder, ConversionOptions options)
         {

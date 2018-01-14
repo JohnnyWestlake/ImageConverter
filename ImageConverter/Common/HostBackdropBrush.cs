@@ -51,7 +51,7 @@ namespace ImageConverter.Common
         }
 
         public static readonly DependencyProperty TintOpacityProperty =
-            DependencyProperty.Register(nameof(TintOpacity), typeof(double), typeof(BlurBrush), new PropertyMetadata(0.6d, (d, e) =>
+            DependencyProperty.Register(nameof(TintOpacity), typeof(double), typeof(BlurBrush), new PropertyMetadata(0.8d, (d, e) =>
             {
                 ((BlurBrush)d).UpdateColor();
             }));

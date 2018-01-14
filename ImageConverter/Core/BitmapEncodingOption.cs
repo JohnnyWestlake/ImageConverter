@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Windows.Graphics.Imaging;
 
 namespace ImageConverter.Bitmap
@@ -11,7 +8,7 @@ namespace ImageConverter.Bitmap
     {
         public static List<Guid> SupportedEncoders { get; } = new List<Guid> { BitmapEncoder.JpegEncoderId, BitmapEncoder.JpegXREncoderId };
 
-        public float ImageQuality { get; set; }
+        public float ImageQuality { get; set; } = 0.9f;
 
         public KeyValuePair<string, BitmapTypedValue> GetValue()
         {
