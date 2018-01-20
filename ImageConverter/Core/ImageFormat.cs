@@ -12,11 +12,14 @@ namespace ImageConverter.Core
         public string DisplayName { get; }
         public string DefaultFileExtension { get; }
 
+        public Format Format { get; }
+
         public ImageFormat(BitmapCodecInformation info)
         {
             CodecInfo = info;
             DisplayName = ImageConverterCore.GetPrefferedDisplayName(info);
             DefaultFileExtension = ImageConverterCore.GetPrefferedFileExtension(info);
+            Format = ImageConverterCore.GetFormat(info);
         }
     }
 }

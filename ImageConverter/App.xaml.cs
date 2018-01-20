@@ -7,6 +7,7 @@ using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -25,6 +26,8 @@ namespace ImageConverter
             this.Suspending += OnSuspending;
         }
 
+        public static CoreDispatcher Dispatcher { get; private set; }
+
         /// <summary>
         /// Invoked when the application is launched normally by the end user.  Other entry points
         /// will be used such as when the application is launched to open a specific file.
@@ -40,6 +43,7 @@ namespace ImageConverter
             {
                 // Create a Frame to act as the navigation context and navigate to the first page
                 rootFrame = new Frame();
+                Dispatcher = rootFrame.Dispatcher;
                 rootFrame.NavigationFailed += OnNavigationFailed;
 
                 // Place the frame in the current Window

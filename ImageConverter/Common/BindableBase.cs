@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using Windows.UI.Xaml;
 
 namespace ImageConverter
 {
@@ -160,13 +161,7 @@ namespace ImageConverter
                 if (eventHandler != null)
                 {
                     bool forceFire = forceFireOverDispatcher || AutomaticallyMarshalToDispatcher;
-
-                    eventHandler(this, new PropertyChangedEventArgs(propertyName));
-
-                    //if (!forceFire)
-                    //    eventHandler(this, new PropertyChangedEventArgs(propertyName));
-                    //else
-                    //    DispatcherHelper.MarshallAsync(() => eventHandler?.Invoke(this, new PropertyChangedEventArgs(propertyName)));
+                    Marshall(() => eventHandler(this, new PropertyChangedEventArgs(propertyName)));
                 }
             }
             catch (Exception e)
@@ -175,14 +170,22 @@ namespace ImageConverter
             }
         }
 
+        private void Marshall(Action action)
+        {
+            if (App.Dispatcher.HasThreadAccess)
+                action();
+            else
+                App.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, new Windows.UI.Core.DispatchedHandler(action));
+        }
+
         protected void OnPropertiesChanged(params String[] args)
         {
             // Marshall all of them together
-            //DispatcherHelper.MarshallAsync(() =>
+            Marshall(() =>
             {
                 foreach (var arg in args)
                     this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(arg));
-            }//);
+            });
         }
 
         /// <summary>
@@ -197,12 +200,7 @@ namespace ImageConverter
                 if (eventHandler != null)
                 {
                     bool forceFire = forceFireOverDispatcher || AutomaticallyMarshalToDispatcher;
-                    eventHandler(this, new PropertyChangedEventArgs(String.Empty));
-
-                    //if (!forceFire)
-                    //    eventHandler(this, new PropertyChangedEventArgs(String.Empty));
-                    //else
-                    //    DispatcherHelper.MarshallAsync(() => eventHandler?.Invoke(this, new PropertyChangedEventArgs(String.Empty)));
+                    Marshall(() => eventHandler(this, new PropertyChangedEventArgs(string.Empty)));
                 }
             }
             catch (Exception e)

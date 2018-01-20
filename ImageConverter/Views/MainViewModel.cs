@@ -16,6 +16,7 @@ namespace ImageConverter.Views
     public class MainViewModel : BindableBase
     {
         public List<ImageFormat> ImageFormats { get; }
+        private OptionsViewModel _optionsViewModel { get; } = new OptionsViewModel();
 
         public ObservableCollection<ImageViewModel> FileList { get; }
         public ObservableCollection<object> SelectedFiles { get; }
@@ -24,6 +25,7 @@ namespace ImageConverter.Views
         public bool HasSelectedItems => SelectedFiles.Count > 0;
         public bool HasItems => FileList.Count > 0;
         public bool HasExportFolder => ExportFolder != null;
+        public bool HasOptions => _optionsViewModel.GetEffectiveOptions().Count > 0;
 
         public StorageFolder ExportFolder
         {
@@ -34,7 +36,14 @@ namespace ImageConverter.Views
         public ImageFormat SelectedFormat
         {
             get => Get<ImageFormat>();
-            set => Set(value);
+            set
+            {
+                if (Set(value))
+                {
+                    _optionsViewModel.SetFormat(value);
+                    OnPropertyChanged(nameof(HasOptions));
+                }
+            }
         }
 
 
@@ -46,7 +55,7 @@ namespace ImageConverter.Views
             SelectedFiles = new ObservableCollection<object>();
 
             SelectedFiles.CollectionChanged += SelectedFiles_CollectionChanged;
-            ImageFormats = ImageConverterCore.GetImageFormats();
+            ImageFormats = ImageConverterCore.GetSupportedEncodingImageFormats();
             SelectedFormat = ImageFormats.FirstOrDefault();
         }
 
@@ -58,7 +67,11 @@ namespace ImageConverter.Views
 
 
 
-
+        public async void OptionsClick()
+        {
+            var options = new OptionsDialog(_optionsViewModel);
+            await options.ShowAsync();
+        }
 
         public void AddFilesClick()
         {
@@ -145,10 +158,8 @@ namespace ImageConverter.Views
             {
                 EncoderId = SelectedFormat.CodecInfo.CodecId,
                 FileExtention = SelectedFormat.DefaultFileExtension,
+                EncodingOptions = _optionsViewModel.GetEffectiveOptions()
             };
-
-            if (JpegQualityOption.SupportedEncoders.Contains(options.EncoderId))
-                options.EncodingOptions.Add(new JpegQualityOption { ImageQuality = 0.9f });
 
             await ImageConverterCore.ConvertAsync(FileList.ToList(), ExportFolder, options);
 

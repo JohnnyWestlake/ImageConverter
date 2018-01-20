@@ -103,9 +103,11 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="Common\BindableBase.cs" />
+    <Compile Include="Common\OptionPresenter.cs" />
     <Compile Include="Core\BitmapEncodingOption.cs" />
     <Compile Include="Core\ConversionOptions.cs" />
     <Compile Include="Common\HostBackdropBrush.cs" />
+    <Compile Include="Core\Format.cs" />
     <Compile Include="Core\ImageConverter.cs" />
     <Compile Include="Core\ImageFormat.cs" />
     <Compile Include="Core\ImageViewModel.cs" />
@@ -117,6 +119,10 @@
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Views\MainViewModel.cs" />
+    <Compile Include="Views\OptionsDialog\OptionsDialog.xaml.cs">
+      <DependentUpon>OptionsDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\OptionsDialog\OptionsViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
@@ -180,9 +186,17 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Page Include="Themes\Generic.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Views\MainPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\OptionsDialog\OptionsDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>
