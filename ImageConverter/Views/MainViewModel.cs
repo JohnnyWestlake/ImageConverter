@@ -67,10 +67,9 @@ namespace ImageConverter.Views
 
 
 
-        public async void OptionsClick()
+        public void OptionsClick()
         {
-            var options = new OptionsDialog(_optionsViewModel);
-            await options.ShowAsync();
+            OptionsDialog.Show(_optionsViewModel);
         }
 
         public void AddFilesClick()

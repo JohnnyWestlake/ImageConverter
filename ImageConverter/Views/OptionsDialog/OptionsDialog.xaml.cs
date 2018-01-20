@@ -20,10 +20,15 @@ namespace ImageConverter.Views
     {
         public OptionsViewModel ViewModel { get; }
 
-        public OptionsDialog(OptionsViewModel viewModel)
+        private OptionsDialog(OptionsViewModel viewModel)
         {
             this.InitializeComponent();
             ViewModel = viewModel;
+        }
+
+        public static void Show(OptionsViewModel viewModel)
+        {
+            var _ = (new OptionsDialog(viewModel)).ShowAsync();
         }
 
         public void Close()

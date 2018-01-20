@@ -73,8 +73,8 @@
                     Margin="10 0 0 0"
                     VerticalAlignment="Bottom"
                     Click="{x:Bind ViewModel.OptionsClick}"
-                    IsEnabled="{x:Bind ViewModel.HasOptions, Mode=OneWay}"
-                    Content="Options" />
+                    Content="Options"
+                    IsEnabled="{x:Bind ViewModel.HasOptions, Mode=OneWay}" />
             <!--<ComboBox Grid.Column="3"
                       Margin="10 0 0 0"
                       Header="Output Quality"
