@@ -25,6 +25,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <!--  TITLE BAR  -->
@@ -158,6 +159,18 @@
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
+
+        <Grid Grid.Row="4"
+              Height="24"
+              Margin="-20 0 -20 0">
+            <Grid.Background>
+                <SolidColorBrush Opacity="0.5" Color="{ThemeResource SystemAccentColor}" />
+            </Grid.Background>
+            <TextBlock Margin="20 0 0 0"
+                       VerticalAlignment="Center"
+                       Text="{x:Bind ViewModel.StatusBarLeft, Mode=OneWay}"
+                       TextLineBounds="Tight" />
+        </Grid>
 
     </Grid>
 </Page>

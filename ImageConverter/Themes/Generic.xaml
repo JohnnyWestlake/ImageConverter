@@ -13,6 +13,7 @@
                                 BorderThickness="{TemplateBinding BorderThickness}">
                         <VisualStateManager.VisualStateGroups>
                             <VisualStateGroup x:Name="DescriptionStates">
+                                <VisualState x:Name="DescriptionHiddenState" />
                                 <VisualState x:Name="DescriptionBelowHeaderState">
                                     <VisualState.Setters>
                                         <Setter Target="tbDescriptionBelowHeader.Visibility" Value="Visible" />

@@ -13,6 +13,7 @@ namespace ImageConverter.Common
 {
     public enum DescriptionStackingMode
     {
+        Hidden,
         BelowHeader,
         BelowContent
     }
@@ -68,7 +69,9 @@ namespace ImageConverter.Common
 
         private void UpdateStates()
         {
-            if (DescriptionStackingMode == DescriptionStackingMode.BelowHeader)
+            if (DescriptionStackingMode == DescriptionStackingMode.Hidden)
+                VisualStateManager.GoToState(this, "DescriptionHiddenState", false);
+            else if (DescriptionStackingMode == DescriptionStackingMode.BelowHeader)
                 VisualStateManager.GoToState(this, "DescriptionBelowHeaderState", false);
             else
                 VisualStateManager.GoToState(this, "DescriptionBelowContentState", false);

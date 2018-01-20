@@ -10,6 +10,13 @@
                IsPrimaryButtonEnabled="False"
                IsSecondaryButtonEnabled="False"
                mc:Ignorable="d">
+    <FrameworkElement.Resources>
+        <Thickness x:Key="ItemSpacingThickess">0 15 0 0</Thickness>
+
+        <Style TargetType="common:OptionPresenter">
+            <Setter Property="Margin" Value="{StaticResource ItemSpacingThickess}" />
+        </Style>
+    </FrameworkElement.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -26,8 +33,18 @@
         <TextBlock Margin="20 7 0 0"
                    FontSize="12"
                    Text="Options" />
-        <Grid Grid.Row="1" Margin="20 10 20 0">
+        <Grid Grid.Row="1" Margin="20 0 20 0">
             <StackPanel>
+                <common:OptionPresenter x:Name="FileFormat"
+                                        DescriptionStackingMode="Hidden"
+                                        Header="Output file format">
+                    <ComboBox Width="120"
+                              Margin="0 4 0 0"
+                              FontSize="12"
+                              ItemsSource="{x:Bind ViewModel.FileFormats}"
+                              SelectedItem="{x:Bind ViewModel.CurrentFileFormat, Mode=TwoWay}" />
+                </common:OptionPresenter>
+
                 <common:OptionPresenter x:Name="LosslessOption"
                                         x:Load="{x:Bind ViewModel.SupportsLossless}"
                                         Description="{x:Bind b:LosslessOption.Description}"
@@ -41,7 +58,6 @@
 
                 <common:OptionPresenter x:Name="JpegQualityOption"
                                         x:Load="{x:Bind ViewModel.SupportsQuality}"
-                                        Margin="0 10 0 0"
                                         Description="{x:Bind b:JpegQualityOption.Description}"
                                         Header="Image Quality">
                     <Slider IsEnabled="{x:Bind ViewModel.IsQualityEnabled, Mode=OneWay}"
@@ -56,7 +72,6 @@
 
                 <common:OptionPresenter x:Name="TiffQualityOption"
                                         x:Load="{x:Bind ViewModel.IsTiff}"
-                                        Margin="0 10 0 0"
                                         Description="{x:Bind b:TiffCompressionQualityOption.Description}"
                                         Header="Compression Quality">
                     <Slider LargeChange="0.1"
@@ -66,12 +81,10 @@
                             StepFrequency="0.1"
                             TickFrequency="0.1"
                             Value="{x:Bind ViewModel.TiffCompressionQuality, Mode=TwoWay}" />
-
                 </common:OptionPresenter>
 
                 <common:OptionPresenter x:Name="PngFilterOption"
                                         x:Load="{x:Bind ViewModel.IsPng}"
-                                        Margin="0 10 0 0"
                                         Description="{x:Bind b:PngFilterModeOption.Description}"
                                         Header="Filter Mode">
                     <ComboBox />

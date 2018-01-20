@@ -25,7 +25,9 @@ namespace ImageConverter.Views
         public bool HasSelectedItems => SelectedFiles.Count > 0;
         public bool HasItems => FileList.Count > 0;
         public bool HasExportFolder => ExportFolder != null;
-        public bool HasOptions => _optionsViewModel.GetEffectiveOptions().Count > 0;
+        public bool HasOptions => true;
+
+        public string StatusBarLeft { get => Get<string>(); private set => Set(value); }
 
         public StorageFolder ExportFolder
         {
@@ -41,7 +43,7 @@ namespace ImageConverter.Views
                 if (Set(value))
                 {
                     _optionsViewModel.SetFormat(value);
-                    OnPropertyChanged(nameof(HasOptions));
+                    //OnPropertyChanged(nameof(HasOptions));
                 }
             }
         }
@@ -57,14 +59,30 @@ namespace ImageConverter.Views
             SelectedFiles.CollectionChanged += SelectedFiles_CollectionChanged;
             ImageFormats = ImageConverterCore.GetSupportedEncodingImageFormats();
             SelectedFormat = ImageFormats.FirstOrDefault();
+            UpdateStatusText();
         }
 
         private void SelectedFiles_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             OnPropertyChanged(nameof(HasSelectedItems));
+            UpdateStatusText(false);
         }
 
+        public void UpdateStatusText(bool updateHasItems = true)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append($"{FileList.Count} item");
+            if (FileList.Count != 1)
+                sb.Append("s");
 
+            if (SelectedFiles.Count > 0)
+                sb.Append($", {SelectedFiles.Count} selected");
+
+            StatusBarLeft = sb.ToString();
+
+            if (updateHasItems)
+                OnPropertyChanged(nameof(HasItems));
+        }
 
 
         public void OptionsClick()
@@ -90,7 +108,7 @@ namespace ImageConverter.Views
         public void ClearClick()
         {
             FileList.Clear();
-            OnPropertyChanged(nameof(HasItems));
+            UpdateStatusText();
         }
 
         public void ConvertClick()
@@ -142,7 +160,7 @@ namespace ImageConverter.Views
                 FileList.Add(item);
             }
 
-            OnPropertyChanged(nameof(HasItems));
+            UpdateStatusText();
             IsBusy = false;
         }
 
@@ -156,7 +174,7 @@ namespace ImageConverter.Views
             var options = new ConversionOptions
             {
                 EncoderId = SelectedFormat.CodecInfo.CodecId,
-                FileExtention = SelectedFormat.DefaultFileExtension,
+                FileExtention = _optionsViewModel.CurrentFileFormat,
                 EncodingOptions = _optionsViewModel.GetEffectiveOptions()
             };
 
@@ -172,6 +190,8 @@ namespace ImageConverter.Views
 
             foreach (var file in files.Cast<ImageViewModel>())
                 FileList.Remove(file);
+
+            UpdateStatusText();
         }
     }
 }

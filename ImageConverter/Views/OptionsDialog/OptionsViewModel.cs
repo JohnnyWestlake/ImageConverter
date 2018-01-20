@@ -24,6 +24,8 @@ namespace ImageConverter.Views
 
 
         // Bindable Properties
+        public List<String> FileFormats { get; set; }
+        public string CurrentFileFormat { get => Get<String>(); set => Set(value); }
         public double JpegQuality               { get => GetV(0.9d); set => Set(value); }
         public double TiffCompressionQuality    { get => GetV(0.9d); set => Set(value); }
         public bool IsLossless
@@ -38,6 +40,9 @@ namespace ImageConverter.Views
         public void SetFormat(ImageFormat format)
         {
             this._format = format;
+
+            this.FileFormats = format.CodecInfo.FileExtensions.ToList();
+            this.CurrentFileFormat = format.DefaultFileExtension;
 
             if (!SupportsLossless)
                 IsLossless = false;

@@ -9,7 +9,7 @@ namespace ImageConverter.Bitmap
     {
         public static List<Format> SupportedFormats { get; } = new List<Format> { Format.Jpeg, Format.JpegXR };
 
-        public static string Description => "Higher values indicate higher quality.";
+        public static string Description => "Higher values indicate higher quality at the cost of larger file sizes.";
 
         public float ImageQuality { get; set; } = 0.9f;
 
