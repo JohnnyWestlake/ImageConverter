@@ -210,7 +210,12 @@
       <Version>1.21.0</Version>
     </PackageReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\ImageConverter.Core.CX\ImageConverter.Core.CX.vcxproj">
+      <Project>{e93df246-f611-4e1b-8f11-7885cf33ad54}</Project>
+      <Name>ImageConverter.Core.CX</Name>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>

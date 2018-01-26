@@ -1,4 +1,5 @@
 ﻿using ImageConverter.Core;
+using ImageConverter_Core_CX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -74,6 +75,7 @@ namespace ImageConverter.Common
                 image.Status = image.ExtendedStatus = null;
             }
 
+            bool collect = false;
             foreach (var image in images)
             {
                 image.Status = "Converting...";
@@ -96,19 +98,12 @@ namespace ImageConverter.Common
                         var outputFile = await targetFolder.CreateFileAsync($"{image.File.DisplayName}{options.FileExtention}", options.CollisionOption).AsTask().ConfigureAwait(false);
                         using (var outputStream = await outputFile.OpenAsync(FileAccessMode.ReadWrite).AsTask().ConfigureAwait(false))
                         {
-                            outputStream.Size = 0;
-
-                            var encoder = await BitmapEncoder.CreateAsync(options.EncoderId, outputStream, options.EncodingOptions.Select(o => o.GetValue())).AsTask().ConfigureAwait(false);
-                            encoder.SetPixelData(
-                                decoder.BitmapPixelFormat,
-                                decoder.BitmapAlphaMode,
-                                decoder.OrientedPixelWidth,
-                                decoder.OrientedPixelHeight,
-                                decoder.DpiX,
-                                decoder.DpiY,
-                                (await decoder.GetPixelDataAsync().AsTask().ConfigureAwait(false)).DetachPixelData());
-
-                            await encoder.FlushAsync().AsTask().ConfigureAwait(false);
+                            await BitmapEncoderFactory.EncodeAsync(
+                                decoder,
+                                options.EncoderId,
+                                outputStream,
+                                options.EncodingOptions.Select(o => o.GetValue()).ToList()
+                                ).AsTask().ConfigureAwait(false);
                         }
                         var props = await outputFile.GetBasicPropertiesAsync().AsTask().ConfigureAwait(false);
                         image.Status = $"Converted ({props.Size / 1024d / 1024d:0.00} MB)";
@@ -118,8 +113,19 @@ namespace ImageConverter.Common
                         image.Status = "Failed";
                         image.ExtendedStatus = "Could not write to output file";
                     }
+
+                    decoder = null;
+
+                    if (collect)
+                    {
+                        GC.Collect();
+                        collect = false;
+                    }
+                    else collect = true;
                 }
             }
+
+            GC.Collect();
         }
     }
 }

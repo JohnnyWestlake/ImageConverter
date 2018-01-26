@@ -1,4 +1,5 @@
 ﻿using ImageConverter.Core;
+using ImageConverter_Core_CX;
 using System;
 using System.Collections.Generic;
 using Windows.Graphics.Imaging;
@@ -13,10 +14,10 @@ namespace ImageConverter.Bitmap
 
         public float ImageQuality { get; set; } = 0.9f;
 
-        public KeyValuePair<string, BitmapTypedValue> GetValue()
+        public BitmapOption GetValue()
         {
             var value = new BitmapTypedValue(ImageQuality, Windows.Foundation.PropertyType.Single );
-            return new KeyValuePair<string, BitmapTypedValue>(nameof(ImageQuality), value);
+            return new BitmapOption(nameof(ImageQuality), value);
         }
     }
 
@@ -28,10 +29,10 @@ namespace ImageConverter.Bitmap
 
         public float CompressionQuality { get; set; } = 0.9f;
 
-        public KeyValuePair<string, BitmapTypedValue> GetValue()
+        public BitmapOption GetValue()
         {
             var value = new BitmapTypedValue(CompressionQuality, Windows.Foundation.PropertyType.Single);
-            return new KeyValuePair<string, BitmapTypedValue>(nameof(CompressionQuality), value);
+            return new BitmapOption(nameof(CompressionQuality), value);
         }
     }
 
@@ -43,10 +44,10 @@ namespace ImageConverter.Bitmap
 
         public bool Lossless { get; set; }
 
-        public KeyValuePair<string, BitmapTypedValue> GetValue()
+        public BitmapOption GetValue()
         {
             var value = new BitmapTypedValue(Lossless, Windows.Foundation.PropertyType.Boolean);
-            return new KeyValuePair<string, BitmapTypedValue>(nameof(Lossless), value);
+            return new BitmapOption(nameof(Lossless), value);
         }
     }
 
@@ -63,15 +64,15 @@ namespace ImageConverter.Bitmap
 
         public PngFilterMode FilterMode { get; set; }
 
-        public KeyValuePair<string, BitmapTypedValue> GetValue()
+        public BitmapOption GetValue()
         {
             var value = new BitmapTypedValue(FilterMode, Windows.Foundation.PropertyType.UInt32);
-            return new KeyValuePair<string, BitmapTypedValue>(nameof(FilterMode), value);
+            return new BitmapOption(nameof(FilterMode), value);
         }
     }
 
     public interface IBitmapEncodingOption
     {
-        KeyValuePair<string, BitmapTypedValue> GetValue();
+        BitmapOption GetValue();
     }
 }
