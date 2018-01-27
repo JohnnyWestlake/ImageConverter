@@ -1,8 +1,8 @@
 ﻿#include "pch.h"
 #include "BitmapOption.h"
 
-using namespace ImageConverter_Core_CX;
 using namespace Platform;
+using namespace ImageConverter::Core::CX;
 
 BitmapOption::BitmapOption(Platform::String^ name, BitmapTypedValue^ bitmapValue)
 {

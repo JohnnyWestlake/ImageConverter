@@ -1,5 +1,5 @@
 ﻿using ImageConverter.Core;
-using ImageConverter_Core_CX;
+using ImageConverter.Core.CX;
 using System;
 using System.Collections.Generic;
 using Windows.Graphics.Imaging;

@@ -1,5 +1,5 @@
 ﻿using ImageConverter.Core;
-using ImageConverter_Core_CX;
+using ImageConverter.Core.CX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -68,64 +68,30 @@ namespace ImageConverter.Common
                 .ToList();
         }
 
-        public static async Task ConvertAsync(List<ImageViewModel> images, StorageFolder targetFolder, ConversionOptions options)
+        public static async Task ConvertAsync(List<ImageViewModel> images, StorageFolder targetFolder, BitmapConversionSettings settings)
         {
             foreach (var image in images)
             {
                 image.Status = image.ExtendedStatus = null;
             }
 
-            bool collect = false;
             foreach (var image in images)
             {
                 image.Status = "Converting...";
-                using (var stream = await image.File.OpenAsync(FileAccessMode.Read).AsTask().ConfigureAwait(false))
+
+                BitmapConversionResult result = 
+                    await BitmapEncoderFactory.EncodeAsync(image.File, targetFolder, settings).AsTask().ConfigureAwait(false);
+
+                if (result.Success)
                 {
-                    BitmapDecoder decoder;
-                    try
-                    {
-                        decoder = await BitmapDecoder.CreateAsync(stream).AsTask().ConfigureAwait(false);
-                    }
-                    catch
-                    {
-                        image.Status = "Failed";
-                        image.ExtendedStatus = "Could not read file";
-                        continue;
-                    }
-
-                    try
-                    {
-                        var outputFile = await targetFolder.CreateFileAsync($"{image.File.DisplayName}{options.FileExtention}", options.CollisionOption).AsTask().ConfigureAwait(false);
-                        using (var outputStream = await outputFile.OpenAsync(FileAccessMode.ReadWrite).AsTask().ConfigureAwait(false))
-                        {
-                            await BitmapEncoderFactory.EncodeAsync(
-                                decoder,
-                                options.EncoderId,
-                                outputStream,
-                                options.EncodingOptions.Select(o => o.GetValue()).ToList()
-                                ).AsTask().ConfigureAwait(false);
-                        }
-                        var props = await outputFile.GetBasicPropertiesAsync().AsTask().ConfigureAwait(false);
-                        image.Status = $"Converted ({props.Size / 1024d / 1024d:0.00} MB)";
-                    }
-                    catch
-                    {
-                        image.Status = "Failed";
-                        image.ExtendedStatus = "Could not write to output file";
-                    }
-
-                    decoder = null;
-
-                    if (collect)
-                    {
-                        GC.Collect();
-                        collect = false;
-                    }
-                    else collect = true;
+                    image.Status = $"Converted ({result.ResultFileSize / 1024d / 1024d:0.00} MB)";
+                }
+                else
+                {
+                    image.Status = "Failed";
+                    image.ExtendedStatus = result.Status;
                 }
             }
-
-            GC.Collect();
         }
     }
 }

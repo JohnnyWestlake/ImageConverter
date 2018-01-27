@@ -15,5 +15,7 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="BitmapOption.h" />
     <ClInclude Include="BitmapEncoderFactory.h" />
+    <ClInclude Include="BitmapConversionResult.h" />
+    <ClInclude Include="BitmapConversionSettings.h" />
   </ItemGroup>
 </Project>

@@ -105,7 +105,6 @@
     <Compile Include="Common\BindableBase.cs" />
     <Compile Include="Common\OptionPresenter.cs" />
     <Compile Include="Core\BitmapEncodingOption.cs" />
-    <Compile Include="Core\ConversionOptions.cs" />
     <Compile Include="Common\HostBackdropBrush.cs" />
     <Compile Include="Core\Format.cs" />
     <Compile Include="Core\ImageConverter.cs" />
@@ -113,7 +112,6 @@
     <Compile Include="Core\ImageViewModel.cs" />
     <Compile Include="Common\ListViewBaseItemsSelectionBehavior.cs" />
     <Compile Include="Common\Logger.cs" />
-    <Compile Include="Common\ObservableFileDictionary.cs" />
     <Compile Include="Views\MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>

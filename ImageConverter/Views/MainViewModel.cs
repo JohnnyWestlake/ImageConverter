@@ -1,6 +1,7 @@
 ﻿using ImageConverter.Bitmap;
 using ImageConverter.Common;
 using ImageConverter.Core;
+using ImageConverter.Core.CX;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -171,12 +172,10 @@ namespace ImageConverter.Views
 
             IsBusy = true;
 
-            var options = new ConversionOptions
-            {
-                EncoderId = SelectedFormat.CodecInfo.CodecId,
-                FileExtention = _optionsViewModel.CurrentFileFormat,
-                EncodingOptions = _optionsViewModel.GetEffectiveOptions()
-            };
+            var options = new BitmapConversionSettings(
+                SelectedFormat.CodecInfo.CodecId,
+                _optionsViewModel.CurrentFileFormat,
+                _optionsViewModel.GetEffectiveOptions().Select(o => o.GetValue()).ToList());
 
             await ImageConverterCore.ConvertAsync(FileList.ToList(), ExportFolder, options);
 
