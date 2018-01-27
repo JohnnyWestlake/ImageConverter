@@ -44,7 +44,6 @@ namespace ImageConverter.Views
                 if (Set(value))
                 {
                     _optionsViewModel.SetFormat(value);
-                    //OnPropertyChanged(nameof(HasOptions));
                 }
             }
         }
@@ -110,6 +109,7 @@ namespace ImageConverter.Views
         {
             FileList.Clear();
             UpdateStatusText();
+            GC.Collect();
         }
 
         public void ConvertClick()
@@ -191,6 +191,7 @@ namespace ImageConverter.Views
                 FileList.Remove(file);
 
             UpdateStatusText();
+            GC.Collect();
         }
     }
 }

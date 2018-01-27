@@ -82,7 +82,7 @@ namespace ImageConverter.Common
                 try
                 {
                     BitmapConversionResult result =
-                   await BitmapEncoderFactory.EncodeAsync(image.File, targetFolder, settings).AsTask().ConfigureAwait(false);
+                        await BitmapEncoderFactory.EncodeAsync(image.File, targetFolder, settings).AsTask().ConfigureAwait(false);
 
                     if (result.Success)
                     {
