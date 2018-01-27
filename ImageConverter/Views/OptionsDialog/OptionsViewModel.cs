@@ -62,7 +62,7 @@ namespace ImageConverter.Views
                 options.Add(new TiffCompressionQualityOption { CompressionQuality = (float)TiffCompressionQuality });
 
             if (IsPng)
-                options.Add(new PngFilterModeOption { FilterMode = PngFilterMode.Automatic });
+                options.Add(new PngFilterModeOption { FilterOption = PngFilterMode.Automatic });
 
             return options;
         }

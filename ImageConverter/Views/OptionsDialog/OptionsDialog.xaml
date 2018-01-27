@@ -86,7 +86,7 @@
                 <common:OptionPresenter x:Name="PngFilterOption"
                                         x:Load="{x:Bind ViewModel.IsPng}"
                                         Description="{x:Bind b:PngFilterModeOption.Description}"
-                                        Header="Filter Mode">
+                                        Header="Filter Option">
                     <ComboBox />
                 </common:OptionPresenter>
 

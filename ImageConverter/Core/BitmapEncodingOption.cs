@@ -62,12 +62,12 @@ namespace ImageConverter.Bitmap
             "Sub, Up, Average and Paeth filtering perform differently across various images. " +
             "Adaptive filtering attempts to select the most efficient of the previous filter modes for each scanline in the image. This typically performs the slowest but consumes the least space.";
 
-        public PngFilterMode FilterMode { get; set; } 
+        public PngFilterMode FilterOption { get; set; } 
 
         public BitmapOption GetValue()
         {
-            var value = new BitmapTypedValue((byte)FilterMode, Windows.Foundation.PropertyType.UInt8);
-            return new BitmapOption(nameof(PngFilterMode), value);
+            var value = new BitmapTypedValue((byte)FilterOption, Windows.Foundation.PropertyType.UInt8);
+            return new BitmapOption(nameof(FilterOption), value);
         }
     }
 
