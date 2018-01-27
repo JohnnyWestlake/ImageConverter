@@ -79,18 +79,27 @@ namespace ImageConverter.Common
             {
                 image.Status = "Converting...";
 
-                BitmapConversionResult result = 
-                    await BitmapEncoderFactory.EncodeAsync(image.File, targetFolder, settings).AsTask().ConfigureAwait(false);
-
-                if (result.Success)
+                try
                 {
-                    image.Status = $"Converted ({result.ResultFileSize / 1024d / 1024d:0.00} MB)";
+                    BitmapConversionResult result =
+                   await BitmapEncoderFactory.EncodeAsync(image.File, targetFolder, settings).AsTask().ConfigureAwait(false);
+
+                    if (result.Success)
+                    {
+                        image.Status = $"Converted ({result.ResultFileSize / 1024d / 1024d:0.00} MB)";
+                    }
+                    else
+                    {
+                        image.Status = "Failed";
+                        image.ExtendedStatus = result.Status;
+                    }
                 }
-                else
+                catch
                 {
                     image.Status = "Failed";
-                    image.ExtendedStatus = result.Status;
+                    image.ExtendedStatus = "Unspecified error";
                 }
+               
             }
         }
     }

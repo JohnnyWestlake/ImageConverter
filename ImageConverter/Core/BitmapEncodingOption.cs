@@ -54,7 +54,7 @@ namespace ImageConverter.Bitmap
 
     public class PngFilterModeOption : IBitmapEncodingOption
     {
-        public static List<Format> SupportedFormats { get; } = new List<Format> { Format.Png };
+        public static List<Format> SupportedFormats { get; } = new List<Format> { Format.Png  };
 
         public static string Description => 
             "Specifies the filter used to optimize the image prior to image compression.\n" +
@@ -62,12 +62,12 @@ namespace ImageConverter.Bitmap
             "Sub, Up, Average and Paeth filtering perform differently across various images. " +
             "Adaptive filtering attempts to select the most efficient of the previous filter modes for each scanline in the image. This typically performs the slowest but consumes the least space.";
 
-        public PngFilterMode FilterMode { get; set; }
+        public PngFilterMode FilterMode { get; set; } 
 
         public BitmapOption GetValue()
         {
-            var value = new BitmapTypedValue(FilterMode, Windows.Foundation.PropertyType.UInt32);
-            return new BitmapOption(nameof(FilterMode), value);
+            var value = new BitmapTypedValue((byte)FilterMode, Windows.Foundation.PropertyType.UInt8);
+            return new BitmapOption(nameof(PngFilterMode), value);
         }
     }
 

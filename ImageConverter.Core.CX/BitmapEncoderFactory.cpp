@@ -33,7 +33,6 @@ IAsyncOperation<BitmapConversionResult^>^  BitmapEncoderFactory::EncodeAsync(
 						.then([file, settings, targetFolder, result, inputStream](BitmapDecoder^ decoder)
 					{
 						delete inputStream;
-
 						try
 						{
 							// 3. Create output file
@@ -56,6 +55,7 @@ IAsyncOperation<BitmapConversionResult^>^  BitmapEncoderFactory::EncodeAsync(
 											.then([result](FileProperties::BasicProperties^ properties)
 										{
 											result->ResultFileSize = properties->Size;
+											result->Success = true;
 											return result;
 										}, task_continuation_context::use_arbitrary());
 									}, task_continuation_context::use_arbitrary());
