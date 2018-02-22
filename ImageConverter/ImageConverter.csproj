@@ -19,6 +19,9 @@
     <WindowsXamlEnableOverview>true</WindowsXamlEnableOverview>
     <PackageCertificateKeyFile>ImageConverter_StoreKey.pfx</PackageCertificateKeyFile>
     <PackageCertificateThumbprint>CAC48E38632496A1487477B8CFE54A9966FAF45A</PackageCertificateThumbprint>
+    <AppxAutoIncrementPackageRevision>True</AppxAutoIncrementPackageRevision>
+    <AppxBundle>Always</AppxBundle>
+    <AppxBundlePlatforms>x64</AppxBundlePlatforms>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
@@ -105,7 +108,6 @@
     <Compile Include="Common\BindableBase.cs" />
     <Compile Include="Common\OptionPresenter.cs" />
     <Compile Include="Core\BitmapEncodingOption.cs" />
-    <Compile Include="Core\ConversionOptions.cs" />
     <Compile Include="Common\HostBackdropBrush.cs" />
     <Compile Include="Core\Format.cs" />
     <Compile Include="Core\ImageConverter.cs" />
@@ -113,7 +115,6 @@
     <Compile Include="Core\ImageViewModel.cs" />
     <Compile Include="Common\ListViewBaseItemsSelectionBehavior.cs" />
     <Compile Include="Common\Logger.cs" />
-    <Compile Include="Common\ObservableFileDictionary.cs" />
     <Compile Include="Views\MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>

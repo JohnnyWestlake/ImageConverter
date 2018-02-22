@@ -175,7 +175,9 @@ namespace ImageConverter
             if (App.Dispatcher.HasThreadAccess)
                 action();
             else
-                App.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, new Windows.UI.Core.DispatchedHandler(action));
+            {
+                var _ =  App.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, new Windows.UI.Core.DispatchedHandler(action));
+            }
         }
 
         protected void OnPropertiesChanged(params String[] args)

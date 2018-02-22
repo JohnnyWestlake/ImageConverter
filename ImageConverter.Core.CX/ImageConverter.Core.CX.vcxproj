@@ -29,7 +29,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{e93df246-f611-4e1b-8f11-7885cf33ad54}</ProjectGuid>
     <Keyword>WindowsRuntimeComponent</Keyword>
-    <RootNamespace>ImageConverter_Core_CX</RootNamespace>
+    <RootNamespace>ImageConverter.Core.CX</RootNamespace>
     <DefaultLanguage>en-US</DefaultLanguage>
     <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
     <AppContainerApplication>true</AppContainerApplication>
@@ -206,6 +206,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="BitmapConversionSettings.h" />
+    <ClInclude Include="BitmapConversionResult.h" />
     <ClInclude Include="BitmapEncoderFactory.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="BitmapOption.h" />
