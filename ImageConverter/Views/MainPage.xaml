@@ -111,10 +111,11 @@
                    TextLineBounds="Tight" />
 
         <!--  OUTPUT ROW  -->
-        <Grid Grid.Row="1" Margin="0 35 0 15">
+        <Grid Grid.Row="1" Margin="0 36 0 8">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="8" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
@@ -128,7 +129,8 @@
                     Click="{x:Bind ViewModel.DestinationClick}"
                     Content="{x:Bind ViewModel.ExportFolder.Path, FallbackValue='Click to choose', TargetNullValue='Click to choose', Mode=OneWay}"
                     FontSize="{StaticResource DefaultFontSize}"
-                    IsEnabled="{x:Bind False(ViewModel.IsBusy), Mode=OneWay}" />
+                    IsEnabled="{x:Bind False(ViewModel.IsBusy), Mode=OneWay}"
+                    ToolTipService.ToolTip="{Binding Content, RelativeSource={RelativeSource Mode=Self}}" />
 
             <Button x:Name="SecondaryButton"
                     Grid.Column="1"
@@ -141,11 +143,13 @@
                     IsEnabled="{x:Bind False(ViewModel.IsBusy), Mode=OneWay}">
                 <Button.Flyout>
                     <MenuFlyout Placement="BottomEdgeAlignedRight">
-                        <MenuFlyoutSubItem FontSize="{StaticResource DefaultFontSize}" Text="File Output Options">
+                        <MenuFlyoutSubItem FontSize="{StaticResource DefaultFontSize}" Text="Output Folder File Options">
                             <ToggleMenuFlyoutItem FontSize="{StaticResource DefaultFontSize}"
-                                                  IsChecked="True"
+                                                  IsChecked="{x:Bind False(ViewModel.IsOverwrite), BindBack=ViewModel.SetNewName, Mode=TwoWay}"
                                                   Text="Generate new name if already exists" />
-                            <ToggleMenuFlyoutItem FontSize="{StaticResource DefaultFontSize}" Text="Overwrite Existing" />
+                            <ToggleMenuFlyoutItem FontSize="{StaticResource DefaultFontSize}"
+                                                  IsChecked="{x:Bind ViewModel.IsOverwrite, Mode=TwoWay}"
+                                                  Text="Overwrite Existing" />
                         </MenuFlyoutSubItem>
                     </MenuFlyout>
                 </Button.Flyout>
@@ -160,9 +164,8 @@
                 </Button.Content>
             </Button>
 
-            <ComboBox Grid.Column="2"
+            <ComboBox Grid.Column="3"
                       Width="92"
-                      Margin="10 0 0 0"
                       VerticalAlignment="Stretch"
                       VerticalContentAlignment="Center"
                       FontSize="12"
@@ -177,7 +180,7 @@
                 </ComboBox.ItemTemplate>
             </ComboBox>
 
-            <Button Grid.Column="3"
+            <Button Grid.Column="4"
                     Height="32"
                     Margin="0 0 0 0"
                     VerticalAlignment="Bottom"
@@ -195,7 +198,7 @@
         </Grid>
 
         <!--  INPUT ROW  -->
-        <Grid Grid.Row="2">
+        <Grid Grid.Row="2" ColumnSpacing="8">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
@@ -206,17 +209,14 @@
             </Grid.ColumnDefinitions>
 
             <Button Grid.Column="0"
-                    Margin="0 0 10 0"
                     Click="{x:Bind ViewModel.AddFilesClick}"
                     Content="Add Files"
                     IsEnabled="{x:Bind False(ViewModel.IsBusy), Mode=OneWay}" />
             <Button Grid.Column="1"
-                    Margin="0 0 10 0"
                     Click="{x:Bind ViewModel.RemoveFilesClick}"
                     Content="Remove Selected"
                     IsEnabled="{x:Bind TrueAndFalse(ViewModel.HasSelectedItems, ViewModel.IsBusy), Mode=OneWay}" />
             <Button Grid.Column="2"
-                    Margin="0 0 10 0"
                     Click="{x:Bind ViewModel.ClearClick}"
                     Content="Remove All"
                     IsEnabled="{x:Bind TrueAndFalse(ViewModel.HasItems, ViewModel.IsBusy), Mode=OneWay}" />
@@ -229,7 +229,8 @@
         </Grid>
 
         <!--  FILES VIEW  -->
-        <ListView Grid.Row="3"
+        <ListView x:Name="FilesList"
+                  Grid.Row="3"
                   Margin="0 10 -20 0"
                   Padding="0 0 20 40"
                   IsEnabled="{x:Bind False(ViewModel.IsBusy), Mode=OneWay}"
@@ -268,27 +269,48 @@
                         <TextBlock Grid.Column="2"
                                    Margin="10 0"
                                    FontSize="13"
-                                   Opacity="0.5"
+                                   Opacity="0.65"
                                    Text="{x:Bind Status, Mode=OneWay}"
                                    ToolTipService.ToolTip="{x:Bind ExtendedStatus, Mode=OneWay}" />
                         <TextBlock Grid.Column="3"
                                    FontSize="13"
-                                   Opacity="0.5"
+                                   Opacity="0.65"
                                    Text="{x:Bind Size}" />
                     </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
 
+        <ProgressRing x:Name="ProcessingRing"
+                      x:Load="{x:Bind ViewModel.IsProcessing, Mode=OneWay}"
+                      Grid.Row="3"
+                      Width="50"
+                      Height="50"
+                      Foreground="White"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Center"
+                      IsActive="True" />
+
+        <!--  STATUS BAR  -->
         <Grid Grid.Row="4"
+              ColumnSpacing="12"
               Height="24"
-              Margin="-20 0 -20 0">
+              Margin="-20 0 -20 0"
+              Padding="12 0">
             <Grid.Background>
                 <SolidColorBrush Opacity="0.5" Color="{ThemeResource SystemAccentColor}" />
             </Grid.Background>
-            <TextBlock Margin="20 0 0 0"
-                       VerticalAlignment="Center"
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <TextBlock VerticalAlignment="Center"
                        Text="{x:Bind ViewModel.StatusBarLeft, Mode=OneWay}"
+                       TextLineBounds="Tight" />
+            <TextBlock Grid.Column="1"
+                       VerticalAlignment="Center"
+                       Text="{x:Bind ViewModel.StatusBarRight, Mode=OneWay}"
+                       TextAlignment="Right"
                        TextLineBounds="Tight" />
         </Grid>
 

@@ -21,7 +21,7 @@ namespace ImageConverter
         /// </summary>
         //readonly ConcurrentDictionary<String, Object> data = new ConcurrentDictionary<String, Object>();
         private Dictionary<String, Object> __data_Store;
-        private Dictionary<String, Object> data => __data_Store ?? (__data_Store = new Dictionary<String, Object>());
+        private Dictionary<String, Object> _data => __data_Store ?? (__data_Store = new Dictionary<String, Object>());
 
         /// <summary>
         /// When overridden, allows you to specify whether all standard SetProperty calls
@@ -60,13 +60,13 @@ namespace ImageConverter
         /// <returns></returns>
         protected Boolean Set<T>(T value, [CallerMemberName] String propertyName = null)
         {
-            if (data == null)
+            if (_data == null)
                 return false;
 
-            if (data.TryGetValue(propertyName, out object t) && object.Equals(t, value))
+            if (_data.TryGetValue(propertyName, out object t) && object.Equals(t, value))
                 return false;
 
-            data[propertyName] = value;
+            _data[propertyName] = value;
             this.OnPropertyChanged(propertyName, AutomaticallyMarshalToDispatcher);
             return true;
         }
@@ -101,10 +101,10 @@ namespace ImageConverter
         /// <returns></returns>
         protected T GetV<T>(T defaultValue = default, [CallerMemberName] String propertyName = null)
         {
-            if (data.TryGetValue(propertyName, out object t))
+            if (_data.TryGetValue(propertyName, out object t))
                 return (T)t;
 
-            data[propertyName] = defaultValue;
+            _data[propertyName] = defaultValue;
             return defaultValue;
         }
 
@@ -117,11 +117,11 @@ namespace ImageConverter
         /// <returns></returns>
         protected T Get<T>(Func<T> defaultValue = null, [CallerMemberName] String propertyName = null)
         {
-            if (data.TryGetValue(propertyName, out object t))
+            if (_data.TryGetValue(propertyName, out object t))
                 return (T)t;
 
             T value = (defaultValue == null) ? default : defaultValue.Invoke();
-            data[propertyName] = value;
+            _data[propertyName] = value;
             return value;
         }
 
@@ -133,11 +133,11 @@ namespace ImageConverter
         /// <returns></returns>
         protected T GetN<T>([CallerMemberName] String propertyName = null) where T : new()
         {
-            if (data.TryGetValue(propertyName, out object t))
+            if (_data.TryGetValue(propertyName, out object t))
                 return (T)t;
 
             T value = new T();
-            data[propertyName] = value;
+            _data[propertyName] = value;
             return value;
         }
 
@@ -223,7 +223,7 @@ namespace ImageConverter
 
         void IDisposable.Dispose()
         {
-            data.Clear();
+            _data.Clear();
         }
 
 
@@ -235,9 +235,9 @@ namespace ImageConverter
         /// <param name="name"></param>
         protected void ResetValue(String name)
         {
-            if (data.ContainsKey(name))
+            if (_data.ContainsKey(name))
             {
-                if (data.Remove(name))
+                if (_data.Remove(name))
                     this.OnPropertyChanged(name);
             }
         }
@@ -249,7 +249,7 @@ namespace ImageConverter
         /// <returns></returns>
         protected virtual void ResetAllValues(bool firePropertyChanged = true)
         {
-            data.Clear();
+            _data.Clear();
 
             if (firePropertyChanged)
                 OnAllPropertiesChanged();
@@ -257,7 +257,7 @@ namespace ImageConverter
 
         protected virtual IReadOnlyDictionary<String, Object> GetDataStore()
         {
-            return data;
+            return _data;
         }
     }
 }

@@ -13,10 +13,13 @@ namespace ImageConverter.Views
     {
         private ImageFormat _format;
 
+        public const string HeifWarning = "The Windows 10 HEIF Encoder created by Microsoft is experimental and prone to crashing on smaller images. \n\nSource Images less than 0.02 MB in size may cause the application to crash with no warning when attempting to convert to HEIF.";
+
         public bool IsJpeg  => _format.Format == Format.Jpeg;
         public bool IsJxr   => _format.Format == Format.JpegXR;
         public bool IsPng   => _format.Format == Format.Png;
         public bool IsTiff  => _format.Format == Format.Tiff;
+        public bool IsHeif  => _format.Format == Format.Heif;
 
         public bool IsQualityEnabled        => !IsLossless;
         public bool SupportsBitmapAlpha     => BitmapV5BGRAOption.SupportedFormats.Contains(_format.Format);

@@ -14,6 +14,7 @@ namespace ImageConverter.Common
         public string Size { get; private set; }
         public string Status { get => Get<String>(); set => Set(value); }
         public string ExtendedStatus { get => Get<String>(); set => Set(value); }
+        public bool LastSuccess { get; set; } = true;
 
         private ImageViewModel(StorageFile file, double filesize)
         {

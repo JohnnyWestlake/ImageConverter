@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Windows.Foundation;
 using Windows.Foundation.Metadata;
 using Windows.Graphics.Imaging;
 using Windows.Storage;
@@ -90,15 +91,25 @@ namespace ImageConverter.Common
             return formats;
         }
 
-        public static async Task ConvertAsync(List<ImageViewModel> images, StorageFolder targetFolder, BitmapConversionSettings settings)
+        public static async Task<BitmapSize> ConvertAsync(
+            List<ImageViewModel> images, 
+            StorageFolder targetFolder, 
+            BitmapConversionSettings settings,
+            Action<int> progressCallback)
         {
             foreach (var image in images)
             {
                 image.Status = image.ExtendedStatus = null;
             }
 
+            uint success = 0;
+            uint fail = 0;
+
+            int i = 1;
             foreach (var image in images)
             {
+                progressCallback(i);
+                i++;
                 image.Status = "Converting...";
 
                 try
@@ -109,20 +120,27 @@ namespace ImageConverter.Common
                     if (result.Success)
                     {
                         image.Status = $"Converted ({result.ResultFileSize / 1024d / 1024d:0.00} MB)";
+                        image.LastSuccess = true;
+                        success++;
                     }
                     else
                     {
                         image.Status = "Failed";
                         image.ExtendedStatus = result.Status;
+                        image.LastSuccess = false;
+                        fail++;
                     }
                 }
                 catch
                 {
                     image.Status = "Failed";
                     image.ExtendedStatus = "Unspecified error";
+                    fail++;
                 }
                
             }
+
+            return new BitmapSize { Width = success, Height = fail };
         }
     }
 }

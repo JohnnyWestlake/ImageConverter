@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27205.2004
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28527.54
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageConverter", "ImageConverter\ImageConverter.csproj", "{79FC4E23-7372-4287-8B3B-78B2841863E4}"
 EndProject
@@ -10,9 +10,11 @@ EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM = Debug|ARM
+		Debug|ARM64 = Debug|ARM64
 		Debug|x64 = Debug|x64
 		Debug|x86 = Debug|x86
 		Release|ARM = Release|ARM
+		Release|ARM64 = Release|ARM64
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
 	EndGlobalSection
@@ -20,6 +22,9 @@ Global
 		{79FC4E23-7372-4287-8B3B-78B2841863E4}.Debug|ARM.ActiveCfg = Debug|ARM
 		{79FC4E23-7372-4287-8B3B-78B2841863E4}.Debug|ARM.Build.0 = Debug|ARM
 		{79FC4E23-7372-4287-8B3B-78B2841863E4}.Debug|ARM.Deploy.0 = Debug|ARM
+		{79FC4E23-7372-4287-8B3B-78B2841863E4}.Debug|ARM64.ActiveCfg = Debug|ARM64
+		{79FC4E23-7372-4287-8B3B-78B2841863E4}.Debug|ARM64.Build.0 = Debug|ARM64
+		{79FC4E23-7372-4287-8B3B-78B2841863E4}.Debug|ARM64.Deploy.0 = Debug|ARM64
 		{79FC4E23-7372-4287-8B3B-78B2841863E4}.Debug|x64.ActiveCfg = Debug|x64
 		{79FC4E23-7372-4287-8B3B-78B2841863E4}.Debug|x64.Build.0 = Debug|x64
 		{79FC4E23-7372-4287-8B3B-78B2841863E4}.Debug|x64.Deploy.0 = Debug|x64
@@ -29,6 +34,9 @@ Global
 		{79FC4E23-7372-4287-8B3B-78B2841863E4}.Release|ARM.ActiveCfg = Release|ARM
 		{79FC4E23-7372-4287-8B3B-78B2841863E4}.Release|ARM.Build.0 = Release|ARM
 		{79FC4E23-7372-4287-8B3B-78B2841863E4}.Release|ARM.Deploy.0 = Release|ARM
+		{79FC4E23-7372-4287-8B3B-78B2841863E4}.Release|ARM64.ActiveCfg = Release|ARM64
+		{79FC4E23-7372-4287-8B3B-78B2841863E4}.Release|ARM64.Build.0 = Release|ARM64
+		{79FC4E23-7372-4287-8B3B-78B2841863E4}.Release|ARM64.Deploy.0 = Release|ARM64
 		{79FC4E23-7372-4287-8B3B-78B2841863E4}.Release|x64.ActiveCfg = Release|x64
 		{79FC4E23-7372-4287-8B3B-78B2841863E4}.Release|x64.Build.0 = Release|x64
 		{79FC4E23-7372-4287-8B3B-78B2841863E4}.Release|x64.Deploy.0 = Release|x64
@@ -37,12 +45,16 @@ Global
 		{79FC4E23-7372-4287-8B3B-78B2841863E4}.Release|x86.Deploy.0 = Release|x86
 		{E93DF246-F611-4E1B-8F11-7885CF33AD54}.Debug|ARM.ActiveCfg = Debug|ARM
 		{E93DF246-F611-4E1B-8F11-7885CF33AD54}.Debug|ARM.Build.0 = Debug|ARM
+		{E93DF246-F611-4E1B-8F11-7885CF33AD54}.Debug|ARM64.ActiveCfg = Debug|ARM64
+		{E93DF246-F611-4E1B-8F11-7885CF33AD54}.Debug|ARM64.Build.0 = Debug|ARM64
 		{E93DF246-F611-4E1B-8F11-7885CF33AD54}.Debug|x64.ActiveCfg = Debug|x64
 		{E93DF246-F611-4E1B-8F11-7885CF33AD54}.Debug|x64.Build.0 = Debug|x64
 		{E93DF246-F611-4E1B-8F11-7885CF33AD54}.Debug|x86.ActiveCfg = Debug|Win32
 		{E93DF246-F611-4E1B-8F11-7885CF33AD54}.Debug|x86.Build.0 = Debug|Win32
 		{E93DF246-F611-4E1B-8F11-7885CF33AD54}.Release|ARM.ActiveCfg = Release|ARM
 		{E93DF246-F611-4E1B-8F11-7885CF33AD54}.Release|ARM.Build.0 = Release|ARM
+		{E93DF246-F611-4E1B-8F11-7885CF33AD54}.Release|ARM64.ActiveCfg = Release|ARM64
+		{E93DF246-F611-4E1B-8F11-7885CF33AD54}.Release|ARM64.Build.0 = Release|ARM64
 		{E93DF246-F611-4E1B-8F11-7885CF33AD54}.Release|x64.ActiveCfg = Release|x64
 		{E93DF246-F611-4E1B-8F11-7885CF33AD54}.Release|x64.Build.0 = Release|x64
 		{E93DF246-F611-4E1B-8F11-7885CF33AD54}.Release|x86.ActiveCfg = Release|Win32
