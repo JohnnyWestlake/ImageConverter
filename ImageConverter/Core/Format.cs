@@ -15,6 +15,7 @@ namespace ImageConverter.Core
         Bmp,
         Gif,
         Tiff,
-        Dds
+        Dds,
+        Heif
     }
 }

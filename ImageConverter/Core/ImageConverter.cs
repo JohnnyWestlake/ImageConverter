@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Windows.Foundation.Metadata;
 using Windows.Graphics.Imaging;
 using Windows.Storage;
 
@@ -11,10 +12,9 @@ namespace ImageConverter.Common
 {
     public static class ImageConverterCore
     {
-        public static List<string> SupportedFileTypes = new List<string>
-        {
-            ".jpg", ".jpeg", ".jxr", ".gif", ".tiff", ".png", ".wdp", ".hdp", ".bmp"
-        };
+        public static bool SupportsSDK17763 { get; } = ApiInformation.IsApiContractPresent("Windows.Foundation.UniversalApiContract", 7);
+
+        public static List<string> SupportedFileTypes { get; private set; }
 
         public static Format GetFormat(BitmapCodecInformation info)
         {
@@ -36,6 +36,12 @@ namespace ImageConverter.Common
             if (info.CodecId == BitmapEncoder.TiffEncoderId)
                 return Format.Tiff;
 
+            if (SupportsSDK17763)
+            {
+                if (info.CodecId == BitmapEncoder.HeifEncoderId)
+                    return Format.Heif;
+            }
+
             if (info.FriendlyName.StartsWith("DDS"))
                 return Format.Dds;
 
@@ -50,6 +56,12 @@ namespace ImageConverter.Common
             if (info.CodecId == BitmapEncoder.JpegXREncoderId)
                 return ".wdp";
 
+            if (SupportsSDK17763)
+            {
+                if (info.CodecId == BitmapEncoder.HeifEncoderId)
+                    return ".heic";
+            }
+
             return info.FileExtensions.FirstOrDefault();
         }
 
@@ -58,14 +70,24 @@ namespace ImageConverter.Common
             if (info.CodecId == BitmapEncoder.JpegXREncoderId)
                 return "JPEG-XR";
 
+            if (SupportsSDK17763)
+            {
+                if (info.CodecId == BitmapEncoder.HeifEncoderId)
+                    return "HEIF";
+            }
+
             return info.FriendlyName.Split(' ').FirstOrDefault();
         }
 
         public static List<ImageFormat> GetSupportedEncodingImageFormats()
         {
-            return BitmapEncoder.GetEncoderInformationEnumerator()
-                .Select(e => new ImageFormat(e))
-                .ToList();
+            List<ImageFormat> formats = BitmapEncoder.GetEncoderInformationEnumerator()
+                                                     .Select(e => new ImageFormat(e))
+                                                     .ToList();
+            if (SupportedFileTypes == null)
+                SupportedFileTypes = formats.SelectMany(f => f.CodecInfo.FileExtensions).Distinct().ToList();
+
+            return formats;
         }
 
         public static async Task ConvertAsync(List<ImageViewModel> images, StorageFolder targetFolder, BitmapConversionSettings settings)

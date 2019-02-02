@@ -7,16 +7,92 @@
       xmlns:i="using:Microsoft.Xaml.Interactivity"
       xmlns:local="using:ImageConverter"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-      FontSize="12"
+      FontSize="{StaticResource DefaultFontSize}"
       mc:Ignorable="d">
 
     <Page.Resources>
-        <Style TargetType="Button">
-            <Setter Property="FontSize" Value="12" />
+        <Style BasedOn="{StaticResource ButtonRevealStyle}" TargetType="Button">
+            <Setter Property="FontSize" Value="{StaticResource DefaultFontSize}" />
+            <Setter Property="Height" Value="32" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="RootGrid"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="{TemplateBinding CornerRadius}">
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualState x:Name="Normal">
+                                        <Storyboard>
+                                            <PointerUpThemeAnimation Storyboard.TargetName="ContentPresenter" />
+                                        </Storyboard>
+                                    </VisualState>
+
+                                    <VisualState x:Name="PointerOver">
+                                        <VisualState.Setters>
+                                            <Setter Target="RootGrid.(RevealBrush.State)" Value="PointerOver" />
+                                            <Setter Target="RootGrid.Background" Value="{ThemeResource ButtonRevealBackgroundPointerOver}" />
+                                            <Setter Target="ContentWrapper.BorderBrush" Value="{ThemeResource ButtonRevealBorderBrushPointerOver}" />
+                                            <Setter Target="ContentPresenter.Foreground" Value="{ThemeResource ButtonForegroundPointerOver}" />
+                                        </VisualState.Setters>
+
+                                        <Storyboard>
+                                            <PointerUpThemeAnimation Storyboard.TargetName="ContentPresenter" />
+                                        </Storyboard>
+                                    </VisualState>
+
+                                    <VisualState x:Name="Pressed">
+                                        <VisualState.Setters>
+                                            <Setter Target="RootGrid.(RevealBrush.State)" Value="Pressed" />
+                                            <Setter Target="RootGrid.Background" Value="{ThemeResource ButtonRevealBackgroundPressed}" />
+                                            <Setter Target="ContentWrapper.BorderBrush" Value="{ThemeResource ButtonRevealBorderBrushPressed}" />
+                                            <Setter Target="ContentPresenter.Foreground" Value="{ThemeResource ButtonForegroundPressed}" />
+                                        </VisualState.Setters>
+
+                                        <Storyboard>
+                                            <PointerDownThemeAnimation Storyboard.TargetName="ContentPresenter" />
+                                        </Storyboard>
+                                    </VisualState>
+
+                                    <VisualState x:Name="Disabled">
+                                        <VisualState.Setters>
+                                            <Setter Target="RootGrid.Background" Value="{ThemeResource ButtonRevealBackgroundDisabled}" />
+                                            <Setter Target="ContentWrapper.BorderBrush" Value="{ThemeResource ButtonRevealBorderBrushDisabled}" />
+                                            <Setter Target="ContentPresenter.Foreground" Value="{ThemeResource ButtonForegroundDisabled}" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+
+                                </VisualStateGroup>
+
+                            </VisualStateManager.VisualStateGroups>
+                            <Border x:Name="ContentWrapper"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}">
+                                <ContentPresenter x:Name="ContentPresenter"
+                                                  Padding="{TemplateBinding Padding}"
+                                                  HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                  VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                  AutomationProperties.AccessibilityView="Raw"
+                                                  Content="{TemplateBinding Content}"
+                                                  ContentTemplate="{TemplateBinding ContentTemplate}"
+                                                  ContentTransitions="{TemplateBinding ContentTransitions}"
+                                                  CornerRadius="{TemplateBinding CornerRadius}" />
+                            </Border>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
     </Page.Resources>
 
     <Grid Padding="20 20 20 0">
+        <Grid.ChildrenTransitions>
+            <TransitionCollection>
+                <EntranceThemeTransition FromHorizontalOffset="0"
+                                         FromVerticalOffset="250"
+                                         IsStaggeringEnabled="True" />
+            </TransitionCollection>
+        </Grid.ChildrenTransitions>
         <Grid.Background>
             <common:BlurBrush FallbackColor="Black" />
         </Grid.Background>
@@ -43,21 +119,52 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <TextBox MinHeight="20"
-                     FontSize="12"
-                     Header="Output Directory"
-                     IsEnabled="False"
-                     Text="{x:Bind ViewModel.ExportFolder.Path, FallbackValue='', TargetNullValue='', Mode=OneWay}" />
+            <TextBlock FontSize="{StaticResource DefaultFontSize}" Text="Output Folder" />
 
-            <Button Grid.Column="1"
-                    Margin="10 0 30 0"
+            <Button Height="32"
+                    HorizontalAlignment="Stretch"
                     VerticalAlignment="Bottom"
+                    HorizontalContentAlignment="Left"
                     Click="{x:Bind ViewModel.DestinationClick}"
-                    Content="..."
+                    Content="{x:Bind ViewModel.ExportFolder.Path, FallbackValue='Click to choose', TargetNullValue='Click to choose', Mode=OneWay}"
+                    FontSize="{StaticResource DefaultFontSize}"
                     IsEnabled="{x:Bind False(ViewModel.IsBusy), Mode=OneWay}" />
 
+            <Button x:Name="SecondaryButton"
+                    Grid.Column="1"
+                    Width="32"
+                    Height="32"
+                    Padding="0,0,8,0"
+                    VerticalAlignment="Bottom"
+                    HorizontalContentAlignment="Stretch"
+                    VerticalContentAlignment="Stretch"
+                    IsEnabled="{x:Bind False(ViewModel.IsBusy), Mode=OneWay}">
+                <Button.Flyout>
+                    <MenuFlyout Placement="BottomEdgeAlignedRight">
+                        <MenuFlyoutSubItem FontSize="{StaticResource DefaultFontSize}" Text="File Output Options">
+                            <ToggleMenuFlyoutItem FontSize="{StaticResource DefaultFontSize}"
+                                                  IsChecked="True"
+                                                  Text="Generate new name if already exists" />
+                            <ToggleMenuFlyoutItem FontSize="{StaticResource DefaultFontSize}" Text="Overwrite Existing" />
+                        </MenuFlyoutSubItem>
+                    </MenuFlyout>
+                </Button.Flyout>
+                <Button.Content>
+                    <TextBlock x:Name="ChevronTextBlock"
+                               HorizontalAlignment="Right"
+                               VerticalAlignment="Center"
+                               AutomationProperties.AccessibilityView="Raw"
+                               FontFamily="Segoe MDL2 Assets"
+                               FontSize="12"
+                               Text="&#xE70D;" />
+                </Button.Content>
+            </Button>
+
             <ComboBox Grid.Column="2"
+                      Width="92"
                       Margin="10 0 0 0"
+                      VerticalAlignment="Stretch"
+                      VerticalContentAlignment="Center"
                       FontSize="12"
                       Header="Output Format"
                       IsEnabled="{x:Bind False(ViewModel.IsBusy), Mode=OneWay}"
@@ -71,15 +178,19 @@
             </ComboBox>
 
             <Button Grid.Column="3"
-                    Margin="10 0 0 0"
+                    Height="32"
+                    Margin="0 0 0 0"
                     VerticalAlignment="Bottom"
                     Click="{x:Bind ViewModel.OptionsClick}"
-                    Content="Options"
-                    IsEnabled="{x:Bind ViewModel.HasOptions, Mode=OneWay}" />
-            <!--<ComboBox Grid.Column="3"
-                      Margin="10 0 0 0"
-                      Header="Output Quality"
-                      IsEnabled="{x:Bind False(ViewModel.IsBusy), Mode=OneWay}" />-->
+                    IsEnabled="{x:Bind TrueAndFalse(ViewModel.HasOptions, ViewModel.IsBusy), Mode=OneWay}">
+                <SymbolIcon Margin="-4"
+                            RenderTransformOrigin="0.5 0.5"
+                            Symbol="Setting">
+                    <SymbolIcon.RenderTransform>
+                        <CompositeTransform ScaleX="0.6" ScaleY="0.6" />
+                    </SymbolIcon.RenderTransform>
+                </SymbolIcon>
+            </Button>
 
         </Grid>
 
@@ -119,8 +230,8 @@
 
         <!--  FILES VIEW  -->
         <ListView Grid.Row="3"
-                  Margin="0 10 0 0"
-                  Padding="0 0 0 40"
+                  Margin="0 10 -20 0"
+                  Padding="0 0 20 40"
                   IsEnabled="{x:Bind False(ViewModel.IsBusy), Mode=OneWay}"
                   ItemsSource="{x:Bind ViewModel.FileList}"
                   SelectionMode="Multiple">
@@ -133,6 +244,15 @@
                     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                 </Style>
             </ListView.Resources>
+            <ListView.ItemContainerTransitions>
+                <TransitionCollection>
+                    <EntranceThemeTransition FromHorizontalOffset="0"
+                                             FromVerticalOffset="200"
+                                             IsStaggeringEnabled="True" />
+                    <AddDeleteThemeTransition />
+                    <ContentThemeTransition />
+                </TransitionCollection>
+            </ListView.ItemContainerTransitions>
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="common:ImageViewModel">
                     <Grid>

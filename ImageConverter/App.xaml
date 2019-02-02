@@ -4,6 +4,12 @@
              xmlns:local="using:ImageConverter"
              RequestedTheme="Dark">
     <Application.Resources>
-        <Thickness x:Key="ContentDialogPadding">0</Thickness>
+        <ResourceDictionary>
+            <Thickness x:Key="ContentDialogPadding">0</Thickness>
+            <x:Double x:Key="DefaultFontSize">12</x:Double>
+
+            <Style TargetType="Button" BasedOn="{StaticResource ButtonRevealStyle}" />
+
+        </ResourceDictionary>
     </Application.Resources>
 </Application>

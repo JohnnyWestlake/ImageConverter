@@ -24,6 +24,12 @@ namespace ImageConverter
         {
             this.InitializeComponent();
             this.Suspending += OnSuspending;
+            this.UnhandledException += App_UnhandledException;
+        }
+
+        private void App_UnhandledException(object sender, Windows.UI.Xaml.UnhandledExceptionEventArgs e)
+        {
+            e.Handled = true;
         }
 
         public static CoreDispatcher Dispatcher { get; private set; }

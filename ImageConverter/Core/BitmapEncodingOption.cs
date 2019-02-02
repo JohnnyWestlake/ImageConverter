@@ -6,6 +6,53 @@ using Windows.Graphics.Imaging;
 
 namespace ImageConverter.Bitmap
 {
+    public class BitmapV5BGRAOption : IBitmapEncodingOption
+    {
+        public static List<Format> SupportedFormats { get; } = new List<Format> { Format.Bmp };
+
+        public static string Description =>
+            "Specifies whether to allow encoding data in the 32bpp BGRA pixel format, allowing an alpha channel to be encoded correctly. If this option is set to true, the BMP will be written with a BITMAPV5HEADER header." +
+            "\n\nNote for 16-bit and 32-bit Windows BMP files, the BMP codec ignores any alpha channel, as many legacy image files contain invalid data in this extra channel. Starting with Windows 8, 32-bit Windows BMP files written using the BITMAPV5HEADER with valid alpha channel content are read as 32bpp BGRA";
+
+        public bool EnableAlpha { get; set; } = false;
+
+        public BitmapOption GetValue()
+        {
+            var value = new BitmapTypedValue(EnableAlpha, Windows.Foundation.PropertyType.Boolean);
+            return new BitmapOption("EnableV5Header32bppBGRA", value);
+        }
+    }
+
+    public class ProgressiveModeOption : IBitmapEncodingOption
+    {
+        public static List<Format> SupportedFormats { get; } = new List<Format> { Format.JpegXR };
+
+        public static string Description => "Switch between sequential or progressive encoding";
+
+        public bool ProgressiveMode { get; set; } = true;
+
+        public BitmapOption GetValue()
+        {
+            var value = new BitmapTypedValue(ProgressiveMode, Windows.Foundation.PropertyType.Boolean);
+            return new BitmapOption(nameof(ProgressiveMode), value);
+        }
+    }
+
+    public class InterlaceOptionOption : IBitmapEncodingOption
+    {
+        public static List<Format> SupportedFormats { get; } = new List<Format> { Format.Png };
+
+        public static string Description => "Specifies whether to encode the image data as interlaced.";
+
+        public bool InterlaceOption { get; set; }
+
+        public BitmapOption GetValue()
+        {
+            var value = new BitmapTypedValue(InterlaceOption, Windows.Foundation.PropertyType.Boolean);
+            return new BitmapOption(nameof(InterlaceOption), value);
+        }
+    }
+
     public class JpegQualityOption : IBitmapEncodingOption
     {
         public static List<Format> SupportedFormats { get; } = new List<Format> { Format.Jpeg, Format.JpegXR };
