@@ -15,7 +15,9 @@ namespace ImageConverter.Common
     {
         public static bool SupportsSDK17763 { get; } = ApiInformation.IsApiContractPresent("Windows.Foundation.UniversalApiContract", 7);
 
-        public static List<string> SupportedFileTypes { get; private set; }
+        public static List<string> SupportedEncodeFileTypes { get; private set; }
+
+        public static List<string> SupportedDecodeFileTypes { get; private set; }
 
         public static Format GetFormat(BitmapCodecInformation info)
         {
@@ -82,13 +84,23 @@ namespace ImageConverter.Common
 
         public static List<ImageFormat> GetSupportedEncodingImageFormats()
         {
-            List<ImageFormat> formats = BitmapEncoder.GetEncoderInformationEnumerator()
-                                                     .Select(e => new ImageFormat(e))
-                                                     .ToList();
-            if (SupportedFileTypes == null)
-                SupportedFileTypes = formats.SelectMany(f => f.CodecInfo.FileExtensions).Distinct().ToList();
+            List<ImageFormat> decodeFormats = BitmapDecoder.GetDecoderInformationEnumerator()
+                                                           .Select(e => new ImageFormat(e))
+                                                           .ToList();
 
-            return formats;
+            List<ImageFormat> encodeFormats = BitmapEncoder.GetEncoderInformationEnumerator()
+                                                           .Select(e => new ImageFormat(e))
+                                                           .ToList();
+            if (SupportedEncodeFileTypes == null)
+            {
+                SupportedEncodeFileTypes = encodeFormats.SelectMany(f => f.CodecInfo.FileExtensions).Distinct().ToList();
+                SupportedDecodeFileTypes = decodeFormats.SelectMany(f => f.CodecInfo.FileExtensions).Distinct().ToList();
+            }
+
+            /* Lists out format support */
+            // string fo = string.Join(Environment.NewLine, SupportedDecodeFileTypes);
+
+            return encodeFormats;
         }
 
         public static async Task<BitmapSize> ConvertAsync(

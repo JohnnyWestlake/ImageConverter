@@ -1,4 +1,4 @@
-﻿using ImageConverter.Bitmap;
+using ImageConverter.Bitmap;
 using ImageConverter.Common;
 using ImageConverter.Core;
 using ImageConverter.Core.CX;
@@ -153,7 +153,7 @@ namespace ImageConverter.Views
                 CommitButtonText = "Select"
             };
 
-            foreach (var type in ImageConverterCore.SupportedFileTypes)
+            foreach (var type in ImageConverterCore.SupportedDecodeFileTypes)
                 picker.FileTypeFilter.Add(type);
 
             IsBusy = true;
