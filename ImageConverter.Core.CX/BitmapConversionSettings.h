@@ -34,6 +34,18 @@ namespace ImageConverter {
 					void set(Platform::String^ value) { _fileExtension = value; }
 				}
 
+				property int ScaledWidth
+				{
+					virtual int get() { return _scaledWidth; }
+					void set(int value) { _scaledWidth = value; }
+				}
+
+				property int ScaledHeight
+				{
+					virtual int get() { return _scaledHeight; }
+					void set(int value) { _scaledHeight = value; }
+				}
+
 				property IVectorView<BitmapOption^>^ Options
 				{
 					virtual IVectorView<BitmapOption^>^ get() { return _options; }
@@ -51,7 +63,8 @@ namespace ImageConverter {
 				Platform::String^ _fileExtension;
 				IVectorView<BitmapOption^>^ _options;
 				CreationCollisionOption _collisionOption;
-
+				int _scaledWidth;
+				int _scaledHeight;
 			};
 		}
 	}

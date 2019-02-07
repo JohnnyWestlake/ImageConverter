@@ -44,7 +44,7 @@ IAsyncOperation<BitmapConversionResult^>^  BitmapEncoderFactory::EncodeAsync(
 									.then([settings, result, decoder, outputFile](IRandomAccessStream^ outputStream)
 								{
 									// 5. Encode
-									return create_task(EncodeInternalAsync(decoder, settings->EncoderId, outputStream, settings->Options))
+									return create_task(EncodeInternalAsync(decoder, outputStream, settings))
 										.then([result, outputStream, outputFile, decoder]
 									{
 										delete decoder;
@@ -81,31 +81,29 @@ IAsyncOperation<BitmapConversionResult^>^  BitmapEncoderFactory::EncodeAsync(
 }
 
 IAsyncOperation<BitmapEncoder^>^ BitmapEncoderFactory::CreateEncoderAsync(
-	Platform::Guid id, 
 	IRandomAccessStream^ stream,
-	IVectorView<BitmapOption^>^ options)
+	BitmapConversionSettings^ settings)
 {
 	auto map = ref new Map<Platform::String^, BitmapTypedValue^>();
-	for each (BitmapOption^ var in options)
+	for each (BitmapOption^ var in settings->Options)
 	{
 		map->Insert(var->Name, var->Value);
 	}
 
-	return BitmapEncoder::CreateAsync(id, stream, map);
+	return BitmapEncoder::CreateAsync(settings->EncoderId, stream, map);
 }
 
 IAsyncAction^ BitmapEncoderFactory::EncodeInternalAsync(
 	BitmapDecoder^ decoder,
-	Platform::Guid encoderId,
 	IRandomAccessStream^ outputStream,
-	IVectorView<BitmapOption^>^ options)
+	BitmapConversionSettings^ settings)
 {
 	outputStream->Size = 0;
-	return create_async([decoder, encoderId, outputStream, options]
+	return create_async([decoder, outputStream, settings]
 	{
-		return create_task(CreateEncoderAsync(encoderId, outputStream, options)).then([decoder](BitmapEncoder^ encoder)
+		return create_task(CreateEncoderAsync(outputStream, settings)).then([decoder, settings](BitmapEncoder^ encoder)
 		{
-			return create_task(decoder->GetPixelDataAsync()).then([encoder, decoder](PixelDataProvider^ pixeldata)
+			return create_task(decoder->GetPixelDataAsync()).then([encoder, decoder, settings](PixelDataProvider^ pixeldata)
 			{
 				encoder->SetPixelData(
 					decoder->BitmapPixelFormat,
@@ -115,6 +113,31 @@ IAsyncAction^ BitmapEncoderFactory::EncodeInternalAsync(
 					decoder->DpiX,
 					decoder->DpiY,
 					pixeldata->DetachPixelData());
+
+				bool needsTransfrom = 
+					(settings->ScaledHeight > 0 && settings->ScaledWidth > 0) 
+					&& (decoder->OrientedPixelWidth > settings->ScaledWidth || decoder->OrientedPixelHeight > settings->ScaledHeight);
+
+				if (needsTransfrom)
+				{
+					double wideratio = (double)settings->ScaledWidth / (double)settings->ScaledHeight;
+					double imageratio = (double)decoder->OrientedPixelWidth / (double)decoder->OrientedPixelHeight;
+
+					if (imageratio < wideratio) 
+					{
+						double ratio = (double)decoder->OrientedPixelHeight / (double)settings->ScaledHeight;
+						encoder->BitmapTransform->ScaledHeight = settings->ScaledHeight;
+						encoder->BitmapTransform->ScaledWidth = decoder->OrientedPixelWidth / ratio;
+					}
+					else
+					{
+						double ratio = (double)decoder->OrientedPixelWidth / (double)settings->ScaledWidth;
+						encoder->BitmapTransform->ScaledWidth = settings->ScaledWidth;
+						encoder->BitmapTransform->ScaledHeight = decoder->OrientedPixelHeight / ratio;
+					}
+
+					encoder->BitmapTransform->InterpolationMode = BitmapInterpolationMode::Fant;
+				}
 
 				return create_task(encoder->FlushAsync()).then([encoder]
 				{

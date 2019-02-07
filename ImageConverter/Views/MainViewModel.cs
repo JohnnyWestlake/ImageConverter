@@ -1,4 +1,4 @@
-using ImageConverter.Bitmap;
+﻿using ImageConverter.Bitmap;
 using ImageConverter.Common;
 using ImageConverter.Core;
 using ImageConverter.Core.CX;
@@ -198,7 +198,9 @@ namespace ImageConverter.Views
                 _optionsViewModel.CurrentFileFormat,
                 _optionsViewModel.GetEffectiveOptions().Select(o => o.GetValue()).ToList())
             {
-                CollisionOption = IsOverwrite ? CreationCollisionOption.ReplaceExisting : CreationCollisionOption.GenerateUniqueName
+                CollisionOption = IsOverwrite ? CreationCollisionOption.ReplaceExisting : CreationCollisionOption.GenerateUniqueName,
+                //ScaledWidth = 5760,
+                //ScaledHeight = 3240
             };
 
             int count = FileList.Count;

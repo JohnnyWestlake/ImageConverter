@@ -26,14 +26,12 @@ namespace ImageConverter {
 
 				static IAsyncAction^ EncodeInternalAsync(
 					BitmapDecoder^ decoder,
-					Platform::Guid encoderId,
 					IRandomAccessStream^ outputStream,
-					IVectorView<BitmapOption^>^ options);
+					BitmapConversionSettings^ settings);
 
 				static IAsyncOperation<BitmapEncoder^>^ CreateEncoderAsync(
-					Platform::Guid id,
 					IRandomAccessStream^ stream,
-					IVectorView<BitmapOption^>^ options);
+					BitmapConversionSettings^ settings);
 			};
 		}
 	}
