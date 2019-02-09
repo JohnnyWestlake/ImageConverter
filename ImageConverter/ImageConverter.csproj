@@ -128,6 +128,7 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="Common\BindableBase.cs" />
+    <Compile Include="Common\MessageBox.cs" />
     <Compile Include="Common\OptionPresenter.cs" />
     <Compile Include="Core\BitmapEncodingOption.cs" />
     <Compile Include="Common\HostBackdropBrush.cs" />
@@ -146,6 +147,10 @@
       <DependentUpon>OptionsDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\OptionsDialog\OptionsViewModel.cs" />
+    <Compile Include="Views\TransformDialog\TransformDialog.xaml.cs">
+      <DependentUpon>TransformDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\TransformDialog\TransformViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
@@ -217,6 +222,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\OptionsDialog\OptionsDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\TransformDialog\TransformDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

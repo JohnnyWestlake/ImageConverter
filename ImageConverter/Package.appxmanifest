@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" IgnorableNamespaces="uap mp">
-  <Identity Name="24532JohnnyWestlake.ImageConverter" Publisher="CN=BE189D46-7049-4D63-A83F-813D95941DC4" Version="1.0.1.0" />
+  <Identity Name="24532JohnnyWestlake.ImageConverter" Publisher="CN=BE189D46-7049-4D63-A83F-813D95941DC4" Version="1.1.0.0" />
   <mp:PhoneIdentity PhoneProductId="37f2ebd8-7be1-4043-9218-4ce51585695c" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
     <DisplayName>Image Converter</DisplayName>

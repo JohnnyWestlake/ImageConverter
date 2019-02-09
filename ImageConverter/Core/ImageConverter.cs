@@ -17,7 +17,7 @@ namespace ImageConverter.Common
 
         public static List<string> SupportedEncodeFileTypes { get; private set; }
 
-        public static List<string> SupportedDecodeFileTypes { get; private set; }
+        public static HashSet<string> SupportedDecodeFileTypes { get; private set; }
 
         public static Format GetFormat(BitmapCodecInformation info)
         {
@@ -93,11 +93,17 @@ namespace ImageConverter.Common
                                                            .ToList();
             if (SupportedEncodeFileTypes == null)
             {
-                SupportedEncodeFileTypes = encodeFormats.SelectMany(f => f.CodecInfo.FileExtensions).Distinct().ToList();
-                SupportedDecodeFileTypes = decodeFormats.SelectMany(f => f.CodecInfo.FileExtensions).Distinct().ToList();
+                SupportedEncodeFileTypes = encodeFormats.SelectMany(f => f.CodecInfo.FileExtensions)
+                                                        .Distinct()
+                                                        .ToList();
+
+                SupportedDecodeFileTypes = decodeFormats.SelectMany(f => f.CodecInfo.FileExtensions)
+                                                        .Distinct()
+                                                        .Select(e => e.ToLower())
+                                                        .ToHashSet();
             }
 
-            /* Lists out format support */
+            /* Creates a list of output formats (for store listings) */
             // string fo = string.Join(Environment.NewLine, SupportedDecodeFileTypes);
 
             return encodeFormats;

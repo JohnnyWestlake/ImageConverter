@@ -55,7 +55,7 @@ namespace ImageConverter.Bitmap
 
     public class JpegQualityOption : IBitmapEncodingOption
     {
-        public static List<Format> SupportedFormats { get; } = new List<Format> { Format.Jpeg, Format.JpegXR };
+        public static List<Format> SupportedFormats { get; } = new List<Format> { Format.Jpeg, Format.JpegXR, Format.Heif };
 
         public static string Description => "Higher values indicate higher quality at the cost of larger file sizes.";
 

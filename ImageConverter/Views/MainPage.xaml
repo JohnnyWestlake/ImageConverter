@@ -85,7 +85,10 @@
         </Style>
     </Page.Resources>
 
-    <Grid Padding="20 20 20 0">
+    <Grid Padding="20 20 20 0"
+          AllowDrop="True"
+          DragOver="Files_DragOver"
+          Drop="Files_Drop">
         <Grid.ChildrenTransitions>
             <TransitionCollection>
                 <EntranceThemeTransition FromHorizontalOffset="0"
@@ -126,8 +129,11 @@
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Bottom"
                     HorizontalContentAlignment="Left"
+                    AllowDrop="False"
                     Click="{x:Bind ViewModel.DestinationClick}"
                     Content="{x:Bind ViewModel.ExportFolder.Path, FallbackValue='Click to choose', TargetNullValue='Click to choose', Mode=OneWay}"
+                    DragOver="Output_DragOver"
+                    Drop="Output_Drop"
                     FontSize="{StaticResource DefaultFontSize}"
                     IsEnabled="{x:Bind False(ViewModel.IsBusy), Mode=OneWay}"
                     ToolTipService.ToolTip="{Binding Content, RelativeSource={RelativeSource Mode=Self}}" />
@@ -143,6 +149,10 @@
                     IsEnabled="{x:Bind False(ViewModel.IsBusy), Mode=OneWay}">
                 <Button.Flyout>
                     <MenuFlyout Placement="BottomEdgeAlignedRight">
+                        <MenuFlyoutItem Click="{x:Bind ViewModel.OpenExportFolderClick}"
+                                        FontSize="{StaticResource DefaultFontSize}"
+                                        IsEnabled="{x:Bind ViewModel.HasExportFolder, Mode=OneWay}"
+                                        Text="Open in Explorer" />
                         <MenuFlyoutSubItem FontSize="{StaticResource DefaultFontSize}" Text="Output Folder File Options">
                             <ToggleMenuFlyoutItem FontSize="{StaticResource DefaultFontSize}"
                                                   IsChecked="{x:Bind False(ViewModel.IsOverwrite), BindBack=ViewModel.SetNewName, Mode=TwoWay}"
@@ -221,10 +231,29 @@
                     Content="Remove All"
                     IsEnabled="{x:Bind TrueAndFalse(ViewModel.HasItems, ViewModel.IsBusy), Mode=OneWay}" />
 
+
+            <Button Grid.Column="4"
+                    Height="32"
+                    Margin="0 0 0 0"
+                    VerticalAlignment="Bottom"
+                    Click="{x:Bind ViewModel.TransformClick}"
+                    IsEnabled="{x:Bind False(ViewModel.IsBusy), Mode=OneWay}">
+                <SymbolIcon Margin="-4"
+                            RenderTransformOrigin="0.5 0.5"
+                            Symbol="FullScreen">
+                    <SymbolIcon.RenderTransform>
+                        <CompositeTransform ScaleX="0.6" ScaleY="0.6" />
+                    </SymbolIcon.RenderTransform>
+                </SymbolIcon>
+            </Button>
+
             <Button Grid.Column="5"
+                    Width="124"
+                    HorizontalAlignment="Stretch"
                     Click="{x:Bind ViewModel.ConvertClick}"
                     Content="Convert"
                     IsEnabled="{x:Bind TrueAndTrueAndFalse(ViewModel.HasItems, ViewModel.HasExportFolder, ViewModel.IsBusy), Mode=OneWay}" />
+
 
         </Grid>
 
@@ -233,6 +262,7 @@
                   Grid.Row="3"
                   Margin="0 10 -20 0"
                   Padding="0 0 20 40"
+                  Background="Transparent"
                   IsEnabled="{x:Bind False(ViewModel.IsBusy), Mode=OneWay}"
                   ItemsSource="{x:Bind ViewModel.FileList}"
                   SelectionMode="Multiple">
@@ -286,9 +316,9 @@
                       Grid.Row="3"
                       Width="50"
                       Height="50"
-                      Foreground="White"
                       HorizontalAlignment="Center"
                       VerticalAlignment="Center"
+                      Foreground="White"
                       IsActive="True" />
 
         <!--  STATUS BAR  -->

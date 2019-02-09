@@ -114,27 +114,19 @@ IAsyncAction^ BitmapEncoderFactory::EncodeInternalAsync(
 					decoder->DpiY,
 					pixeldata->DetachPixelData());
 
-				bool needsTransfrom = 
-					(settings->ScaledHeight > 0 && settings->ScaledWidth > 0) 
-					&& (decoder->OrientedPixelWidth > settings->ScaledWidth || decoder->OrientedPixelHeight > settings->ScaledHeight);
+				bool needsTransfrom =
+					(settings->ScaledHeight > 0 && decoder->OrientedPixelHeight > settings->ScaledHeight)
+					|| (settings->ScaledWidth > 0 && decoder->OrientedPixelWidth > settings->ScaledWidth);
 
 				if (needsTransfrom)
 				{
-					double wideratio = (double)settings->ScaledWidth / (double)settings->ScaledHeight;
-					double imageratio = (double)decoder->OrientedPixelWidth / (double)decoder->OrientedPixelHeight;
+					double destWidth = settings->ScaledWidth > 0 ? (double)min(settings->ScaledWidth, decoder->OrientedPixelWidth) : decoder->OrientedPixelWidth;
+					double destHeight = settings->ScaledHeight > 0 ? (double)min(settings->ScaledHeight, decoder->OrientedPixelHeight) : decoder->OrientedPixelHeight;
 
-					if (imageratio < wideratio) 
-					{
-						double ratio = (double)decoder->OrientedPixelHeight / (double)settings->ScaledHeight;
-						encoder->BitmapTransform->ScaledHeight = settings->ScaledHeight;
-						encoder->BitmapTransform->ScaledWidth = decoder->OrientedPixelWidth / ratio;
-					}
-					else
-					{
-						double ratio = (double)decoder->OrientedPixelWidth / (double)settings->ScaledWidth;
-						encoder->BitmapTransform->ScaledWidth = settings->ScaledWidth;
-						encoder->BitmapTransform->ScaledHeight = decoder->OrientedPixelHeight / ratio;
-					}
+					double scale = min(destWidth / (double)decoder->OrientedPixelWidth, destHeight / (double)decoder->OrientedPixelHeight);
+
+					encoder->BitmapTransform->ScaledHeight = (double)decoder->OrientedPixelHeight * scale;
+					encoder->BitmapTransform->ScaledWidth = (double)decoder->OrientedPixelWidth * scale;
 
 					encoder->BitmapTransform->InterpolationMode = BitmapInterpolationMode::Fant;
 				}

@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Windows.Graphics.Imaging;
 using Windows.Storage;
 using Windows.Storage.Pickers;
+using Windows.System;
 
 namespace ImageConverter.Views
 {
@@ -18,6 +19,7 @@ namespace ImageConverter.Views
     {
         public List<ImageFormat> ImageFormats { get; }
         private OptionsViewModel _optionsViewModel { get; } = new OptionsViewModel();
+        private TransformViewModel _transformViewModel { get; } = new TransformViewModel();
 
         public ObservableCollection<ImageViewModel> FileList { get; }
         public ObservableCollection<object> SelectedFiles { get; }
@@ -43,13 +45,7 @@ namespace ImageConverter.Views
         public ImageFormat SelectedFormat
         {
             get => Get<ImageFormat>();
-            set
-            {
-                if (Set(value))
-                {
-                    _optionsViewModel.SetFormat(value);
-                }
-            }
+            set { if (Set(value)) { _optionsViewModel.SetFormat(value); } }
         }
 
 
@@ -93,10 +89,14 @@ namespace ImageConverter.Views
                 OnPropertyChanged(nameof(HasItems));
         }
 
-
         public void OptionsClick()
         {
             OptionsDialog.Show(_optionsViewModel);
+        }
+
+        public void TransformClick()
+        {
+            TransformDialog.Show(_transformViewModel);
         }
 
         public void AddFilesClick()
@@ -112,6 +112,11 @@ namespace ImageConverter.Views
         public void DestinationClick()
         {
             _ = ChooseExportFolderAsync();
+        }
+
+        public void OpenExportFolderClick()
+        {
+            _ = OpenExportFolderAsync();
         }
 
         public void ClearClick()
@@ -132,19 +137,40 @@ namespace ImageConverter.Views
             IsOverwrite = !b;
         }
 
+        internal void ProcessDroppedFiles(IReadOnlyList<IStorageItem> items)
+        {
+            _ = ProcessAddFilesAsync(items.OfType<StorageFile>().ToList());
+        }
 
 
 
-        private async Task ChooseExportFolderAsync()
+
+
+
+        async Task ChooseExportFolderAsync()
         {
             FolderPicker picker = new FolderPicker();
             picker.FileTypeFilter.Add("*");
             var folder = await picker.PickSingleFolderAsync();
-            if (folder != null)
-            {
-                ExportFolder = folder;
-            }
+            ProcessExportFolder(folder);
         }
+
+        internal void ProcessExportFolder(StorageFolder folder)
+        {
+            if (folder == null ||string.IsNullOrWhiteSpace(folder.Path))
+                return;
+
+            ExportFolder = folder;
+        }
+
+        Task OpenExportFolderAsync()
+        {
+            if (ExportFolder == null)
+                return Task.CompletedTask;
+
+            return Launcher.LaunchFolderAsync(ExportFolder).AsTask();
+        }
+
 
         async Task AddFilesAsync()
         {
@@ -159,11 +185,28 @@ namespace ImageConverter.Views
             IsBusy = true;
 
             var files = await picker.PickMultipleFilesAsync();
+            await ProcessAddFilesAsync(files);
+        }
 
+        async Task ProcessAddFilesAsync(IEnumerable<StorageFile> files)
+        {
+            IsBusy = true;
             IsProcessing = true;
+
+            int onlineFiles = 0;
+
             List<StorageFile> _tooAdd = new List<StorageFile>();
-            foreach(var file in files)
+            foreach (var file in files)
             {
+                if (!ImageConverterCore.SupportedDecodeFileTypes.Contains(file.FileType.ToLower()))
+                    continue;
+
+                if (file.Attributes.HasFlag(FileAttributes.LocallyIncomplete))
+                {
+                    onlineFiles++;
+                    continue;
+                }
+
                 if (!FileList.Any(f => f.File.Path == file.Path))
                 {
                     _tooAdd.Add(file);
@@ -175,7 +218,6 @@ namespace ImageConverter.Views
                 FileList.Add(item);
             }
 
-
             UpdateStatusText();
 
             if (_tooAdd.Count > 0)
@@ -183,6 +225,11 @@ namespace ImageConverter.Views
 
             IsProcessing = false;
             IsBusy = false;
+
+            if (onlineFiles > 0)
+                MessageBox.Show(
+                    "To add files from online sources such as OneDrive, please make sure they are avaiable locally on your device first.",
+                    $"{onlineFiles} online-only files skipped.");
         }
 
         async Task ConvertAsync()
@@ -198,10 +245,10 @@ namespace ImageConverter.Views
                 _optionsViewModel.CurrentFileFormat,
                 _optionsViewModel.GetEffectiveOptions().Select(o => o.GetValue()).ToList())
             {
-                CollisionOption = IsOverwrite ? CreationCollisionOption.ReplaceExisting : CreationCollisionOption.GenerateUniqueName,
-                //ScaledWidth = 5760,
-                //ScaledHeight = 3240
+                CollisionOption = IsOverwrite ? CreationCollisionOption.ReplaceExisting : CreationCollisionOption.GenerateUniqueName
             };
+
+            _transformViewModel.ApplyTo(options);
 
             int count = FileList.Count;
             var result = await ImageConverterCore.ConvertAsync(FileList.ToList(), ExportFolder, options, i =>
