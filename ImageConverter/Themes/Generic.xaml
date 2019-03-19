@@ -30,7 +30,7 @@
                         <TextBlock x:Name="tbDescriptionBelowHeader"
                                    x:Load="False"
                                    FontSize="{TemplateBinding FontSize}"
-                                   Opacity="0.5"
+                                   Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}"
                                    Text="{TemplateBinding Description}"
                                    TextWrapping="Wrap"
                                    Visibility="Collapsed" />
@@ -41,7 +41,7 @@
                         <TextBlock x:Name="tbDescriptionBelowContent"
                                    x:Load="False"
                                    FontSize="{TemplateBinding FontSize}"
-                                   Opacity="0.5"
+                                   Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}"
                                    Text="{TemplateBinding Description}"
                                    TextWrapping="Wrap"
                                    Visibility="Collapsed" />

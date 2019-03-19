@@ -15,23 +15,43 @@ namespace ImageConverter
     public sealed partial class MainPage : Page
     {
         public MainViewModel ViewModel { get; }
-        
+        public UISettings UISettings { get; }
+
         public MainPage()
         {
             this.InitializeComponent();
-            EnableTitleBarDrawing();
+            //EnableTitleBarDrawing();
+            UISettings = new UISettings();
+            UISettings.ColorValuesChanged += UISettings_ColorValuesChanged;
+            DisableTitleBarDrawing();
+
             ViewModel = new MainViewModel();
             ViewModel.PropertyChanged += ViewModel_PropertyChanged;
         }
 
-        
-        private void EnableTitleBarDrawing()
+        private void UISettings_ColorValuesChanged(UISettings sender, object args)
         {
-            CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar = true;
-            var appView = ApplicationView.GetForCurrentView();
-            appView.TitleBar.ButtonBackgroundColor = Colors.Transparent;
-            appView.TitleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
+            _ = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.High, DisableTitleBarDrawing);
         }
+
+        private void DisableTitleBarDrawing()
+        {
+            CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar = false;
+            var appView = ApplicationView.GetForCurrentView();
+            appView.TitleBar.ButtonBackgroundColor = (Color)App.Current.Resources["SystemChromeMediumColor"];
+            appView.TitleBar.ButtonInactiveBackgroundColor = (Color)App.Current.Resources["SystemChromeLowColor"];
+            appView.TitleBar.BackgroundColor = (Color)App.Current.Resources["SystemChromeMediumColor"];
+            appView.TitleBar.InactiveBackgroundColor = (Color)App.Current.Resources["SystemChromeLowColor"];
+        }
+
+
+        //private void EnableTitleBarDrawing()
+        //{
+        //    CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar = true;
+        //    var appView = ApplicationView.GetForCurrentView();
+        //    appView.TitleBar.ButtonBackgroundColor = Colors.Transparent;
+        //    appView.TitleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
+        //}
 
         private void ViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {

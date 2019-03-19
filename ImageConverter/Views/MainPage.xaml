@@ -84,9 +84,9 @@
 
     <Grid Padding="0 0 0 0"
           AllowDrop="True"
+          Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}"
           DragOver="Files_DragOver"
-          Drop="Files_Drop"
-          Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}">
+          Drop="Files_Drop">
 
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -97,13 +97,13 @@
         </Grid.RowDefinitions>
 
         <!--  TITLE BAR  -->
-        <TextBlock Margin="12 10 0 0"
+        <!--<TextBlock Margin="12 10 0 0"
                    FontSize="12"
                    Text="Image Converter for Windows 10"
-                   TextLineBounds="Tight" />
+                   TextLineBounds="Tight" />-->
 
         <!--  OUTPUT ROW  -->
-        <Grid Grid.Row="1" Margin="12 26 12 8">
+        <Grid Grid.Row="1" Margin="12 12 12 8">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
@@ -248,14 +248,17 @@
         </Grid>
 
         <!--  FILES VIEW  -->
-        <Grid Grid.Row="3" >
+        <Grid Grid.Row="3">
             <Grid.Background>
-                <common:BlurBrush FallbackColor="Black" />
+                <AcrylicBrush BackgroundSource="HostBackdrop"
+                              TintColor="{ThemeResource SystemAltHighColor}"
+                              FallbackColor="{ThemeResource SystemAltHighColor}"
+                              TintOpacity="0.7" />
             </Grid.Background>
             <ListView x:Name="FilesList"
                       Grid.Row="3"
                       Margin="0 0 0 0"
-                      Padding="0 20 0 40"
+                      Padding="0 12 0 40"
                       Background="Transparent"
                       IsEnabled="{x:Bind False(ViewModel.IsBusy), Mode=OneWay}"
                       ItemsSource="{x:Bind ViewModel.FileList}"
@@ -319,26 +322,28 @@
 
 
         <!--  STATUS BAR  -->
-        <Grid Grid.Row="4"
-              ColumnSpacing="12"
-              Height="24"
-              Padding="12 0">
-            <Grid.Background>
-                <SolidColorBrush Opacity="0.5" Color="{ThemeResource SystemAccentColor}" />
-            </Grid.Background>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            <TextBlock VerticalAlignment="Center"
-                       Text="{x:Bind ViewModel.StatusBarLeft, Mode=OneWay}"
-                       TextLineBounds="Tight" />
-            <TextBlock Grid.Column="1"
-                       VerticalAlignment="Center"
-                       Text="{x:Bind ViewModel.StatusBarRight, Mode=OneWay}"
-                       TextAlignment="Right"
-                       TextLineBounds="Tight" />
-        </Grid>
-
+        <Border Grid.Row="4"
+                Background="Black"
+                RequestedTheme="Dark">
+            <Grid ColumnSpacing="12"
+                  Height="24"
+                  Padding="12 0">
+                <Grid.Background>
+                    <SolidColorBrush Opacity="0.5" Color="{ThemeResource SystemAccentColor}" />
+                </Grid.Background>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock VerticalAlignment="Center"
+                           Text="{x:Bind ViewModel.StatusBarLeft, Mode=OneWay}"
+                           TextLineBounds="Tight" />
+                <TextBlock Grid.Column="1"
+                           VerticalAlignment="Center"
+                           Text="{x:Bind ViewModel.StatusBarRight, Mode=OneWay}"
+                           TextAlignment="Right"
+                           TextLineBounds="Tight" />
+            </Grid>
+        </Border>
     </Grid>
 </Page>

@@ -1,8 +1,7 @@
 ﻿<Application x:Class="ImageConverter.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="using:ImageConverter"
-             RequestedTheme="Dark">
+             xmlns:local="using:ImageConverter">
     <Application.Resources>
         <ResourceDictionary>
             <Thickness x:Key="ContentDialogPadding">0</Thickness>
