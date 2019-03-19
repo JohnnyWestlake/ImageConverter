@@ -17,9 +17,7 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="RootGrid"
-                                Background="{TemplateBinding Background}"
-                                CornerRadius="{TemplateBinding CornerRadius}">
+                        <Border x:Name="RootGrid" Background="{TemplateBinding Background}">
                             <VisualStateManager.VisualStateGroups>
                                 <VisualStateGroup x:Name="CommonStates">
                                     <VisualState x:Name="Normal">
@@ -75,8 +73,7 @@
                                                   AutomationProperties.AccessibilityView="Raw"
                                                   Content="{TemplateBinding Content}"
                                                   ContentTemplate="{TemplateBinding ContentTemplate}"
-                                                  ContentTransitions="{TemplateBinding ContentTransitions}"
-                                                  CornerRadius="{TemplateBinding CornerRadius}" />
+                                                  ContentTransitions="{TemplateBinding ContentTransitions}" />
                             </Border>
                         </Border>
                     </ControlTemplate>
@@ -85,20 +82,12 @@
         </Style>
     </Page.Resources>
 
-    <Grid Padding="20 20 20 0"
+    <Grid Padding="0 0 0 0"
           AllowDrop="True"
           DragOver="Files_DragOver"
-          Drop="Files_Drop">
-        <Grid.ChildrenTransitions>
-            <TransitionCollection>
-                <EntranceThemeTransition FromHorizontalOffset="0"
-                                         FromVerticalOffset="250"
-                                         IsStaggeringEnabled="True" />
-            </TransitionCollection>
-        </Grid.ChildrenTransitions>
-        <Grid.Background>
-            <common:BlurBrush FallbackColor="Black" />
-        </Grid.Background>
+          Drop="Files_Drop"
+          Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}">
+
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -108,13 +97,13 @@
         </Grid.RowDefinitions>
 
         <!--  TITLE BAR  -->
-        <TextBlock Margin="0 -10 0 0"
+        <TextBlock Margin="12 10 0 0"
                    FontSize="12"
                    Text="Image Converter for Windows 10"
                    TextLineBounds="Tight" />
 
         <!--  OUTPUT ROW  -->
-        <Grid Grid.Row="1" Margin="0 36 0 8">
+        <Grid Grid.Row="1" Margin="12 26 12 8">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
@@ -148,7 +137,7 @@
                     VerticalContentAlignment="Stretch"
                     IsEnabled="{x:Bind False(ViewModel.IsBusy), Mode=OneWay}">
                 <Button.Flyout>
-                    <MenuFlyout Placement="BottomEdgeAlignedRight">
+                    <MenuFlyout Placement="Bottom">
                         <MenuFlyoutItem Click="{x:Bind ViewModel.OpenExportFolderClick}"
                                         FontSize="{StaticResource DefaultFontSize}"
                                         IsEnabled="{x:Bind ViewModel.HasExportFolder, Mode=OneWay}"
@@ -208,7 +197,9 @@
         </Grid>
 
         <!--  INPUT ROW  -->
-        <Grid Grid.Row="2" ColumnSpacing="8">
+        <Grid Grid.Row="2"
+              ColumnSpacing="8"
+              Margin="12 0 12 12">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
@@ -254,78 +245,83 @@
                     Content="Convert"
                     IsEnabled="{x:Bind TrueAndTrueAndFalse(ViewModel.HasItems, ViewModel.HasExportFolder, ViewModel.IsBusy), Mode=OneWay}" />
 
-
         </Grid>
 
         <!--  FILES VIEW  -->
-        <ListView x:Name="FilesList"
-                  Grid.Row="3"
-                  Margin="0 10 -20 0"
-                  Padding="0 0 20 40"
-                  Background="Transparent"
-                  IsEnabled="{x:Bind False(ViewModel.IsBusy), Mode=OneWay}"
-                  ItemsSource="{x:Bind ViewModel.FileList}"
-                  SelectionMode="Multiple">
-            <i:Interaction.Behaviors>
-                <common:ListViewBaseItemsSelectionBehavior SelectedItems="{x:Bind ViewModel.SelectedFiles}" />
-            </i:Interaction.Behaviors>
-            <ListView.Resources>
-                <Style TargetType="ListViewItem">
-                    <Setter Property="HorizontalAlignment" Value="Stretch" />
-                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                </Style>
-            </ListView.Resources>
-            <ListView.ItemContainerTransitions>
-                <TransitionCollection>
-                    <EntranceThemeTransition FromHorizontalOffset="0"
-                                             FromVerticalOffset="200"
-                                             IsStaggeringEnabled="True" />
-                    <AddDeleteThemeTransition />
-                    <ContentThemeTransition />
-                </TransitionCollection>
-            </ListView.ItemContainerTransitions>
-            <ListView.ItemTemplate>
-                <DataTemplate x:DataType="common:ImageViewModel">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="10" />
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock FontSize="13"
-                                   Text="{x:Bind File.Name}"
-                                   ToolTipService.ToolTip="{x:Bind File.Path}" />
-                        <TextBlock Grid.Column="2"
-                                   Margin="10 0"
-                                   FontSize="13"
-                                   Opacity="0.65"
-                                   Text="{x:Bind Status, Mode=OneWay}"
-                                   ToolTipService.ToolTip="{x:Bind ExtendedStatus, Mode=OneWay}" />
-                        <TextBlock Grid.Column="3"
-                                   FontSize="13"
-                                   Opacity="0.65"
-                                   Text="{x:Bind Size}" />
-                    </Grid>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
-
-        <ProgressRing x:Name="ProcessingRing"
-                      x:Load="{x:Bind ViewModel.IsProcessing, Mode=OneWay}"
+        <Grid Grid.Row="3" >
+            <Grid.Background>
+                <common:BlurBrush FallbackColor="Black" />
+            </Grid.Background>
+            <ListView x:Name="FilesList"
                       Grid.Row="3"
-                      Width="50"
-                      Height="50"
-                      HorizontalAlignment="Center"
-                      VerticalAlignment="Center"
-                      Foreground="White"
-                      IsActive="True" />
+                      Margin="0 0 0 0"
+                      Padding="0 20 0 40"
+                      Background="Transparent"
+                      IsEnabled="{x:Bind False(ViewModel.IsBusy), Mode=OneWay}"
+                      ItemsSource="{x:Bind ViewModel.FileList}"
+                      SelectionMode="Multiple">
+                <i:Interaction.Behaviors>
+                    <common:ListViewBaseItemsSelectionBehavior SelectedItems="{x:Bind ViewModel.SelectedFiles}" />
+                </i:Interaction.Behaviors>
+                <ListView.Resources>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="HorizontalAlignment" Value="Stretch" />
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    </Style>
+                </ListView.Resources>
+                <ListView.ItemContainerTransitions>
+                    <TransitionCollection>
+                        <EntranceThemeTransition FromHorizontalOffset="0"
+                                                 FromVerticalOffset="200"
+                                                 IsStaggeringEnabled="True" />
+                        <AddDeleteThemeTransition />
+                        <ContentThemeTransition />
+                    </TransitionCollection>
+                </ListView.ItemContainerTransitions>
+                <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="common:ImageViewModel">
+                        <Grid Padding="0 0 12 0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="10" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock FontSize="13"
+                                       Text="{x:Bind File.Name}"
+                                       ToolTipService.ToolTip="{x:Bind File.Path}" />
+                            <TextBlock Grid.Column="2"
+                                       Margin="10 0"
+                                       FontSize="13"
+                                       Opacity="0.65"
+                                       Text="{x:Bind Status, Mode=OneWay}"
+                                       ToolTipService.ToolTip="{x:Bind ExtendedStatus, Mode=OneWay}" />
+                            <TextBlock Grid.Column="3"
+                                       FontSize="13"
+                                       Opacity="0.65"
+                                       Text="{x:Bind Size}" />
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+
+            <ProgressRing x:Name="ProcessingRing"
+                          x:Load="{x:Bind ViewModel.IsProcessing, Mode=OneWay}"
+                          Grid.Row="3"
+                          Width="50"
+                          Height="50"
+                          HorizontalAlignment="Center"
+                          VerticalAlignment="Center"
+                          Foreground="White"
+                          IsActive="True" />
+        </Grid>
+
+
 
         <!--  STATUS BAR  -->
         <Grid Grid.Row="4"
               ColumnSpacing="12"
               Height="24"
-              Margin="-20 0 -20 0"
               Padding="12 0">
             <Grid.Background>
                 <SolidColorBrush Opacity="0.5" Color="{ThemeResource SystemAccentColor}" />

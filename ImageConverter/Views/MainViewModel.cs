@@ -8,6 +8,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.ApplicationModel.ExtendedExecution;
 using Windows.Graphics.Imaging;
 using Windows.Storage;
 using Windows.Storage.Pickers;
@@ -240,29 +241,38 @@ namespace ImageConverter.Views
             IsBusy = true;
             ConvertIndex = 0;
 
-            var options = new BitmapConversionSettings(
-                SelectedFormat.CodecInfo.CodecId,
-                _optionsViewModel.CurrentFileFormat,
-                _optionsViewModel.GetEffectiveOptions().Select(o => o.GetValue()).ToList())
+            using (ExtendedExecutionSession ex = new ExtendedExecutionSession())
             {
-                CollisionOption = IsOverwrite ? CreationCollisionOption.ReplaceExisting : CreationCollisionOption.GenerateUniqueName
-            };
+                ex.Reason = ExtendedExecutionReason.Unspecified;
+                bool extended = await ex.RequestExtensionAsync() == ExtendedExecutionResult.Allowed;
 
-            _transformViewModel.ApplyTo(options);
+                var options = new BitmapConversionSettings(
+                    SelectedFormat.CodecInfo.CodecId,
+                    _optionsViewModel.CurrentFileFormat,
+                    _optionsViewModel.GetEffectiveOptions().Select(o => o.GetValue()).ToList())
+                {
+                    CollisionOption = IsOverwrite ? CreationCollisionOption.ReplaceExisting : CreationCollisionOption.GenerateUniqueName
+                };
 
-            int count = FileList.Count;
-            var result = await ImageConverterCore.ConvertAsync(FileList.ToList(), ExportFolder, options, i =>
-            {
-                ConvertIndex = i - 1;
-                StatusBarRight = $"Converting {i} of {count}...";
-            });
+                _transformViewModel.ApplyTo(options);
 
-            StringBuilder b = new StringBuilder();
-            if (result.Width > 0 && result.Height == 0)
-                StatusBarRight = $"Result: {result.Width} items converted";
-            else
-                StatusBarRight = $"Result: {result.Width} items converted, {result.Height} failed";
+                int count = FileList.Count;
+                var result = await ImageConverterCore.ConvertAsync(FileList.ToList(), ExportFolder, options, i =>
+                {
+                    ConvertIndex = i - 1;
+                    StatusBarRight = $"Converting {i} of {count}...";
+                    ex.PercentProgress = (uint)(i / count);
+                });
 
+                StringBuilder b = new StringBuilder();
+                if (result.Width > 0 && result.Height == 0)
+                    StatusBarRight = $"Result: {result.Width} items converted";
+                else
+                    StatusBarRight = $"Result: {result.Width} items converted, {result.Height} failed";
+
+                ex.PercentProgress = 100;
+            }
+               
             IsBusy = false;
         }
 

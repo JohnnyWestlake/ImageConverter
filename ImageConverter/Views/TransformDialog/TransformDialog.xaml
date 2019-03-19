@@ -168,9 +168,9 @@
             <ScrollViewer>
                 <StackPanel Margin="20 0 20 20">
 
-                    <common:OptionPresenter Description="Constrains the width of the output image to not exceed the value, whilst maintaining the original aspect ratio." DescriptionStackingMode="BelowContent">
+                    <common:OptionPresenter Description="If the width of the output image is bigger than the value, the image is scaled down to fit whilst maintaining the original aspect ratio." DescriptionStackingMode="BelowContent">
                         <StackPanel>
-                            <CheckBox Content="Constrain to maximum Width (pixels)"
+                            <CheckBox Content="Fit to Width (pixels)"
                                       FontSize="{StaticResource DefaultFontSize}"
                                       IsChecked="{x:Bind ViewModel.ConstrainWidth, Mode=TwoWay}" />
                             <TextBox BeforeTextChanging="TextBox_BeforeTextChanging"
@@ -180,9 +180,9 @@
 
                     </common:OptionPresenter>
 
-                    <common:OptionPresenter Description="Constrains the height of the output image to not exceed the value, whilst maintaining the original aspect ratio." DescriptionStackingMode="BelowContent">
+                    <common:OptionPresenter Description="If the height of the output image is bigger than the value, the image is scaled down to fit whilst maintaining the original aspect ratio." DescriptionStackingMode="BelowContent">
                         <StackPanel>
-                            <CheckBox Content="Constrain to maximum Height (pixels)"
+                            <CheckBox Content="Fit to Height (pixels)"
                                       FontSize="{StaticResource DefaultFontSize}"
                                       IsChecked="{x:Bind ViewModel.ConstrainHeight, Mode=TwoWay}" />
                             <TextBox BeforeTextChanging="TextBox_BeforeTextChanging"
