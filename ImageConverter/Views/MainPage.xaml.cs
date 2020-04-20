@@ -2,46 +2,53 @@
 using System;
 using System.ComponentModel;
 using System.Linq;
+using System.Numerics;
 using Windows.ApplicationModel.Core;
 using Windows.ApplicationModel.DataTransfer;
+using Windows.Foundation.Metadata;
 using Windows.Storage;
 using Windows.UI;
+using Windows.UI.Composition;
 using Windows.UI.ViewManagement;
+using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-
+using Windows.UI.Xaml.Media;
 
 namespace ImageConverter
 {
     public sealed partial class MainPage : Page
     {
+        public static bool Supports1903 { get; } = ApiInformation.IsApiContractPresent("Windows.Foundation.UniversalApiContract", 8);
+
         public MainViewModel ViewModel { get; }
         public UISettings UISettings { get; }
 
         public MainPage()
         {
             this.InitializeComponent();
-            //EnableTitleBarDrawing();
             UISettings = new UISettings();
             UISettings.ColorValuesChanged += UISettings_ColorValuesChanged;
-            DisableTitleBarDrawing();
+            UdpateTitleBar();
 
             ViewModel = new MainViewModel();
             ViewModel.PropertyChanged += ViewModel_PropertyChanged;
+            SetThemeShadow(InputBackground, 40, OutputBackground);
         }
 
         private void UISettings_ColorValuesChanged(UISettings sender, object args)
         {
-            _ = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.High, DisableTitleBarDrawing);
+            _ = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.High, UdpateTitleBar);
         }
 
-        private void DisableTitleBarDrawing()
+        private void UdpateTitleBar()
         {
-            CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar = false;
+            CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar = true;
+            Window.Current.SetTitleBar(TitleBar);
             var appView = ApplicationView.GetForCurrentView();
-            appView.TitleBar.ButtonBackgroundColor = (Color)App.Current.Resources["SystemChromeMediumColor"];
-            appView.TitleBar.ButtonInactiveBackgroundColor = (Color)App.Current.Resources["SystemChromeLowColor"];
-            appView.TitleBar.BackgroundColor = (Color)App.Current.Resources["SystemChromeMediumColor"];
-            appView.TitleBar.InactiveBackgroundColor = (Color)App.Current.Resources["SystemChromeLowColor"];
+            appView.TitleBar.ButtonBackgroundColor = Colors.Transparent;
+            appView.TitleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
+            appView.TitleBar.ButtonForegroundColor = ((SolidColorBrush)App.Current.Resources["ApplicationForegroundThemeBrush"]).Color;
+            appView.TitleBar.ButtonHoverForegroundColor = ((SolidColorBrush)App.Current.Resources["ApplicationForegroundThemeBrush"]).Color;
         }
 
 
@@ -104,6 +111,23 @@ namespace ImageConverter
             }
         }
 
+        public static void SetThemeShadow(UIElement target, float depth, params UIElement[] recievers)
+        {
+            try
+            {
+                if (!Supports1903 || !CompositionCapabilities.GetForCurrentView().AreEffectsFast())
+                    return;
+
+                target.Translation = new Vector3(0, 0, depth);
+
+                var shadow = new ThemeShadow();
+                target.Shadow = shadow;
+                foreach (var r in recievers)
+                    shadow.Receivers.Add(r);
+            }
+            catch { }
+        }
+
 
 
         /* x:Bind Converters */
@@ -111,5 +135,6 @@ namespace ImageConverter
         public bool FalseOrFalse(bool a, bool b) => !b || !a;
         public bool TrueAndFalse(bool a, bool b) => a & !b;
         public bool TrueAndTrueAndFalse(bool a, bool b, bool c) => a && b && !c;
+        public Visibility FalseToVis(bool a) => a ? Visibility.Collapsed : Visibility.Visible;
     }
 }

@@ -1,16 +1,40 @@
-<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:common="using:ImageConverter.Common"
-                    xmlns:local="using:ImageConverter">
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:common="using:ImageConverter.Common"
+    xmlns:local="using:ImageConverter">
 
     <Style TargetType="common:OptionPresenter">
         <Setter Property="FontSize" Value="12" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="common:OptionPresenter">
-                    <StackPanel Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}">
+                    <StackPanel
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}">
+                        <TextBlock FontSize="{TemplateBinding FontSize}" Text="{TemplateBinding Header}" />
+                        <TextBlock
+                            x:Name="tbDescriptionBelowHeader"
+                            x:Load="False"
+                            FontSize="{TemplateBinding FontSize}"
+                            Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}"
+                            Text="{TemplateBinding Description}"
+                            TextWrapping="Wrap"
+                            Visibility="Collapsed" />
+                        <ContentPresenter
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            ContentTemplateSelector="{TemplateBinding ContentTemplateSelector}"
+                            ContentTransitions="{TemplateBinding ContentTransitions}" />
+                        <TextBlock
+                            x:Name="tbDescriptionBelowContent"
+                            x:Load="False"
+                            FontSize="{TemplateBinding FontSize}"
+                            Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}"
+                            Text="{TemplateBinding Description}"
+                            TextWrapping="Wrap"
+                            Visibility="Collapsed" />
                         <VisualStateManager.VisualStateGroups>
                             <VisualStateGroup x:Name="DescriptionStates">
                                 <VisualState x:Name="DescriptionHiddenState" />
@@ -26,25 +50,6 @@
                                 </VisualState>
                             </VisualStateGroup>
                         </VisualStateManager.VisualStateGroups>
-                        <TextBlock FontSize="{TemplateBinding FontSize}" Text="{TemplateBinding Header}" />
-                        <TextBlock x:Name="tbDescriptionBelowHeader"
-                                   x:Load="False"
-                                   FontSize="{TemplateBinding FontSize}"
-                                   Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}"
-                                   Text="{TemplateBinding Description}"
-                                   TextWrapping="Wrap"
-                                   Visibility="Collapsed" />
-                        <ContentPresenter Content="{TemplateBinding Content}"
-                                          ContentTemplate="{TemplateBinding ContentTemplate}"
-                                          ContentTemplateSelector="{TemplateBinding ContentTemplateSelector}"
-                                          ContentTransitions="{TemplateBinding ContentTransitions}" />
-                        <TextBlock x:Name="tbDescriptionBelowContent"
-                                   x:Load="False"
-                                   FontSize="{TemplateBinding FontSize}"
-                                   Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}"
-                                   Text="{TemplateBinding Description}"
-                                   TextWrapping="Wrap"
-                                   Visibility="Collapsed" />
                     </StackPanel>
                 </ControlTemplate>
             </Setter.Value>

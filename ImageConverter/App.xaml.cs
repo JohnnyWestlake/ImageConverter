@@ -40,28 +40,20 @@ namespace ImageConverter
         /// <param name="e">Details about the launch request and process.</param>
         protected override void OnLaunched(LaunchActivatedEventArgs e)
         {
-            Frame rootFrame = Window.Current.Content as Frame;
-
             // Do not repeat app initialization when the Window already has content,
             // just ensure that the window is active
-            if (rootFrame == null)
+            if (!(Window.Current.Content is MainPage page))
             {
                 // Create a Frame to act as the navigation context and navigate to the first page
-                rootFrame = new Frame();
-                Dispatcher = rootFrame.Dispatcher;
-                rootFrame.NavigationFailed += OnNavigationFailed;
+                Dispatcher = Window.Current.Dispatcher;
+                page = new MainPage();
 
                 // Place the frame in the current Window
-                Window.Current.Content = rootFrame;
+                Window.Current.Content = page;
             }
 
             if (e.PrelaunchActivated == false)
             {
-                if (rootFrame.Content == null)
-                {
-                    rootFrame.Navigate(typeof(MainPage), e.Arguments);
-                }
-
                 Window.Current.Activate();
             }
         }
