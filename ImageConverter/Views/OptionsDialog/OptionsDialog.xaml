@@ -7,11 +7,12 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:ImageConverter.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Padding="0"
+    CornerRadius="8"
     FontSize="{StaticResource DefaultFontSize}"
     IsPrimaryButtonEnabled="False"
     IsSecondaryButtonEnabled="False"
-    Loaded="ContentDialog_Loaded" 
-    Padding="0"
+    Loaded="ContentDialog_Loaded"
     mc:Ignorable="d">
     <FrameworkElement.Resources>
         <Thickness x:Key="ContentDialogPadding">0</Thickness>
@@ -22,7 +23,7 @@
             <Setter Property="Margin" Value="{StaticResource ItemSpacingThickess}" />
         </Style>
 
-        <Style TargetType="CheckBox" BasedOn="{StaticResource DefaultCheckBoxStyle}">
+        <Style BasedOn="{StaticResource DefaultCheckBoxStyle}" TargetType="CheckBox">
             <Setter Property="Padding" Value="8,0,0,0" />
             <Setter Property="IsThreeState" Value="False" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
@@ -36,17 +37,17 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" CornerRadius="8 8 0 0">
             <Button
-                Margin="0"
                 MinWidth="64"
+                Margin="0"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Stretch"
                 Background="Transparent"
                 Canvas.ZIndex="10"
-                Style="{StaticResource ButtonRevealStyle}"
                 Click="{x:Bind Close}"
-                CornerRadius="0">
+                CornerRadius="0 8 0 0"
+                Style="{StaticResource ButtonRevealStyle}">
                 <SymbolIcon Symbol="Cancel" />
             </Button>
             <TextBlock
@@ -56,7 +57,10 @@
                 Text="Options" />
         </Grid>
 
-        <Grid Grid.Row="1" Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}">
+        <Grid
+            Grid.Row="1"
+            Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}"
+            CornerRadius="0 0 8 8">
             <ScrollViewer>
                 <StackPanel Margin="20,0,20,20">
                     <!--<Panel.ChildrenTransitions>

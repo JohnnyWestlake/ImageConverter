@@ -2,11 +2,11 @@
     x:Class="ImageConverter.Views.TransformDialog"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:b="using:ImageConverter.Bitmap"
     xmlns:common="using:ImageConverter.Common"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:ImageConverter.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    CornerRadius="8"
     FontSize="{StaticResource DefaultFontSize}"
     IsPrimaryButtonEnabled="False"
     IsSecondaryButtonEnabled="False"
@@ -157,7 +157,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" CornerRadius="8 8 0 0">
             <Button
                 MinWidth="64"
                 Margin="0"
@@ -166,7 +166,7 @@
                 Background="Transparent"
                 Canvas.ZIndex="10"
                 Click="{x:Bind Close}"
-                CornerRadius="0"
+                CornerRadius="0 8 0 0"
                 Style="{StaticResource ButtonRevealStyle}">
                 <SymbolIcon Symbol="Accept" />
             </Button>
@@ -174,10 +174,13 @@
                 Margin="20,20,20,12"
                 FontSize="24"
                 FontWeight="Bold"
-                Text="Resize Options" />
+                Text="Resizing" />
         </Grid>
 
-        <Grid Grid.Row="1" Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}">
+        <Grid
+            Grid.Row="1"
+            Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}"
+            CornerRadius="0 0 8 8">
             <ScrollViewer>
                 <StackPanel Margin="20,-12,20,20">
 

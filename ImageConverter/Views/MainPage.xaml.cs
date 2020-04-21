@@ -12,6 +12,7 @@ using Windows.UI.Composition;
 using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Documents;
 using Windows.UI.Xaml.Media;
 
 namespace ImageConverter
@@ -43,22 +44,13 @@ namespace ImageConverter
         private void UdpateTitleBar()
         {
             CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar = true;
-            Window.Current.SetTitleBar(TitleBar);
+            Window.Current.SetTitleBar(TitleBarBackground);
             var appView = ApplicationView.GetForCurrentView();
             appView.TitleBar.ButtonBackgroundColor = Colors.Transparent;
             appView.TitleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
             appView.TitleBar.ButtonForegroundColor = ((SolidColorBrush)App.Current.Resources["ApplicationForegroundThemeBrush"]).Color;
             appView.TitleBar.ButtonHoverForegroundColor = ((SolidColorBrush)App.Current.Resources["ApplicationForegroundThemeBrush"]).Color;
         }
-
-
-        //private void EnableTitleBarDrawing()
-        //{
-        //    CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar = true;
-        //    var appView = ApplicationView.GetForCurrentView();
-        //    appView.TitleBar.ButtonBackgroundColor = Colors.Transparent;
-        //    appView.TitleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
-        //}
 
         private void ViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
@@ -128,6 +120,19 @@ namespace ImageConverter
             catch { }
         }
 
+        private void ShowHelp() => HelpToolTip.IsOpen = true;
+
+        private void FocusAddFiles(Hyperlink sender, HyperlinkClickEventArgs args) => FocusTarget(AddFilesButton);
+
+        private void FocusOutputFolder(Hyperlink sender, HyperlinkClickEventArgs args) => FocusTarget(OutputFolderButton);
+
+        private void FocusOutputFormat(Hyperlink sender, HyperlinkClickEventArgs args) => FocusTarget(OutputFormatSelector);
+
+        private void FocusFormatOptions(Hyperlink sender, HyperlinkClickEventArgs args) => FocusTarget(OutputFormatOptionsButton);
+
+        private void FocusResize(Hyperlink sender, HyperlinkClickEventArgs args) => FocusTarget(ResizeOptionsButton);
+
+        private void FocusTarget(Control c) => c.Focus(FocusState.Keyboard);
 
 
         /* x:Bind Converters */
@@ -136,5 +141,7 @@ namespace ImageConverter
         public bool TrueAndFalse(bool a, bool b) => a & !b;
         public bool TrueAndTrueAndFalse(bool a, bool b, bool c) => a && b && !c;
         public Visibility FalseToVis(bool a) => a ? Visibility.Collapsed : Visibility.Visible;
+
+
     }
 }

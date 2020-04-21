@@ -22,6 +22,7 @@ namespace ImageConverter
     {
         public App()
         {
+            this.FocusVisualKind = FocusVisualKind.Reveal;
             this.InitializeComponent();
             this.UnhandledException += App_UnhandledException;
         }
