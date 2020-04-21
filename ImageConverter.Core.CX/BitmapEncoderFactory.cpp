@@ -132,7 +132,7 @@ IAsyncAction^ BitmapEncoderFactory::EncodeInternalAsync(
 								encoder->BitmapTransform->InterpolationMode = BitmapInterpolationMode::Fant;
 							}
 
-							return create_task(TryCopyMetadataAsync(decoder, encoder)).then([encoder](bool success)
+							return create_task(HandleMetadataAsync(decoder, encoder, settings->CopyMetadata)).then([encoder](bool success)
 								{
 									return create_task(encoder->FlushAsync()).then([encoder]
 										{
@@ -145,12 +145,16 @@ IAsyncAction^ BitmapEncoderFactory::EncodeInternalAsync(
 		});
 }
 
-IAsyncOperation<bool>^ BitmapEncoderFactory::TryCopyMetadataAsync(
+IAsyncOperation<bool>^ BitmapEncoderFactory::HandleMetadataAsync(
 	BitmapDecoder^ decoder,
-	BitmapEncoder^ encoder)
+	BitmapEncoder^ encoder,
+	bool copy)
 {
-	return create_async([decoder, encoder]
+	return create_async([decoder, encoder, copy]
 		{
+			if (!copy)
+				return task_from_result(false);
+
 			return create_task(TryCopyMetadataSetAsync(decoder, encoder, GetIFDPath(decoder->DecoderInformation->CodecId), GetIFDPath(encoder->EncoderInformation->CodecId)))
 				.then([decoder, encoder](bool ifd)
 					{
@@ -219,7 +223,8 @@ Platform::String^ BitmapEncoderFactory::GetExifPath(Platform::Guid id)
 	if (id == BitmapDecoder::JpegDecoderId || id == BitmapEncoder::JpegEncoderId)
 		return ref new Platform::String(L"/app1/ifd/exif");
 	else if (id == BitmapDecoder::TiffDecoderId || id == BitmapDecoder::JpegXRDecoderId
-		|| id == BitmapEncoder::TiffEncoderId || id == BitmapEncoder::JpegXREncoderId)
+		|| id == BitmapEncoder::TiffEncoderId || id == BitmapEncoder::JpegXREncoderId
+		|| id == BitmapEncoder::HeifEncoderId || id == BitmapDecoder::HeifDecoderId)
 		return ref new Platform::String(L"/ifd/exif");
 	else
 		return nullptr;
@@ -230,7 +235,8 @@ Platform::String^ BitmapEncoderFactory::GetXMPPath(Platform::Guid id)
 	if (id == BitmapDecoder::JpegDecoderId || id == BitmapEncoder::JpegEncoderId)
 		return ref new Platform::String(L"/xmp");
 	else if (id == BitmapDecoder::TiffDecoderId || id == BitmapDecoder::JpegXRDecoderId
-		|| id == BitmapEncoder::TiffEncoderId || id == BitmapEncoder::JpegXREncoderId)
+		|| id == BitmapEncoder::TiffEncoderId || id == BitmapEncoder::JpegXREncoderId
+		|| id == BitmapEncoder::HeifEncoderId || id == BitmapDecoder::HeifDecoderId)
 		return ref new Platform::String(L"/ifd/xmp");
 	else
 		return nullptr;
@@ -241,7 +247,8 @@ Platform::String^ BitmapEncoderFactory::GetGPSPath(Platform::Guid id)
 	if (id == BitmapDecoder::JpegDecoderId || id == BitmapEncoder::JpegEncoderId)
 		return ref new Platform::String(L"/app1/ifd/gps");
 	else if (id == BitmapDecoder::TiffDecoderId || id == BitmapDecoder::JpegXRDecoderId
-		|| id == BitmapEncoder::TiffEncoderId || id == BitmapEncoder::JpegXREncoderId)
+		|| id == BitmapEncoder::TiffEncoderId || id == BitmapEncoder::JpegXREncoderId
+		|| id == BitmapEncoder::HeifEncoderId || id == BitmapDecoder::HeifDecoderId)
 		return ref new Platform::String(L"/ifd/gps");
 	else
 		return nullptr;
@@ -252,7 +259,8 @@ Platform::String^ BitmapEncoderFactory::GetIFDPath(Platform::Guid id)
 	if (id == BitmapDecoder::JpegDecoderId || id == BitmapEncoder::JpegEncoderId)
 		return ref new Platform::String(L"/app1/ifd");
 	else if (id == BitmapDecoder::TiffDecoderId || id == BitmapDecoder::JpegXRDecoderId
-		|| id == BitmapEncoder::TiffEncoderId || id == BitmapEncoder::JpegXREncoderId)
+		|| id == BitmapEncoder::TiffEncoderId || id == BitmapEncoder::JpegXREncoderId
+		|| id == BitmapEncoder::HeifEncoderId || id == BitmapDecoder::HeifDecoderId)
 		return ref new Platform::String(L"/ifd");
 	else
 		return nullptr;

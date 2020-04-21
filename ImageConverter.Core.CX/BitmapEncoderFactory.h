@@ -39,9 +39,10 @@ namespace ImageConverter {
 					IRandomAccessStream^ stream,
 					BitmapConversionSettings^ settings);
 
-				static IAsyncOperation<bool>^ TryCopyMetadataAsync(
+				static IAsyncOperation<bool>^ HandleMetadataAsync(
 					BitmapDecoder^ decoder,
-					BitmapEncoder^ encoder);
+					BitmapEncoder^ encoder,
+					bool copy);
 
 				static IAsyncOperation<bool>^ TryCopyMetadataSetAsync(
 					BitmapDecoder^ decoder,

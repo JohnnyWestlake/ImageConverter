@@ -17,54 +17,24 @@ namespace ImageConverter {
 
 				BitmapConversionSettings(Platform::Guid encoderId, Platform::String^ fileExtension, IVectorView<BitmapOption^>^ options)
 				{
-					_encoderId = encoderId;
-					_fileExtension = fileExtension;
-					_options = options;
+					EncoderId = encoderId;
+					FileExtension = fileExtension;
+					Options = options;
 				}
 
-				property Platform::Guid EncoderId
-				{
-					Platform::Guid get() { return _encoderId; }
-					void set(Platform::Guid value) { _encoderId = value; }
-				}
+				property Platform::Guid EncoderId;
 
-				property Platform::String^ FileExtension
-				{
-					virtual Platform::String^ get() { return _fileExtension; }
-					void set(Platform::String^ value) { _fileExtension = value; }
-				}
+				property Platform::String^ FileExtension;
 
-				property int ScaledWidth
-				{
-					virtual int get() { return _scaledWidth; }
-					void set(int value) { _scaledWidth = value; }
-				}
+				property int ScaledWidth;
 
-				property int ScaledHeight
-				{
-					virtual int get() { return _scaledHeight; }
-					void set(int value) { _scaledHeight = value; }
-				}
+				property int ScaledHeight;
 
-				property IVectorView<BitmapOption^>^ Options
-				{
-					virtual IVectorView<BitmapOption^>^ get() { return _options; }
-					void set(IVectorView<BitmapOption^>^ value) { _options = value; }
-				}
+				property bool CopyMetadata;
 
-				property CreationCollisionOption CollisionOption
-				{
-					virtual CreationCollisionOption get() { return _collisionOption; }
-					void set(CreationCollisionOption value) { _collisionOption = value; }
-				}
+				property IVectorView<BitmapOption^>^ Options;
 
-			private:
-				Platform::Guid _encoderId;
-				Platform::String^ _fileExtension;
-				IVectorView<BitmapOption^>^ _options;
-				CreationCollisionOption _collisionOption;
-				int _scaledWidth;
-				int _scaledHeight;
+				property CreationCollisionOption CollisionOption;
 			};
 		}
 	}

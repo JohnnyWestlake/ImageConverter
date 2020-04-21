@@ -1,5 +1,4 @@
-﻿using ImageConverter.Bitmap;
-using ImageConverter.Common;
+﻿using ImageConverter.Common;
 using ImageConverter.Core;
 using ImageConverter.Core.CX;
 using System;
@@ -9,7 +8,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.ExtendedExecution;
-using Windows.Graphics.Imaging;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 using Windows.System;
@@ -229,7 +227,7 @@ namespace ImageConverter.Views
 
             if (onlineFiles > 0)
                 MessageBox.Show(
-                    "To add files from online sources such as OneDrive, please make sure they are avaiable locally on your device first.",
+                    "To add files from online sources such as OneDrive, please make sure they are available locally on your device first.",
                     $"{onlineFiles} online-only files skipped.");
         }
 
@@ -251,7 +249,8 @@ namespace ImageConverter.Views
                     _optionsViewModel.CurrentFileFormat,
                     _optionsViewModel.GetEffectiveOptions().Select(o => o.GetValue()).ToList())
                 {
-                    CollisionOption = IsOverwrite ? CreationCollisionOption.ReplaceExisting : CreationCollisionOption.GenerateUniqueName
+                    CollisionOption = IsOverwrite ? CreationCollisionOption.ReplaceExisting : CreationCollisionOption.GenerateUniqueName,
+                    CopyMetadata = true
                 };
 
                 _transformViewModel.ApplyTo(options);

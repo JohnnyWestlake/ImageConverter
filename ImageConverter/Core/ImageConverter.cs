@@ -104,7 +104,9 @@ namespace ImageConverter.Common
             }
 
             /* Creates a list of output formats (for store listings) */
-            // string fo = string.Join(Environment.NewLine, SupportedDecodeFileTypes);
+#if DEBUG
+            string fo = string.Join(Environment.NewLine, SupportedDecodeFileTypes);
+#endif
 
             return encodeFormats;
         }

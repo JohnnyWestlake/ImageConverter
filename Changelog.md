@@ -1,5 +1,5 @@
-# Version 2.1.0.0 (21 April 2020)
-- Added metadata copying when converting between JPEG/JPEG-XR/TIFF formats. (Heic is currently unsupported for metadata writing by Windows itself)
+# Version 2.1.1.0 (21 April 2020)
+- Added metadata copying when converting between JPEG/JPEG-XR/TIFF/HEIF/HEIC formats. 
 - Added help button with in-app guide.
 
 # Version 2.0.0.0
