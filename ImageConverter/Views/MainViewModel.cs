@@ -4,6 +4,7 @@ using ImageConverter.Core.CX;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -195,16 +196,37 @@ namespace ImageConverter.Views
 
             int onlineFiles = 0;
 
+            List<StorageFile> heifImageSequence = new List<StorageFile>();
+
             List<StorageFile> _tooAdd = new List<StorageFile>();
             foreach (var file in files)
             {
                 if (!ImageConverterCore.SupportedDecodeFileTypes.Contains(file.FileType.ToLower()))
                     continue;
 
-                if (file.Attributes.HasFlag(FileAttributes.LocallyIncomplete))
+                if (file.Attributes.HasFlag(Windows.Storage.FileAttributes.LocallyIncomplete))
                 {
                     onlineFiles++;
                     continue;
+                }
+
+                // We don't allow HEIC image sequences right now.
+                if (file.FileType == ".heic" || file.FileType == ".heif")
+                {
+                    using Stream s = await file.OpenStreamForReadAsync();
+                    using StreamReader r = new StreamReader(s, Encoding.ASCII);
+                    if (s.Length > 2048)
+                    {
+                        char[] buffer = new char[2048];
+                        r.Read(buffer, 0, 2048);
+
+                        var str = new String(buffer.Where(c => char.IsLetter(c)).ToArray());
+                        if (str.Contains("ImageSequencePictureHandler") || str.Contains("Derivedimage"))
+                        {
+                            heifImageSequence.Add(file);
+                            continue;
+                        }
+                    }
                 }
 
                 if (!FileList.Any(f => f.File.Path == file.Path))
@@ -226,10 +248,37 @@ namespace ImageConverter.Views
             IsProcessing = false;
             IsBusy = false;
 
-            if (onlineFiles > 0)
-                MessageBox.Show(
-                    "To add files from online sources such as OneDrive, please make sure they are available locally on your device first.",
-                    $"{onlineFiles} online-only files skipped.");
+            if (onlineFiles > 0 || heifImageSequence.Count > 0)
+            {
+                string title = "Some files have been skipped";
+                StringBuilder sb = new StringBuilder();
+
+                if (heifImageSequence.Count > 0)
+                {
+                    sb.Append("Some of your HEIF files contain images sequences or derived images, which are not supported by Windows. As a result, the following files have not been added:");
+                    sb.AppendLine();
+                    sb.AppendLine();
+                    foreach (var file in heifImageSequence)
+                    {
+                        sb.AppendFormat(" · {0}", file.Name);
+                        sb.AppendLine();
+                    }
+
+                }
+                if (onlineFiles > 0)
+                {
+                    if (sb.Length > 0)
+                    {
+                        sb.AppendLine();
+                        sb.AppendLine();
+                    }
+
+                    sb.Append(
+                        "To add files from online sources such as OneDrive, please make sure they are available locally on your device first.");
+                }
+
+                MessageBox.Show(sb.ToString(), title);
+            }
         }
 
         async Task ConvertAsync()
