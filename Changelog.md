@@ -1,3 +1,7 @@
+# Version 2.2.0.0 (30 April 2020)
+- Support converting of multi-frame images into separate images (e.g. .tiff)
+- Support copying metadata from WebP input files.
+
 # Version 2.1.1.0 (21 April 2020)
 - Added metadata copying when converting between JPEG/JPEG-XR/TIFF/HEIF/HEIC formats. 
 - Added help button with in-app guide.
