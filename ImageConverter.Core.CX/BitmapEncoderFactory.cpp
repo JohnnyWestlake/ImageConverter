@@ -48,10 +48,13 @@ task<BitmapConversionResult^> BitmapEncoderFactory::EncodeInternalAsync(
 		result->Success = false;
 	}
 
-	for (UINT i = 0; i < decoder->FrameCount; i++)
+	if (decoder != nullptr)
 	{
-		if (result->Success)
-			co_await EncodeFrameAsync(decoder, result, file->DisplayName, settings, targetFolder, i);
+		for (UINT i = 0; i < decoder->FrameCount; i++)
+		{
+			if (result->Success)
+				co_await EncodeFrameAsync(decoder, result, file->DisplayName, settings, targetFolder, i);
+		}
 	}
 
 	co_return result;
