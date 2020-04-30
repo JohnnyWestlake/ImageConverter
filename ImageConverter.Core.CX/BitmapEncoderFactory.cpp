@@ -224,7 +224,8 @@ Platform::String^ BitmapEncoderFactory::GetExifPath(Platform::Guid id)
 		return ref new Platform::String(L"/app1/ifd/exif");
 	else if (id == BitmapDecoder::TiffDecoderId || id == BitmapDecoder::JpegXRDecoderId
 		|| id == BitmapEncoder::TiffEncoderId || id == BitmapEncoder::JpegXREncoderId
-		|| id == BitmapEncoder::HeifEncoderId || id == BitmapDecoder::HeifDecoderId)
+		|| id == BitmapEncoder::HeifEncoderId || id == BitmapDecoder::HeifDecoderId
+		|| id == BitmapDecoder::WebpDecoderId)
 		return ref new Platform::String(L"/ifd/exif");
 	else
 		return nullptr;
@@ -236,7 +237,8 @@ Platform::String^ BitmapEncoderFactory::GetXMPPath(Platform::Guid id)
 		return ref new Platform::String(L"/xmp");
 	else if (id == BitmapDecoder::TiffDecoderId || id == BitmapDecoder::JpegXRDecoderId
 		|| id == BitmapEncoder::TiffEncoderId || id == BitmapEncoder::JpegXREncoderId
-		|| id == BitmapEncoder::HeifEncoderId || id == BitmapDecoder::HeifDecoderId)
+		|| id == BitmapEncoder::HeifEncoderId || id == BitmapDecoder::HeifDecoderId
+		|| id == BitmapDecoder::WebpDecoderId)
 		return ref new Platform::String(L"/ifd/xmp");
 	else
 		return nullptr;
@@ -248,7 +250,8 @@ Platform::String^ BitmapEncoderFactory::GetGPSPath(Platform::Guid id)
 		return ref new Platform::String(L"/app1/ifd/gps");
 	else if (id == BitmapDecoder::TiffDecoderId || id == BitmapDecoder::JpegXRDecoderId
 		|| id == BitmapEncoder::TiffEncoderId || id == BitmapEncoder::JpegXREncoderId
-		|| id == BitmapEncoder::HeifEncoderId || id == BitmapDecoder::HeifDecoderId)
+		|| id == BitmapEncoder::HeifEncoderId || id == BitmapDecoder::HeifDecoderId
+		|| id == BitmapDecoder::WebpDecoderId)
 		return ref new Platform::String(L"/ifd/gps");
 	else
 		return nullptr;
@@ -260,7 +263,8 @@ Platform::String^ BitmapEncoderFactory::GetIFDPath(Platform::Guid id)
 		return ref new Platform::String(L"/app1/ifd");
 	else if (id == BitmapDecoder::TiffDecoderId || id == BitmapDecoder::JpegXRDecoderId
 		|| id == BitmapEncoder::TiffEncoderId || id == BitmapEncoder::JpegXREncoderId
-		|| id == BitmapEncoder::HeifEncoderId || id == BitmapDecoder::HeifDecoderId)
+		|| id == BitmapEncoder::HeifEncoderId || id == BitmapDecoder::HeifDecoderId
+		|| id == BitmapDecoder::WebpDecoderId)
 		return ref new Platform::String(L"/ifd");
 	else
 		return nullptr;
