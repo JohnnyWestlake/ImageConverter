@@ -2,6 +2,7 @@
 #include "BitmapOption.h"
 #include "BitmapConversionSettings.h"
 #include "BitmapConversionResult.h"
+#include "pplawait.h"
 
 using namespace Platform;
 using namespace Windows::Graphics::Imaging;
@@ -9,6 +10,7 @@ using namespace Windows::Foundation;
 using namespace Windows::Storage;
 using namespace Windows::Storage::Streams;
 using namespace Windows::Foundation::Collections;
+using namespace concurrency;
 
 
 namespace ImageConverter {
@@ -30,21 +32,34 @@ namespace ImageConverter {
 				static Platform::String^ GetXMPPath(Platform::Guid codecId);
 				static Platform::String^ GetExifPath(Platform::Guid codecId);
 
-				static IAsyncAction^ EncodeInternalAsync(
+				static IAsyncOperation<BitmapConversionResult^>^ EncodeFrameAsync(
 					BitmapDecoder^ decoder,
-					IRandomAccessStream^ outputStream,
-					BitmapConversionSettings^ settings);
+					BitmapConversionResult^ result,
+					Platform::String^ baseName,
+					BitmapConversionSettings^ settings,
+					IStorageFolder^ targetFolder,
+					UINT frameIndex);
 
 				static IAsyncOperation<BitmapEncoder^>^ CreateEncoderAsync(
 					IRandomAccessStream^ stream,
 					BitmapConversionSettings^ settings);
 
-				static IAsyncOperation<bool>^ HandleMetadataAsync(
-					BitmapDecoder^ decoder,
-					BitmapEncoder^ encoder,
-					bool copy);
+				static task<BitmapConversionResult^> EncodeInternalAsync(
+					StorageFile^ file,
+					IStorageFolder^ targetFolder,
+					BitmapConversionSettings^ settings);
 
-				static IAsyncOperation<bool>^ TryCopyMetadataSetAsync(
+				static task<bool> HandleEncodeAsync(
+					BitmapDecoder^ decoder,
+					UINT frameIndex,
+					IRandomAccessStream^ outputStream,
+					BitmapConversionSettings^ settings);
+
+				static task<bool> HandleMetadataAsync(
+					BitmapDecoder^ decoder,
+					BitmapEncoder^ encoder);
+
+				static task<bool> TryCopyMetadataSetAsync(
 					BitmapDecoder^ decoder,
 					BitmapEncoder^ encoder,
 					String^ decodeFramePath,

@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.ExtendedExecution;
+using Windows.Graphics.Imaging;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 using Windows.System;
@@ -57,7 +58,7 @@ namespace ImageConverter.Views
 
             SelectedFiles.CollectionChanged += SelectedFiles_CollectionChanged;
             ImageFormats = ImageConverterCore.GetSupportedEncodingImageFormats();
-            SelectedFormat = ImageFormats.FirstOrDefault();
+            SelectedFormat = ImageFormats.FirstOrDefault(f => f.CodecInfo.CodecId == BitmapEncoder.JpegEncoderId);
             UpdateStatusText();
         }
 

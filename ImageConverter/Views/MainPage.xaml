@@ -469,12 +469,12 @@
                 TextLineBounds="Tight" />
 
             <Button
+                Margin="0,0,0,-6"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Bottom"
                 Click="{x:Bind ShowHelp}"
-                Margin="0 0 0 -6"
                 Style="{StaticResource GhostButtonStyle}">
-                <Image Height="20" Width="20">
+                <Image Width="20" Height="20">
                     <Image.Source>
                         <SvgImageSource UriSource="/Assets/Help.svg" />
                     </Image.Source>
