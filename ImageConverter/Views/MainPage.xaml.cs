@@ -142,6 +142,6 @@ namespace ImageConverter
         public bool TrueAndTrueAndFalse(bool a, bool b, bool c) => a && b && !c;
         public Visibility FalseToVis(bool a) => a ? Visibility.Collapsed : Visibility.Visible;
 
-
+        public static Visibility NullOrEmptyToVis(string s) => string.IsNullOrEmpty(s) ? Visibility.Collapsed : Visibility.Visible;
     }
 }
