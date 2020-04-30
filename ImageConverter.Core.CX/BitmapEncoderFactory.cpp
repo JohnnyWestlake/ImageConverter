@@ -108,6 +108,7 @@ IAsyncOperation<BitmapConversionResult^>^ BitmapEncoderFactory::EncodeFrameAsync
 			catch (Exception^ ex)
 			{
 				result->Status = "Could not write to output file";
+				result->Success = false;
 				return task_from_result(result);
 			}
 		});
