@@ -27,8 +27,7 @@
 
         <Style TargetType="TextBox">
             <Setter Property="InputScope" Value="Number" />
-            <Setter Property="Height" Value="30" />
-            <Setter Property="MinHeight" Value="20" />
+            <Setter Property="MinHeight" Value="30" />
             <Setter Property="Margin" Value="0 2 0 4" />
             <Setter Property="MaxLength" Value="8" />
             <Setter Property="PlaceholderText" Value="Enter a number" />

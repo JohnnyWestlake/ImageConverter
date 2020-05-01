@@ -54,8 +54,7 @@
                        Text="Options" />
         </Grid>
 
-        <Grid Grid.Row="1"
-              CornerRadius="0 0 8 8">
+        <Grid Grid.Row="1" CornerRadius="0 0 8 8">
             <ScrollViewer>
                 <StackPanel Margin="20 0 20 20">
                     <!--<Panel.ChildrenTransitions>

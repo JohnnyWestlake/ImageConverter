@@ -604,11 +604,11 @@
 
             <StackPanel Padding="12" Spacing="12">
                 <Button Grid.Column="5"
-                        Height="32"
+                        MinHeight="32"
                         HorizontalAlignment="Stretch"
                         Background="{ThemeResource SystemControlHighlightBaseMediumLowRevealAccentBackgroundBrush}"
                         Click="{x:Bind ViewModel.ConvertClick}"
-                        Content="Convert"
+                        Content="Convert All Files"
                         Foreground="{ThemeResource AccentButtonForeground}"
                         IsEnabled="{x:Bind TrueAndTrueAndFalse(ViewModel.HasItems, ViewModel.HasExportFolder, ViewModel.IsBusy), Mode=OneWay}" />
                 <TextBlock FontSize="12.333"
@@ -635,7 +635,7 @@
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <Button x:Name="OutputFolderButton"
-                                    Height="32"
+                                    MinHeight="32"
                                     HorizontalAlignment="Stretch"
                                     VerticalAlignment="Bottom"
                                     HorizontalContentAlignment="Left"
@@ -652,13 +652,14 @@
                             <Button x:Name="SecondaryButton"
                                     Grid.Column="1"
                                     Width="32"
-                                    Height="32"
+                                    MinHeight="32"
                                     Padding="0 0 8 0"
-                                    VerticalAlignment="Bottom"
+                                    VerticalAlignment="Stretch"
                                     HorizontalContentAlignment="Stretch"
                                     VerticalContentAlignment="Stretch"
                                     CornerRadius="0 2 2 0"
-                                    IsEnabled="{x:Bind False(ViewModel.IsBusy), Mode=OneWay}">
+                                    IsEnabled="{x:Bind False(ViewModel.IsBusy), Mode=OneWay}"
+                                    IsTextScaleFactorEnabled="False">
                                 <Button.Flyout>
                                     <MenuFlyout Placement="Bottom">
                                         <MenuFlyoutItem Click="{x:Bind ViewModel.OpenExportFolderClick}"
@@ -690,50 +691,58 @@
 
                     </StackPanel>
 
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Margin="0 0 0 4"
+                                   FontSize="{StaticResource DefaultFontSize}"
+                                   Opacity="0.7"
+                                   Text="Output Format" />
 
-                        <ComboBox x:Name="OutputFormatSelector"
-                                  HorizontalAlignment="Stretch"
-                                  VerticalAlignment="Stretch"
-                                  VerticalContentAlignment="Center"
-                                  CornerRadius="2 0 0 2"
-                                  FontSize="12"
-                                  Header="Output Format"
-                                  IsEnabled="{x:Bind False(ViewModel.IsBusy), Mode=OneWay}"
-                                  ItemsSource="{x:Bind ViewModel.ImageFormats}"
-                                  SelectedItem="{x:Bind ViewModel.SelectedFormat, Mode=TwoWay}">
-                            <ComboBox.ItemTemplate>
-                                <DataTemplate x:DataType="core:ImageFormat">
-                                    <TextBlock Text="{x:Bind DisplayName}" />
-                                </DataTemplate>
-                            </ComboBox.ItemTemplate>
-                        </ComboBox>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
 
-                        <Button x:Name="OutputFormatOptionsButton"
-                                Grid.Column="1"
-                                Height="32"
-                                Margin="0 0 0 0"
-                                VerticalAlignment="Bottom"
-                                Click="{x:Bind ViewModel.OptionsClick}"
-                                CornerRadius=" 0 2 2 0"
-                                IsEnabled="{x:Bind TrueAndFalse(ViewModel.HasOptions, ViewModel.IsBusy), Mode=OneWay}">
-                            <SymbolIcon Margin="-4"
-                                        RenderTransformOrigin="0.5 0.5"
-                                        Symbol="Setting">
-                                <SymbolIcon.RenderTransform>
-                                    <CompositeTransform ScaleX="0.6" ScaleY="0.6" />
-                                </SymbolIcon.RenderTransform>
-                            </SymbolIcon>
-                        </Button>
-                    </Grid>
+                            <ComboBox x:Name="OutputFormatSelector"
+                                      HorizontalAlignment="Stretch"
+                                      VerticalAlignment="Stretch"
+                                      VerticalContentAlignment="Center"
+                                      CornerRadius="2 0 0 2"
+                                      FontSize="12"
+                                      IsEnabled="{x:Bind False(ViewModel.IsBusy), Mode=OneWay}"
+                                      ItemsSource="{x:Bind ViewModel.ImageFormats}"
+                                      SelectedItem="{x:Bind ViewModel.SelectedFormat, Mode=TwoWay}">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate x:DataType="core:ImageFormat">
+                                        <TextBlock Text="{x:Bind DisplayName}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+
+                            <Button x:Name="OutputFormatOptionsButton"
+                                    Grid.Column="1"
+                                    MinHeight="32"
+                                    Margin="0 0 0 0"
+                                    VerticalAlignment="Stretch"
+                                    Click="{x:Bind ViewModel.OptionsClick}"
+                                    CornerRadius=" 0 2 2 0"
+                                    IsEnabled="{x:Bind TrueAndFalse(ViewModel.HasOptions, ViewModel.IsBusy), Mode=OneWay}">
+                                <SymbolIcon Margin="-4"
+                                            RenderTransformOrigin="0.5 0.5"
+                                            Symbol="Setting">
+                                    <SymbolIcon.RenderTransform>
+                                        <CompositeTransform ScaleX="0.6" ScaleY="0.6" />
+                                    </SymbolIcon.RenderTransform>
+                                </SymbolIcon>
+                            </Button>
+                        </Grid>
+                    </StackPanel>
+
+
 
                     <Button x:Name="ResizeOptionsButton"
                             Grid.Column="4"
-                            Height="32"
+                            MinHeight="32"
                             Margin="0 0 0 0"
                             HorizontalAlignment="Stretch"
                             Click="{x:Bind ViewModel.TransformClick}"
@@ -762,9 +771,10 @@
                 <LineBreak /><Run Text=" 5. Press Convert!" />
             </TextBlock>
         </muxc:TeachingTip>
+
         <!--  STATUS BAR  -->
         <Border Grid.Row="2">
-            <Grid Height="24"
+            <Grid MinHeight="24"
                   Padding="12 0"
                   ColumnSpacing="12">
                 <Grid.ColumnDefinitions>
