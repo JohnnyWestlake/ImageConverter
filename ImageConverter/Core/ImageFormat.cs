@@ -1,11 +1,13 @@
 ﻿using ImageConverter.Common;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Windows.Graphics.Imaging;
 
 namespace ImageConverter.Core
 {
+    [DebuggerDisplay("{CodecInfo.FriendlyName}")]
     public class ImageFormat
     {
         public BitmapCodecInformation CodecInfo { get; }

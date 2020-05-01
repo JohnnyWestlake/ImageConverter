@@ -17,5 +17,6 @@
     <ClInclude Include="BitmapEncoderFactory.h" />
     <ClInclude Include="BitmapConversionResult.h" />
     <ClInclude Include="BitmapConversionSettings.h" />
+    <ClInclude Include="CodecSupport.h" />
   </ItemGroup>
 </Project>

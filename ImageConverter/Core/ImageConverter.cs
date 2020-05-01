@@ -13,39 +13,40 @@ namespace ImageConverter.Common
 {
     public static class ImageConverterCore
     {
-        public static bool SupportsSDK17763 { get; } = ApiInformation.IsApiContractPresent("Windows.Foundation.UniversalApiContract", 7);
-
         public static List<string> SupportedEncodeFileTypes { get; private set; }
 
         public static HashSet<string> SupportedDecodeFileTypes { get; private set; }
 
         public static Format GetFormat(BitmapCodecInformation info)
         {
-            if (info.CodecId == BitmapEncoder.JpegEncoderId)
+            if (info.CodecId == BitmapEncoder.JpegEncoderId || info.CodecId == BitmapDecoder.JpegDecoderId)
                 return Format.Jpeg;
 
-            if (info.CodecId == BitmapEncoder.JpegXREncoderId)
+            if (info.CodecId == BitmapEncoder.JpegXREncoderId || info.CodecId == BitmapDecoder.JpegXRDecoderId)
                 return Format.JpegXR;
 
-            if (info.CodecId == BitmapEncoder.GifEncoderId)
+            if (info.CodecId == BitmapEncoder.GifEncoderId || info.CodecId == BitmapDecoder.GifDecoderId)
                 return Format.Gif;
 
-            if (info.CodecId == BitmapEncoder.PngEncoderId)
+            if (info.CodecId == BitmapEncoder.PngEncoderId || info.CodecId == BitmapDecoder.PngDecoderId)
                 return Format.Png;
 
-            if (info.CodecId == BitmapEncoder.BmpEncoderId)
+            if (info.CodecId == BitmapEncoder.BmpEncoderId || info.CodecId == BitmapDecoder.BmpDecoderId)
                 return Format.Bmp;
 
-            if (info.CodecId == BitmapEncoder.TiffEncoderId)
+            if (info.CodecId == BitmapEncoder.TiffEncoderId || info.CodecId == BitmapDecoder.TiffDecoderId)
                 return Format.Tiff;
 
-            if (SupportsSDK17763)
-            {
-                if (info.CodecId == BitmapEncoder.HeifEncoderId)
-                    return Format.Heif;
-            }
+           if (info.CodecId == BitmapEncoder.HeifEncoderId || info.CodecId == BitmapDecoder.HeifDecoderId)
+               return Format.Heif;
 
-            if (info.FriendlyName.StartsWith("DDS"))
+           if (info.CodecId == BitmapDecoder.WebpDecoderId)
+               return Format.WebP;
+
+            if (info.CodecId == CodecSupport.RAWImageExtensionsDecoderID)
+                return Format.RAW;
+
+            if (info.CodecId == CodecSupport.DDSDecoderID || info.CodecId == CodecSupport.DDSEncoderID)
                 return Format.Dds;
 
             return Format.Unknown;
@@ -58,12 +59,8 @@ namespace ImageConverter.Common
 
             if (info.CodecId == BitmapEncoder.JpegXREncoderId)
                 return ".wdp";
-
-            if (SupportsSDK17763)
-            {
                 if (info.CodecId == BitmapEncoder.HeifEncoderId)
                     return ".heic";
-            }
 
             return info.FileExtensions.FirstOrDefault();
         }
@@ -73,17 +70,16 @@ namespace ImageConverter.Common
             if (info.CodecId == BitmapEncoder.JpegXREncoderId)
                 return "JPEG-XR";
 
-            if (SupportsSDK17763)
-            {
-                if (info.CodecId == BitmapEncoder.HeifEncoderId)
-                    return "HEIF";
-            }
+            if (info.CodecId == BitmapEncoder.HeifEncoderId)
+                return "HEIF";
 
             return info.FriendlyName.Split(' ').FirstOrDefault();
         }
 
         public static List<ImageFormat> GetSupportedEncodingImageFormats()
         {
+            CodecSupport summary = CodecSupport.CreateSummary();
+
             List<ImageFormat> decodeFormats = BitmapDecoder.GetDecoderInformationEnumerator()
                                                            .Select(e => new ImageFormat(e))
                                                            .ToList();
@@ -91,6 +87,7 @@ namespace ImageConverter.Common
             List<ImageFormat> encodeFormats = BitmapEncoder.GetEncoderInformationEnumerator()
                                                            .Select(e => new ImageFormat(e))
                                                            .ToList();
+
             if (SupportedEncodeFileTypes == null)
             {
                 SupportedEncodeFileTypes = encodeFormats.SelectMany(f => f.CodecInfo.FileExtensions)

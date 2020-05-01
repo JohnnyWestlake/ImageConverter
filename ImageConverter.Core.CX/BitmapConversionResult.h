@@ -1,5 +1,4 @@
 #pragma once
-#include "BitmapOption.h"
 
 using namespace Windows::Graphics::Imaging;
 using namespace Windows::Foundation;

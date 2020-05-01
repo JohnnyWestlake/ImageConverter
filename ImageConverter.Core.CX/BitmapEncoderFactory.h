@@ -2,6 +2,7 @@
 #include "BitmapOption.h"
 #include "BitmapConversionSettings.h"
 #include "BitmapConversionResult.h"
+#include "CodecSupport.h"
 #include "pplawait.h"
 
 using namespace Platform;

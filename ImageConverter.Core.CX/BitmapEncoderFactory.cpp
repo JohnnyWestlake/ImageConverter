@@ -69,7 +69,7 @@ IAsyncOperation<BitmapConversionResult^>^ BitmapEncoderFactory::EncodeFrameAsync
 	IStorageFolder^ targetFolder,
 	UINT frameIndex)
 {
-	return create_async([decoder, baseName, settings, frameIndex, targetFolder, result]
+	return create_async([&]
 		{
 			try
 			{

@@ -16,6 +16,8 @@ namespace ImageConverter.Core
         Gif,
         Tiff,
         Dds,
-        Heif
+        Heif,
+        WebP,
+        RAW
     }
 }
