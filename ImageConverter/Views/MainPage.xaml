@@ -621,8 +621,8 @@
             </StackPanel>
 
 
-            <ScrollViewer Grid.Row="1" Padding="12 8 12 12">
-                <StackPanel Spacing="20">
+            <ScrollViewer Grid.Row="1" Padding="12 8 12 0">
+                <StackPanel Margin="0 0 0 12" Spacing="20">
                     <StackPanel>
                         <TextBlock Margin="0 0 0 4"
                                    FontSize="{StaticResource DefaultFontSize}"
@@ -749,6 +749,32 @@
                             IsEnabled="{x:Bind False(ViewModel.IsBusy), Mode=OneWay}">
                         Configure Resizing
                     </Button>
+
+                    <StackPanel>
+                        <StackPanel.Resources>
+                            <Style BasedOn="{StaticResource DefaultCheckBoxStyle}" TargetType="CheckBox">
+                                <Setter Property="Padding" Value="8 0" />
+                                <Setter Property="VerticalContentAlignment" Value="Center" />
+                                <Setter Property="Padding" Value="8 0" />
+                                <Setter Property="FontSize" Value="{StaticResource DefaultFontSize}" />
+                                <Setter Property="HorizontalAlignment" Value="Stretch" />
+                            </Style>
+                        </StackPanel.Resources>
+
+                        <CheckBox IsChecked="{x:Bind ViewModel.CopyMetadata, Mode=TwoWay}" IsEnabled="{x:Bind False(ViewModel.IsBusy), Mode=OneWay}">
+                            Enable metadata copy
+                        </CheckBox>
+                        <CheckBox Content="Enable multi-frame support"
+                                  IsChecked="{x:Bind ViewModel.MultiframeSupport, Mode=TwoWay}"
+                                  IsEnabled="{x:Bind False(ViewModel.IsBusy), Mode=OneWay}">
+                            <ToolTipService.ToolTip>
+                                When enabled, images that contain multiple frames (like TIFF or DDS) will have each frame converted to a separate file.
+                                If disabled, only the first frame of each image will be converted.
+                            </ToolTipService.ToolTip>
+                        </CheckBox>
+                    </StackPanel>
+
+
 
                 </StackPanel>
             </ScrollViewer>

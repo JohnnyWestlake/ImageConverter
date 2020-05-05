@@ -217,6 +217,7 @@
   <ItemGroup>
     <ClInclude Include="BitmapConversionSettings.h" />
     <ClInclude Include="BitmapConversionResult.h" />
+    <ClInclude Include="BitmapFrameHandling.h" />
     <ClInclude Include="CodecSupport.h" />
     <ClInclude Include="BitmapEncoderFactory.h" />
     <ClInclude Include="pch.h" />

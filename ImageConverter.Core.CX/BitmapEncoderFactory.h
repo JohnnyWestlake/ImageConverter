@@ -2,8 +2,6 @@
 #include "BitmapOption.h"
 #include "BitmapConversionSettings.h"
 #include "BitmapConversionResult.h"
-#include "CodecSupport.h"
-#include "pplawait.h"
 
 using namespace Platform;
 using namespace Windows::Graphics::Imaging;
@@ -11,7 +9,6 @@ using namespace Windows::Foundation;
 using namespace Windows::Storage;
 using namespace Windows::Storage::Streams;
 using namespace Windows::Foundation::Collections;
-using namespace concurrency;
 
 
 namespace ImageConverter {
@@ -33,7 +30,13 @@ namespace ImageConverter {
 				static Platform::String^ GetXMPPath(Platform::Guid codecId);
 				static Platform::String^ GetExifPath(Platform::Guid codecId);
 
-				static IAsyncOperation<BitmapConversionResult^>^ EncodeFrameAsync(
+				static IAsyncAction^ EncodeInternalAsync(
+					BitmapDecoder^ decoder,
+					UINT frameIndex,
+					IRandomAccessStream^ outputStream,
+					BitmapConversionSettings^ settings);
+
+				static IAsyncOperation<BitmapConversionResult^>^ EncodeFramesAsync(
 					BitmapDecoder^ decoder,
 					BitmapConversionResult^ result,
 					Platform::String^ baseName,
@@ -41,30 +44,25 @@ namespace ImageConverter {
 					IStorageFolder^ targetFolder,
 					UINT frameIndex);
 
+
 				static IAsyncOperation<BitmapEncoder^>^ CreateEncoderAsync(
 					IRandomAccessStream^ stream,
 					BitmapConversionSettings^ settings);
 
-				static task<BitmapConversionResult^> EncodeInternalAsync(
-					StorageFile^ file,
-					IStorageFolder^ targetFolder,
-					BitmapConversionSettings^ settings);
-
-				static task<bool> HandleEncodeAsync(
+				static IAsyncOperation<bool>^ HandleMetadataAsync(
 					BitmapDecoder^ decoder,
-					UINT frameIndex,
-					IRandomAccessStream^ outputStream,
-					BitmapConversionSettings^ settings);
+					BitmapEncoder^ encoder,
+					bool copy);
 
-				static task<bool> HandleMetadataAsync(
-					BitmapDecoder^ decoder,
-					BitmapEncoder^ encoder);
-
-				static task<bool> TryCopyMetadataSetAsync(
+				static IAsyncOperation<bool>^ TryCopyMetadataSetAsync(
 					BitmapDecoder^ decoder,
 					BitmapEncoder^ encoder,
 					String^ decodeFramePath,
 					String^ encodeFramePath);
+
+				static IAsyncOperation<IBitmapFrame^>^ GetFrameAsync(
+					BitmapDecoder^ decoder,
+					UINT frameIndex);
 			};
 		}
 	}

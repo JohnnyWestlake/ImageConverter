@@ -2,7 +2,6 @@
 #include "BitmapEncoderFactory.h"
 #include "BitmapConversionSettings.h"
 #include <concurrent_vector.h>
-#include "pplawait.h"
 
 using namespace ImageConverter::Core::CX;
 using namespace Platform;
@@ -16,6 +15,7 @@ BitmapEncoderFactory::BitmapEncoderFactory()
 
 }
 
+
 IAsyncOperation<BitmapConversionResult^>^ BitmapEncoderFactory::EncodeAsync(
 	StorageFile^ file,
 	IStorageFolder^ targetFolder,
@@ -23,45 +23,116 @@ IAsyncOperation<BitmapConversionResult^>^ BitmapEncoderFactory::EncodeAsync(
 {
 	return create_async([file, targetFolder, settings]
 		{
-			return create_task(EncodeInternalAsync(file, targetFolder, settings));
+			return create_task(file->OpenAsync(FileAccessMode::Read))
+				.then([file, settings, targetFolder](IRandomAccessStream^ inputStream)
+					{
+						BitmapConversionResult^ result = ref new BitmapConversionResult();
+						try
+						{
+							// 2. Try to decode file as an image
+							return create_task(BitmapDecoder::CreateAsync(inputStream))
+								.then([file, settings, targetFolder, result, inputStream](BitmapDecoder^ decoder)
+									{
+										delete inputStream;
+										try
+										{
+											return create_task(EncodeFramesAsync(decoder, result, file->DisplayName, settings, targetFolder, 0))
+												.then([](BitmapConversionResult^ r)
+													{
+														return r;
+													}, task_continuation_context::use_arbitrary());
+										}
+										catch (Exception^ ex)
+										{
+											result->Status = "Could not write to output file";
+											return task_from_result(result);
+										}
+
+									}, task_continuation_context::use_arbitrary());
+						}
+						catch (Exception^ ex)
+						{
+							result->Status = "Could not decode file";
+							return task_from_result(result);
+						}
+
+					}, task_continuation_context::use_arbitrary());
 		});
 }
 
-task<BitmapConversionResult^> BitmapEncoderFactory::EncodeInternalAsync(
-	StorageFile^ file,
-	IStorageFolder^ targetFolder,
+IAsyncOperation<BitmapEncoder^>^ BitmapEncoderFactory::CreateEncoderAsync(
+	IRandomAccessStream^ stream,
 	BitmapConversionSettings^ settings)
 {
-	BitmapConversionResult^ result = ref new BitmapConversionResult();
-	result->Success = true;
-
-	BitmapDecoder^ decoder;
-
-	try
+	auto map = ref new Map<Platform::String^, BitmapTypedValue^>();
+	for each (BitmapOption ^ var in settings->Options)
 	{
-		IRandomAccessStream^ inputStream = co_await file->OpenAsync(FileAccessMode::Read);
-		decoder = co_await BitmapDecoder::CreateAsync(inputStream);
-	}
-	catch (Exception^ ex)
-	{
-		result->Status = "Could not open / decode file";
-		result->Success = false;
+		map->Insert(var->Name, var->Value);
 	}
 
-	if (decoder != nullptr)
-	{
-		for (UINT i = 0; i < decoder->FrameCount; i++)
-		{
-			if (result->Success)
-				co_await EncodeFrameAsync(decoder, result, file->DisplayName, settings, targetFolder, i);
-		}
-	}
-
-	co_return result;
+	return BitmapEncoder::CreateAsync(settings->EncoderId, stream, map);
 }
 
-/* This is left as IAsyncOperation as the task version dies when HEIC encoding */
-IAsyncOperation<BitmapConversionResult^>^ BitmapEncoderFactory::EncodeFrameAsync(
+IAsyncAction^ BitmapEncoderFactory::EncodeInternalAsync(
+	BitmapDecoder^ decoder,
+	UINT frameIndex,
+	IRandomAccessStream^ outputStream,
+	BitmapConversionSettings^ settings)
+{
+	outputStream->Size = 0;
+	return create_async([decoder, frameIndex, outputStream, settings]
+		{
+			return create_task(GetFrameAsync(decoder, frameIndex)).then([decoder, frameIndex, outputStream, settings](IBitmapFrame^ frame)
+			{
+				return create_task(CreateEncoderAsync(outputStream, settings)).then([decoder, frameIndex, frame, settings](BitmapEncoder^ encoder)
+					{
+						return create_task(frame->GetPixelDataAsync()).then([decoder, frameIndex, encoder, frame, settings](PixelDataProvider^ pixeldata)
+							{
+								encoder->SetPixelData(
+									frame->BitmapPixelFormat,
+									frame->BitmapAlphaMode,
+									frame->OrientedPixelWidth,
+									frame->OrientedPixelHeight,
+									frame->DpiX,
+									frame->DpiY,
+									pixeldata->DetachPixelData());
+
+								bool needsTransfrom =
+									(settings->ScaledHeight > 0 && frame->OrientedPixelHeight > settings->ScaledHeight)
+									|| (settings->ScaledWidth > 0 && frame->OrientedPixelWidth > settings->ScaledWidth);
+
+								if (needsTransfrom)
+								{
+									double destWidth = settings->ScaledWidth > 0 ? (double)min(settings->ScaledWidth, decoder->OrientedPixelWidth) : frame->OrientedPixelWidth;
+									double destHeight = settings->ScaledHeight > 0 ? (double)min(settings->ScaledHeight, decoder->OrientedPixelHeight) : frame->OrientedPixelHeight;
+
+									double scale = min(destWidth / (double)decoder->OrientedPixelWidth, destHeight / (double)decoder->OrientedPixelHeight);
+
+									encoder->BitmapTransform->ScaledHeight = (double)frame->OrientedPixelHeight * scale;
+									encoder->BitmapTransform->ScaledWidth = (double)frame->OrientedPixelWidth * scale;
+
+									encoder->BitmapTransform->InterpolationMode = BitmapInterpolationMode::Fant;
+								}
+
+								return create_task(HandleMetadataAsync(decoder, encoder, settings->CopyMetadata)).then([frame, frameIndex, encoder](bool success)
+									{
+										return create_task(encoder->FlushAsync()).then([frame, frameIndex, encoder]
+											{
+												delete encoder;
+
+												if (frameIndex > 0)
+													delete frame;
+
+											}, task_continuation_context::use_arbitrary());
+									}, task_continuation_context::use_arbitrary());
+
+							}, task_continuation_context::use_arbitrary());
+					}, task_continuation_context::use_arbitrary());
+				}, task_continuation_context::use_arbitrary());
+			});
+}
+
+IAsyncOperation<BitmapConversionResult^>^ BitmapEncoderFactory::EncodeFramesAsync(
 	BitmapDecoder^ decoder,
 	BitmapConversionResult^ result,
 	Platform::String^ baseName,
@@ -75,31 +146,46 @@ IAsyncOperation<BitmapConversionResult^>^ BitmapEncoderFactory::EncodeFrameAsync
 			{
 				// 1. Create file name
 				String^ fileName = baseName + settings->FileExtension;
-				if (decoder->FrameCount > 1)
+				if (decoder->FrameCount > 1 && settings->FrameHandling == BitmapFrameHandling::ExtractAllSeperately)
 					fileName = baseName + L" " + frameIndex + settings->FileExtension;
 
 				// 2. Create output file
 				return create_task(targetFolder->CreateFileAsync(fileName, settings->CollisionOption))
-					.then([settings, decoder, result, frameIndex](StorageFile^ outputFile)
+					.then([decoder, frameIndex, settings, result, baseName, targetFolder](StorageFile^ outputFile)
 						{
 							// 3. Open output stream
 							return create_task(outputFile->OpenAsync(FileAccessMode::ReadWrite))
-								.then([settings, decoder, outputFile, frameIndex, result](IRandomAccessStream^ outputStream)
+								.then([decoder, frameIndex, settings, result, baseName, targetFolder, outputFile](IRandomAccessStream^ outputStream)
 									{
 										// 4. Encode
-										return HandleEncodeAsync(decoder, frameIndex, outputStream, settings)
-											.then([outputStream, outputFile, decoder, result](bool r)
+										return create_task(EncodeInternalAsync(decoder, frameIndex, outputStream, settings))
+											.then([decoder, frameIndex, settings, result, baseName, targetFolder, outputFile, outputStream]
 												{
-													delete decoder;
 													delete outputStream;
 
 													// 5. Get result file size
 													return create_task(outputFile->GetBasicPropertiesAsync())
-														.then([result](FileProperties::BasicProperties^ properties)
+														.then([decoder, frameIndex, settings, result, baseName, targetFolder](FileProperties::BasicProperties^ properties)
 															{
 																result->ResultFileSize += properties->Size;
 																result->Success = true;
-																return result;
+
+																if (settings->FrameHandling == BitmapFrameHandling::FirstFrameOnly || decoder->FrameCount - 1 == frameIndex)
+																{
+																	delete decoder;
+																	return task_from_result(result);
+																}
+																else
+																	return create_task(EncodeFramesAsync(
+																		decoder,
+																		result,
+																		baseName,
+																		settings,
+																		targetFolder,
+																		frameIndex + 1)).then([](BitmapConversionResult^ r)
+																			{
+																				return r;
+																			}, task_continuation_context::use_arbitrary());
 															}, task_continuation_context::use_arbitrary());
 												}, task_continuation_context::use_arbitrary());
 									}, task_continuation_context::use_arbitrary());
@@ -114,120 +200,89 @@ IAsyncOperation<BitmapConversionResult^>^ BitmapEncoderFactory::EncodeFrameAsync
 		});
 }
 
-
-IAsyncOperation<BitmapEncoder^>^ BitmapEncoderFactory::CreateEncoderAsync(
-	IRandomAccessStream^ stream,
-	BitmapConversionSettings^ settings)
-{
-	auto map = ref new Map<Platform::String^, BitmapTypedValue^>();
-	for each (BitmapOption^ var in settings->Options)
-	{
-		map->Insert(var->Name, var->Value);
-	}
-
-	return BitmapEncoder::CreateAsync(settings->EncoderId, stream, map);
-}
-
-task<bool> BitmapEncoderFactory::HandleEncodeAsync(
+IAsyncOperation<bool>^ BitmapEncoderFactory::HandleMetadataAsync(
 	BitmapDecoder^ decoder,
-	UINT frameIndex,
-	IRandomAccessStream^ outputStream,
-	BitmapConversionSettings^ settings)
+	BitmapEncoder^ encoder,
+	bool copy)
 {
-	outputStream->Size = 0;
+	return create_async([decoder, encoder, copy]
+		{
+			if (!copy)
+				return task_from_result(false);
 
-	// 1. Get pixel data for the correct frame
-	IBitmapFrame^ frame = decoder;
-	if (frameIndex > 0)
-		frame = co_await decoder->GetFrameAsync(frameIndex);
-
-	PixelDataProvider^ pixeldata = co_await frame->GetPixelDataAsync();
-
-	// 2. Create the encoder with the pixel data
-	BitmapEncoder^ encoder = co_await CreateEncoderAsync(outputStream, settings);
-	encoder->SetPixelData(
-		frame->BitmapPixelFormat,
-		frame->BitmapAlphaMode,
-		frame->OrientedPixelWidth,
-		frame->OrientedPixelHeight,
-		frame->DpiX,
-		frame->DpiY,
-		pixeldata->DetachPixelData());
-
-	// 3. Apply scaling
-	bool needsTransfrom =
-		(settings->ScaledHeight > 0 && frame->OrientedPixelHeight > settings->ScaledHeight)
-		|| (settings->ScaledWidth > 0 && frame->OrientedPixelWidth > settings->ScaledWidth);
-
-	if (needsTransfrom)
-	{
-		double destWidth = settings->ScaledWidth > 0 ? (double)min(settings->ScaledWidth, decoder->OrientedPixelWidth) : decoder->OrientedPixelWidth;
-		double destHeight = settings->ScaledHeight > 0 ? (double)min(settings->ScaledHeight, decoder->OrientedPixelHeight) : decoder->OrientedPixelHeight;
-
-		double scale = min(destWidth / (double)decoder->OrientedPixelWidth, destHeight / (double)decoder->OrientedPixelHeight);
-
-		encoder->BitmapTransform->ScaledHeight = (double)decoder->OrientedPixelHeight * scale;
-		encoder->BitmapTransform->ScaledWidth = (double)decoder->OrientedPixelWidth * scale;
-
-		encoder->BitmapTransform->InterpolationMode = BitmapInterpolationMode::Fant;
-	}
-
-	// 4. Copy metadata
-	if (settings->CopyMetadata)
-		co_await HandleMetadataAsync(decoder, encoder);
-
-	// 5. Commit
-	co_await encoder->FlushAsync();
-	delete encoder;
-
-	co_return true;
+			return create_task(TryCopyMetadataSetAsync(decoder, encoder, GetIFDPath(decoder->DecoderInformation->CodecId), GetIFDPath(encoder->EncoderInformation->CodecId)))
+				.then([decoder, encoder](bool ifd)
+					{
+						return create_task(TryCopyMetadataSetAsync(decoder, encoder, GetExifPath(decoder->DecoderInformation->CodecId), GetExifPath(encoder->EncoderInformation->CodecId)))
+							.then([decoder, encoder, ifd](bool exif)
+								{
+									return create_task(TryCopyMetadataSetAsync(decoder, encoder, GetXMPPath(decoder->DecoderInformation->CodecId), GetXMPPath(encoder->EncoderInformation->CodecId)))
+										.then([decoder, encoder, ifd, exif](bool xmp)
+											{
+												return create_task(TryCopyMetadataSetAsync(decoder, encoder, GetGPSPath(decoder->DecoderInformation->CodecId), GetGPSPath(encoder->EncoderInformation->CodecId)))
+													.then([ifd, exif, xmp](bool gps)
+														{
+															return ifd || exif || xmp || gps;
+														}, task_continuation_context::use_arbitrary());
+											}, task_continuation_context::use_arbitrary());
+								}, task_continuation_context::use_arbitrary());
+					}, task_continuation_context::use_arbitrary());
+		});
 }
 
-task<bool> BitmapEncoderFactory::HandleMetadataAsync(
+IAsyncOperation<bool>^ BitmapEncoderFactory::TryCopyMetadataSetAsync(
 	BitmapDecoder^ decoder,
-	BitmapEncoder^ encoder)
-{
-	auto d = decoder->DecoderInformation->CodecId;
-	auto e = encoder->EncoderInformation->CodecId;
-
-	auto ifd = co_await TryCopyMetadataSetAsync(decoder, encoder, GetIFDPath(d), GetIFDPath(e));
-	auto exif = co_await TryCopyMetadataSetAsync(decoder, encoder, GetExifPath(d), GetExifPath(e));
-	auto xmp = co_await TryCopyMetadataSetAsync(decoder, encoder, GetXMPPath(d), GetXMPPath(e));
-	auto gps = co_await TryCopyMetadataSetAsync(decoder, encoder, GetGPSPath(d), GetGPSPath(e));
-
-	co_return ifd || exif || xmp || gps;
-}
-
-task<bool> BitmapEncoderFactory::TryCopyMetadataSetAsync(
-	BitmapDecoder^ decoder, 
 	BitmapEncoder^ encoder,
 	String^ decodeFramePath,
 	String^ encodeFramePath)
 {
-	try
+	return create_async([decoder, encoder, decodeFramePath, encodeFramePath]
+		{
+			try
+			{
+				if (decodeFramePath == nullptr || encodeFramePath == nullptr)
+					return task_from_result(false);
+
+				auto vec = ref new Vector<String^>();
+				vec->Append(decodeFramePath);
+				return create_task(decoder->BitmapProperties->GetPropertiesAsync(vec)).then([encoder, decodeFramePath, encodeFramePath](BitmapPropertySet^ props)
+					{
+						if (props->Size == 0 || !props->HasKey(decodeFramePath))
+							return task_from_result(false);
+
+						BitmapTypedValue^ exif = props->Lookup(decodeFramePath);
+
+						auto map = ref new Map<String^, BitmapTypedValue^>();
+						map->Insert(encodeFramePath, exif);
+
+						return create_task(encoder->BitmapProperties->SetPropertiesAsync(map)).then([]
+							{
+								return task_from_result(true);
+							});
+					});
+
+			}
+			catch (Exception^ ex)
+			{
+				return task_from_result(false);
+			}
+		});
+
+}
+
+IAsyncOperation<IBitmapFrame^>^ BitmapEncoderFactory::GetFrameAsync(BitmapDecoder^ decoder, UINT frameIndex)
+{
+	return create_async([decoder, frameIndex]
 	{
-		if (decodeFramePath == nullptr || encodeFramePath == nullptr)
-			co_return false;
+		if (frameIndex == 0)
+			return task_from_result((IBitmapFrame^)decoder);
 
-		auto vec = ref new Vector<String^>();
-		vec->Append(decodeFramePath);
-
-		BitmapPropertySet^ props = co_await decoder->BitmapProperties->GetPropertiesAsync(vec);
-		if (props->Size == 0 || !props->HasKey(decodeFramePath))
-			co_return false;
-
-		BitmapTypedValue^ val = props->Lookup(decodeFramePath);
-
-		auto map = ref new Map<String^, BitmapTypedValue^>();
-		map->Insert(encodeFramePath, val);
-
-		co_await encoder->BitmapProperties->SetPropertiesAsync(map);
-		co_return true;
-	}
-	catch (Exception^ ex)
-	{
-		co_return false;
-	}
+		return create_task(decoder->GetFrameAsync(frameIndex)).then([](IBitmapFrame^ frame)
+			{
+				return frame;
+			});
+	});
+	
 }
 
 

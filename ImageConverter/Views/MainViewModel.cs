@@ -29,6 +29,8 @@ namespace ImageConverter.Views
         public bool IsBusy              { get => GetV(false); private set => Set(value); }
         public bool IsProcessing        { get => GetV(false); private set => Set(value); }
         public bool IsOverwrite         { get => GetV(false); set => Set(value); }
+        public bool CopyMetadata        { get => GetV(true); set => Set(value); }
+        public bool MultiframeSupport   { get => GetV(true); set => Set(value); }
         public bool HasSelectedItems    => SelectedFiles.Count > 0;
         public bool HasItems            => FileList.Count > 0;
         public bool HasExportFolder     => ExportFolder != null;
@@ -300,7 +302,8 @@ namespace ImageConverter.Views
                     _optionsViewModel.GetEffectiveOptions().Select(o => o.GetValue()).ToList())
                 {
                     CollisionOption = IsOverwrite ? CreationCollisionOption.ReplaceExisting : CreationCollisionOption.GenerateUniqueName,
-                    CopyMetadata = true
+                    CopyMetadata = CopyMetadata,
+                    FrameHandling = MultiframeSupport ? BitmapFrameHandling.ExtractAllSeperately : BitmapFrameHandling.FirstFrameOnly
                 };
 
                 _transformViewModel.ApplyTo(options);

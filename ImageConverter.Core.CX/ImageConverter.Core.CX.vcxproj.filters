@@ -18,5 +18,6 @@
     <ClInclude Include="BitmapConversionResult.h" />
     <ClInclude Include="BitmapConversionSettings.h" />
     <ClInclude Include="CodecSupport.h" />
+    <ClInclude Include="BitmapFrameHandling.h" />
   </ItemGroup>
 </Project>

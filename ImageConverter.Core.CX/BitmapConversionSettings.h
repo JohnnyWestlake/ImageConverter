@@ -1,5 +1,5 @@
 #pragma once
-#include "BitmapOption.h"
+#include "pch.h"
 
 using namespace Windows::Graphics::Imaging;
 using namespace Windows::Foundation;
@@ -31,6 +31,8 @@ namespace ImageConverter {
 				property int ScaledHeight;
 
 				property bool CopyMetadata;
+
+				property BitmapFrameHandling FrameHandling;
 
 				property IVectorView<BitmapOption^>^ Options;
 
