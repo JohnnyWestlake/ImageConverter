@@ -15,28 +15,27 @@ BitmapEncoderFactory::BitmapEncoderFactory()
 
 }
 
-
 IAsyncOperation<BitmapConversionResult^>^ BitmapEncoderFactory::EncodeAsync(
-	StorageFile^ file,
+	StorageFile^ sourceFile,
 	IStorageFolder^ targetFolder,
 	BitmapConversionSettings^ settings)
 {
-	return create_async([file, targetFolder, settings]
+	return create_async([sourceFile, targetFolder, settings]
 		{
-			return create_task(file->OpenAsync(FileAccessMode::Read))
-				.then([file, settings, targetFolder](IRandomAccessStream^ inputStream)
+			return create_task(sourceFile->OpenAsync(FileAccessMode::Read))
+				.then([sourceFile, settings, targetFolder](IRandomAccessStream^ inputStream)
 					{
 						BitmapConversionResult^ result = ref new BitmapConversionResult();
 						try
 						{
 							// 2. Try to decode file as an image
 							return create_task(BitmapDecoder::CreateAsync(inputStream))
-								.then([file, settings, targetFolder, result, inputStream](BitmapDecoder^ decoder)
+								.then([sourceFile, settings, targetFolder, result, inputStream](BitmapDecoder^ decoder)
 									{
 										delete inputStream;
 										try
 										{
-											return create_task(EncodeFramesAsync(decoder, result, file->DisplayName, settings, targetFolder, 0))
+											return create_task(EncodeFramesAsync(decoder, result, sourceFile->DisplayName, settings, targetFolder, 0))
 												.then([](BitmapConversionResult^ r)
 													{
 														return r;
@@ -57,6 +56,53 @@ IAsyncOperation<BitmapConversionResult^>^ BitmapEncoderFactory::EncodeAsync(
 						}
 
 					}, task_continuation_context::use_arbitrary());
+		});
+}
+
+IAsyncOperation<BitmapConversionResult^>^ BitmapEncoderFactory::EncodeAsync(
+	IRandomAccessStream^ inputStream, 
+	IRandomAccessStream^ outputStream, 
+	UINT inputFrameIndex,
+	bool keepinputStreamAlive, 
+	BitmapConversionSettings^ settings)
+{
+	return create_async([inputStream, outputStream, settings, keepinputStreamAlive, inputFrameIndex]
+		{
+			BitmapConversionResult^ result = ref new BitmapConversionResult();
+			try
+			{
+				return create_task(BitmapDecoder::CreateAsync(inputStream))
+					.then([outputStream, settings, keepinputStreamAlive, result, inputStream, inputFrameIndex](BitmapDecoder^ decoder)
+						{
+							if (!keepinputStreamAlive)
+							{
+								inputStream->Dispose();
+								delete inputStream;
+							}
+
+							try
+							{
+								return create_task(EncodeInternalAsync(decoder, inputFrameIndex, outputStream, settings))
+									.then([decoder, result]
+										{
+											delete decoder;
+											result->Success = true;
+											return result;
+										}, task_continuation_context::use_arbitrary());
+							}
+							catch (Exception^ ex)
+							{
+								result->Status = "Could not write to output stream";
+								return task_from_result(result);
+							}
+
+						}, task_continuation_context::use_arbitrary());
+			}
+			catch (Exception^ ex)
+			{
+				result->Status = "Could not decode input stream";
+				return task_from_result(result);
+			}
 		});
 }
 
@@ -125,7 +171,6 @@ IAsyncAction^ BitmapEncoderFactory::EncodeInternalAsync(
 
 											}, task_continuation_context::use_arbitrary());
 									}, task_continuation_context::use_arbitrary());
-
 							}, task_continuation_context::use_arbitrary());
 					}, task_continuation_context::use_arbitrary());
 				}, task_continuation_context::use_arbitrary());
@@ -258,7 +303,7 @@ IAsyncOperation<bool>^ BitmapEncoderFactory::TryCopyMetadataSetAsync(
 						return create_task(encoder->BitmapProperties->SetPropertiesAsync(map)).then([]
 							{
 								return task_from_result(true);
-							});
+							}, task_continuation_context::use_arbitrary());
 					});
 
 			}
@@ -280,7 +325,7 @@ IAsyncOperation<IBitmapFrame^>^ BitmapEncoderFactory::GetFrameAsync(BitmapDecode
 		return create_task(decoder->GetFrameAsync(frameIndex)).then([](IBitmapFrame^ frame)
 			{
 				return frame;
-			});
+			}, task_continuation_context::use_arbitrary());
 	});
 	
 }

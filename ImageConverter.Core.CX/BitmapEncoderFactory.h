@@ -18,8 +18,15 @@ namespace ImageConverter {
 			{
 			public:
 				static IAsyncOperation<BitmapConversionResult^>^ EncodeAsync(
-					StorageFile^ file,
+					StorageFile^ sourceFile,
 					IStorageFolder^ targetFolder,
+					BitmapConversionSettings^ settings);
+
+				static IAsyncOperation<BitmapConversionResult^>^ EncodeAsync(
+					IRandomAccessStream^ inputStream,
+					IRandomAccessStream^ outputStream,
+					UINT inputFrameIndex,
+					bool keepinputStreamAlive,
 					BitmapConversionSettings^ settings);
 
 			private:
