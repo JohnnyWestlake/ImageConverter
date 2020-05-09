@@ -176,7 +176,7 @@
 
                     <common:OptionPresenter Description="If the width of the output image is bigger than the value, the image is scaled down to fit whilst maintaining the original aspect ratio." DescriptionStackingMode="BelowContent">
                         <StackPanel>
-                            <CheckBox Content="Fit to Width (pixels)"
+                            <CheckBox Content="Downsize to fit to Width (pixels)"
                                       FontSize="{StaticResource DefaultFontSize}"
                                       IsChecked="{x:Bind ViewModel.ConstrainWidth, Mode=TwoWay}" />
                             <TextBox BeforeTextChanging="TextBox_BeforeTextChanging"
@@ -188,7 +188,7 @@
 
                     <common:OptionPresenter Description="If the height of the output image is bigger than the value, the image is scaled down to fit whilst maintaining the original aspect ratio." DescriptionStackingMode="BelowContent">
                         <StackPanel>
-                            <CheckBox Content="Fit to Height (pixels)"
+                            <CheckBox Content="Downsize to fit to Height (pixels)"
                                       FontSize="{StaticResource DefaultFontSize}"
                                       IsChecked="{x:Bind ViewModel.ConstrainHeight, Mode=TwoWay}" />
                             <TextBox BeforeTextChanging="TextBox_BeforeTextChanging"

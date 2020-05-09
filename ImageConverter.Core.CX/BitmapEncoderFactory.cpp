@@ -76,7 +76,6 @@ IAsyncOperation<BitmapConversionResult^>^ BitmapEncoderFactory::EncodeAsync(
 						{
 							if (!keepinputStreamAlive)
 							{
-								inputStream->Dispose();
 								delete inputStream;
 							}
 
