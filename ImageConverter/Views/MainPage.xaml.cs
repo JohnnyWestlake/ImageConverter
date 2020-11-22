@@ -3,6 +3,7 @@ using System;
 using System.ComponentModel;
 using System.Linq;
 using System.Numerics;
+using Windows.ApplicationModel;
 using Windows.ApplicationModel.Core;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Foundation.Metadata;
@@ -27,6 +28,10 @@ namespace ImageConverter
         public MainPage()
         {
             this.InitializeComponent();
+
+            if (DesignMode.DesignModeEnabled)
+                return;
+
             UISettings = new UISettings();
             UISettings.ColorValuesChanged += UISettings_ColorValuesChanged;
             UdpateTitleBar();

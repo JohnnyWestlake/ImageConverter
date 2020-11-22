@@ -3,12 +3,14 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:common="using:ImageConverter.Common"
       xmlns:core="using:ImageConverter.Core"
+      xmlns:cx="using:ImageConverter.Core.CX"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:i="using:Microsoft.Xaml.Interactivity"
       xmlns:local="using:ImageConverter"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
       xmlns:win1903="http://schemas.microsoft.com/winfx/2006/xaml/presentation?IsApiContractPresent(Windows.Foundation.UniversalApiContract, 8)"
+      d:DesignHeight="720"
       FontSize="{StaticResource DefaultFontSize}"
       mc:Ignorable="d">
 
@@ -419,6 +421,7 @@
           Drop="Files_Drop">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
@@ -473,8 +476,26 @@
                 Grid.RowSpan="10"
                 Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" />
 
+        <!--  WARNING ROW  -->
+        <StackPanel Grid.Row="1">
+            <Grid MinHeight="40"
+                  Margin="0 12 0 0"
+                  Background="{ThemeResource SystemColorControlAccentBrush}"
+                  Visibility="{x:Bind FalseToVis(ViewModel.Support.HasHEIFImageExtensions)}">
+                <TextBlock Margin="12 6"
+                           VerticalAlignment="Center"
+                           Foreground="White"
+                           TextWrapping="Wrap">
+                    <Run FontWeight="Bold" Text="WARNING" />
+                    <Run Text="To convert HEIC files, you need the" />
+                    <Hyperlink Foreground="White" NavigateUri="{x:Bind cx:CodecSupport.HEIFImageExtensionsWebLink}">HEIF Image Extensions from the Microsoft Store.</Hyperlink>
+                    <Run Text="Restart the app after installing." />
+                </TextBlock>
+            </Grid>
+        </StackPanel>
+
         <!--  INPUT COLUMN  -->
-        <Grid x:Name="InputContainer" Grid.Row="1">
+        <Grid x:Name="InputContainer" Grid.Row="2">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
@@ -589,7 +610,7 @@
         <!--  OUTPUT COLUMN  -->
         <Grid x:Name="OutputContainer"
               Grid.Row="1"
-              Grid.RowSpan="3"
+              Grid.RowSpan="4"
               Grid.Column="1">
             <Grid.ChildrenTransitions>
                 <TransitionCollection>
@@ -784,6 +805,7 @@
         <muxc:TeachingTip x:Name="HelpToolTip"
                           Title="Help"
                           Grid.Row="1"
+                          Grid.RowSpan="2"
                           d:IsHidden="True"
                           PreferredPlacement="BottomLeft">
             <TextBlock FontSize="{StaticResource DefaultFontSize}"
@@ -799,7 +821,7 @@
         </muxc:TeachingTip>
 
         <!--  STATUS BAR  -->
-        <Border Grid.Row="2">
+        <Border Grid.Row="3">
             <Grid MinHeight="24"
                   Padding="12 0"
                   ColumnSpacing="12">

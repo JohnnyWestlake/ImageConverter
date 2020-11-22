@@ -51,7 +51,7 @@ namespace ImageConverter.Views
             set { if (Set(value)) { _optionsViewModel.SetFormat(value); } }
         }
 
-
+        public CodecSupport Support { get; }
 
 
         public MainViewModel()
@@ -63,6 +63,8 @@ namespace ImageConverter.Views
             ImageFormats = ImageConverterCore.GetSupportedEncodingImageFormats();
             SelectedFormat = ImageFormats.FirstOrDefault(f => f.CodecInfo.CodecId == BitmapEncoder.JpegEncoderId);
             UpdateStatusText();
+
+            Support = CodecSupport.CreateSummary();
         }
 
         private void SelectedFiles_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
