@@ -60,3 +60,29 @@ Full supported decoding format list*:
 .DNG
 
 (*some formats may only be supported on the most recent Windows 10 Update)
+
+
+## Using as a library
+
+The `ImageConverter.Core.CX` project contains all of the conversion logic as a Windows Runtime Component that can be used in UWP applications of any language as a library. Below is C#  example of converting a file to JPEG using the library.
+
+````
+Task<BitmapConversionResult> ConvertAsync(StorageFile input, StorageFolder output)
+{
+    /* Converts an image to jpg 95% quality */
+    var settings = new BitmapConversionSettings
+    {
+        CollisionOption = CreationCollisionOption.ReplaceExisting,
+        EncoderId = BitmapEncoder.JpegEncoderId,
+        FileExtension = ".jpg",
+        Options = new List<BitmapOption>
+        {
+            new BitmapOption("ImageQuality", new BitmapTypedValue(0.95f, PropertyType.Single ))
+        }
+    };
+
+    return BitmapEncoderFactory.EncodeAsync(input, output, settings).AsTask();
+}
+````
+
+Example bitmap options can be found in `ImageConverter.Core.BitmapEncodingOption.cs`. These map to WIC properties, more of which can be found in offical Microsoft documentation.
