@@ -20,6 +20,7 @@ namespace ImageConverter {
 					EncoderId = encoderId;
 					FileExtension = fileExtension;
 					Options = options;
+					Interpolation = BitmapInterpolationMode::Fant;
 				}
 
 				property Platform::Guid EncoderId;
@@ -33,6 +34,8 @@ namespace ImageConverter {
 				property bool CopyMetadata;
 
 				property BitmapFrameHandling FrameHandling;
+
+				property BitmapInterpolationMode Interpolation;
 
 				property IVectorView<BitmapOption^>^ Options;
 

@@ -60,10 +60,10 @@ IAsyncOperation<BitmapConversionResult^>^ BitmapEncoderFactory::EncodeAsync(
 }
 
 IAsyncOperation<BitmapConversionResult^>^ BitmapEncoderFactory::EncodeAsync(
-	IRandomAccessStream^ inputStream, 
-	IRandomAccessStream^ outputStream, 
+	IRandomAccessStream^ inputStream,
+	IRandomAccessStream^ outputStream,
 	UINT inputFrameIndex,
-	bool keepinputStreamAlive, 
+	bool keepinputStreamAlive,
 	BitmapConversionSettings^ settings)
 {
 	return create_async([inputStream, outputStream, settings, keepinputStreamAlive, inputFrameIndex]
@@ -110,9 +110,12 @@ IAsyncOperation<BitmapEncoder^>^ BitmapEncoderFactory::CreateEncoderAsync(
 	BitmapConversionSettings^ settings)
 {
 	auto map = ref new Map<Platform::String^, BitmapTypedValue^>();
-	for each (BitmapOption ^ var in settings->Options)
+	if (settings->Options != nullptr)
 	{
-		map->Insert(var->Name, var->Value);
+		for each (BitmapOption ^ var in settings->Options)
+		{
+			map->Insert(var->Name, var->Value);
+		}
 	}
 
 	return BitmapEncoder::CreateAsync(settings->EncoderId, stream, map);
@@ -128,52 +131,52 @@ IAsyncAction^ BitmapEncoderFactory::EncodeInternalAsync(
 	return create_async([decoder, frameIndex, outputStream, settings]
 		{
 			return create_task(GetFrameAsync(decoder, frameIndex)).then([decoder, frameIndex, outputStream, settings](IBitmapFrame^ frame)
-			{
-				return create_task(CreateEncoderAsync(outputStream, settings)).then([decoder, frameIndex, frame, settings](BitmapEncoder^ encoder)
-					{
-						return create_task(frame->GetPixelDataAsync()).then([decoder, frameIndex, encoder, frame, settings](PixelDataProvider^ pixeldata)
-							{
-								encoder->SetPixelData(
-									frame->BitmapPixelFormat,
-									frame->BitmapAlphaMode,
-									frame->OrientedPixelWidth,
-									frame->OrientedPixelHeight,
-									frame->DpiX,
-									frame->DpiY,
-									pixeldata->DetachPixelData());
-
-								bool needsTransfrom =
-									(settings->ScaledHeight > 0 && frame->OrientedPixelHeight > settings->ScaledHeight)
-									|| (settings->ScaledWidth > 0 && frame->OrientedPixelWidth > settings->ScaledWidth);
-
-								if (needsTransfrom)
+				{
+					return create_task(CreateEncoderAsync(outputStream, settings)).then([decoder, frameIndex, frame, settings](BitmapEncoder^ encoder)
+						{
+							return create_task(frame->GetPixelDataAsync()).then([decoder, frameIndex, encoder, frame, settings](PixelDataProvider^ pixeldata)
 								{
-									double destWidth = settings->ScaledWidth > 0 ? (double)min(settings->ScaledWidth, decoder->OrientedPixelWidth) : frame->OrientedPixelWidth;
-									double destHeight = settings->ScaledHeight > 0 ? (double)min(settings->ScaledHeight, decoder->OrientedPixelHeight) : frame->OrientedPixelHeight;
+									encoder->SetPixelData(
+										frame->BitmapPixelFormat,
+										frame->BitmapAlphaMode,
+										frame->OrientedPixelWidth,
+										frame->OrientedPixelHeight,
+										frame->DpiX,
+										frame->DpiY,
+										pixeldata->DetachPixelData());
 
-									double scale = min(destWidth / (double)decoder->OrientedPixelWidth, destHeight / (double)decoder->OrientedPixelHeight);
+									bool needsTransfrom =
+										(settings->ScaledHeight > 0 && frame->OrientedPixelHeight > settings->ScaledHeight)
+										|| (settings->ScaledWidth > 0 && frame->OrientedPixelWidth > settings->ScaledWidth);
 
-									encoder->BitmapTransform->ScaledHeight = (double)frame->OrientedPixelHeight * scale;
-									encoder->BitmapTransform->ScaledWidth = (double)frame->OrientedPixelWidth * scale;
-
-									encoder->BitmapTransform->InterpolationMode = BitmapInterpolationMode::Fant;
-								}
-
-								return create_task(HandleMetadataAsync(decoder, encoder, settings->CopyMetadata)).then([frame, frameIndex, encoder](bool success)
+									if (needsTransfrom)
 									{
-										return create_task(encoder->FlushAsync()).then([frame, frameIndex, encoder]
-											{
-												delete encoder;
+										double destWidth = settings->ScaledWidth > 0 ? (double)min(settings->ScaledWidth, decoder->OrientedPixelWidth) : frame->OrientedPixelWidth;
+										double destHeight = settings->ScaledHeight > 0 ? (double)min(settings->ScaledHeight, decoder->OrientedPixelHeight) : frame->OrientedPixelHeight;
 
-												if (frameIndex > 0)
-													delete frame;
+										double scale = min(destWidth / (double)decoder->OrientedPixelWidth, destHeight / (double)decoder->OrientedPixelHeight);
 
-											}, task_continuation_context::use_arbitrary());
-									}, task_continuation_context::use_arbitrary());
-							}, task_continuation_context::use_arbitrary());
-					}, task_continuation_context::use_arbitrary());
+										encoder->BitmapTransform->ScaledHeight = (double)frame->OrientedPixelHeight * scale;
+										encoder->BitmapTransform->ScaledWidth = (double)frame->OrientedPixelWidth * scale;
+
+										encoder->BitmapTransform->InterpolationMode = settings->Interpolation;
+									}
+
+									return create_task(HandleMetadataAsync(decoder, encoder, settings->CopyMetadata)).then([frame, frameIndex, encoder](bool success)
+										{
+											return create_task(encoder->FlushAsync()).then([frame, frameIndex, encoder]
+												{
+													delete encoder;
+
+													if (frameIndex > 0)
+														delete frame;
+
+												}, task_continuation_context::use_arbitrary());
+										}, task_continuation_context::use_arbitrary());
+								}, task_continuation_context::use_arbitrary());
+						}, task_continuation_context::use_arbitrary());
 				}, task_continuation_context::use_arbitrary());
-			});
+		});
 }
 
 IAsyncOperation<BitmapConversionResult^>^ BitmapEncoderFactory::EncodeFramesAsync(
@@ -317,16 +320,16 @@ IAsyncOperation<bool>^ BitmapEncoderFactory::TryCopyMetadataSetAsync(
 IAsyncOperation<IBitmapFrame^>^ BitmapEncoderFactory::GetFrameAsync(BitmapDecoder^ decoder, UINT frameIndex)
 {
 	return create_async([decoder, frameIndex]
-	{
-		if (frameIndex == 0)
-			return task_from_result((IBitmapFrame^)decoder);
+		{
+			if (frameIndex == 0)
+				return task_from_result((IBitmapFrame^)decoder);
 
-		return create_task(decoder->GetFrameAsync(frameIndex)).then([](IBitmapFrame^ frame)
-			{
-				return frame;
-			}, task_continuation_context::use_arbitrary());
-	});
-	
+			return create_task(decoder->GetFrameAsync(frameIndex)).then([](IBitmapFrame^ frame)
+				{
+					return frame;
+				}, task_continuation_context::use_arbitrary());
+		});
+
 }
 
 
