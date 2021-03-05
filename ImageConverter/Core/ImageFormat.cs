@@ -1,4 +1,5 @@
 ﻿using ImageConverter.Common;
+using ImageConverter.Core.CX;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

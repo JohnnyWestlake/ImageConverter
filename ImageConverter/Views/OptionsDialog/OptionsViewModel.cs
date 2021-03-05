@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ImageConverter.Bitmap;
 using ImageConverter.Core;
+using ImageConverter.Core.CX;
 using Windows.Graphics.Imaging;
 
 namespace ImageConverter.Views

@@ -1,7 +1,7 @@
 ﻿<ContentDialog x:Class="ImageConverter.Views.OptionsDialog"
                xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-               xmlns:b="using:ImageConverter.Bitmap"
+               xmlns:c="using:ImageConverter.Core.CX"
                xmlns:common="using:ImageConverter.Common"
                xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                xmlns:local="using:ImageConverter.Views"
@@ -76,7 +76,7 @@
 
                     <common:OptionPresenter x:Name="LosslessOption"
                                             x:Load="{x:Bind ViewModel.SupportsLossless}"
-                                            Description="{x:Bind b:LosslessOption.Description}"
+                                            Description="{x:Bind c:LosslessOption.Description}"
                                             DescriptionStackingMode="BelowContent">
                         <CheckBox Content="Lossless"
                                   FontSize="{StaticResource DefaultFontSize}"
@@ -85,7 +85,7 @@
 
                     <common:OptionPresenter x:Name="ProgressiveModeOption"
                                             x:Load="{x:Bind ViewModel.SupportsProgressive}"
-                                            Description="{x:Bind b:ProgressiveModeOption.Description}"
+                                            Description="{x:Bind c:ProgressiveModeOption.Description}"
                                             DescriptionStackingMode="BelowContent">
                         <CheckBox Content="Progressive Mode"
                                   FontSize="{StaticResource DefaultFontSize}"
@@ -94,7 +94,7 @@
 
                     <common:OptionPresenter x:Name="InterlaceModeOption"
                                             x:Load="{x:Bind ViewModel.SupportsInterlace}"
-                                            Description="{x:Bind b:InterlaceOptionOption.Description}"
+                                            Description="{x:Bind c:InterlaceOptionOption.Description}"
                                             DescriptionStackingMode="BelowContent">
                         <CheckBox Content="Interlace"
                                   FontSize="{StaticResource DefaultFontSize}"
@@ -103,7 +103,7 @@
 
                     <common:OptionPresenter x:Name="BitmapAlphaOption"
                                             x:Load="{x:Bind ViewModel.SupportsBitmapAlpha}"
-                                            Description="{x:Bind b:BitmapV5BGRAOption.Description}"
+                                            Description="{x:Bind c:BitmapV5BGRAOption.Description}"
                                             DescriptionStackingMode="BelowContent">
                         <CheckBox Content="Use Bitmap V5 Header (supporting transparency)"
                                   FontSize="{StaticResource DefaultFontSize}"
@@ -112,7 +112,7 @@
 
                     <common:OptionPresenter x:Name="JpegQualityOption"
                                             x:Load="{x:Bind ViewModel.SupportsQuality}"
-                                            Description="{x:Bind b:JpegQualityOption.Description}"
+                                            Description="{x:Bind c:JpegQualityOption.Description}"
                                             Header="Image Quality">
                         <Slider IsEnabled="{x:Bind ViewModel.IsQualityEnabled, Mode=OneWay}"
                                 LargeChange="0.1"
@@ -126,7 +126,7 @@
 
                     <common:OptionPresenter x:Name="TiffQualityOption"
                                             x:Load="{x:Bind ViewModel.IsTiff}"
-                                            Description="{x:Bind b:TiffCompressionQualityOption.Description}"
+                                            Description="{x:Bind c:TiffCompressionQualityOption.Description}"
                                             Header="Compression Quality">
                         <Slider LargeChange="0.1"
                                 Maximum="1"
@@ -139,7 +139,7 @@
 
                     <common:OptionPresenter x:Name="PngFilterOption"
                                             x:Load="{x:Bind ViewModel.IsPng}"
-                                            Description="{x:Bind b:PngFilterModeOption.Description}"
+                                            Description="{x:Bind c:PngFilterModeOption.Description}"
                                             Header="Filter Option">
                         <ComboBox Width="120"
                                   Margin="0 8 0 0"

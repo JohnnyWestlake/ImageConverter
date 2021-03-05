@@ -135,8 +135,6 @@
     <Compile Include="Common\BindableBase.cs" />
     <Compile Include="Common\MessageBox.cs" />
     <Compile Include="Common\OptionPresenter.cs" />
-    <Compile Include="Core\BitmapEncodingOption.cs" />
-    <Compile Include="Core\Format.cs" />
     <Compile Include="Core\ImageConverter.cs" />
     <Compile Include="Core\ImageFormat.cs" />
     <Compile Include="Core\ImageViewModel.cs" />
@@ -236,7 +234,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
-      <Version>6.2.10</Version>
+      <Version>6.2.12</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.UI.Xaml">
       <Version>2.4.0</Version>

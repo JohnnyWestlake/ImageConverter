@@ -5,4 +5,5 @@
 
 #include "BitmapFrameHandling.h"
 #include "BitmapOption.h"
+#include "IBitmapEncodingOption.h"
 #include "CodecSupport.h"
