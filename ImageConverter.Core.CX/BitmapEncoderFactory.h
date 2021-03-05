@@ -37,6 +37,14 @@ namespace ImageConverter {
 				static Platform::String^ GetXMPPath(Platform::Guid codecId);
 				static Platform::String^ GetExifPath(Platform::Guid codecId);
 
+				static Platform::String^ GetFileName(Platform::String^ defaultName, BitmapConversionSettings^ settings)
+				{
+					if (settings->TargetFileName == nullptr || settings->TargetFileName->IsEmpty())
+						return defaultName;
+
+					return settings->TargetFileName;
+				}
+
 				static IAsyncAction^ EncodeInternalAsync(
 					BitmapDecoder^ decoder,
 					UINT frameIndex,

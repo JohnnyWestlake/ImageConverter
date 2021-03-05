@@ -192,6 +192,7 @@ IAsyncOperation<BitmapConversionResult^>^ BitmapEncoderFactory::EncodeFramesAsyn
 			try
 			{
 				// 1. Create file name
+				baseName = GetFileName(baseName, settings);
 				String^ fileName = baseName + settings->FileExtension;
 				if (decoder->FrameCount > 1 && settings->FrameHandling == BitmapFrameHandling::ExtractAllSeperately)
 					fileName = baseName + L" " + frameIndex + settings->FileExtension;

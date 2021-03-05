@@ -25,7 +25,16 @@ namespace ImageConverter {
 
 				property Platform::Guid EncoderId;
 
+				/// <summary>
+				/// File extension to use when creating the converted file.
+				/// </summary>
 				property Platform::String^ FileExtension;
+
+				/// <summary>
+				/// File name not including file extension to use when creating the converted file.
+				/// If not set, uses the source file's DisplayName
+				/// </summary>
+				property Platform::String^ TargetFileName;
 
 				property int ScaledWidth;
 
