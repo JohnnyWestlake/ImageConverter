@@ -138,7 +138,7 @@ IAsyncAction^ BitmapEncoderFactory::EncodeInternalAsync(
 								{
 									encoder->SetPixelData(
 										frame->BitmapPixelFormat,
-										frame->BitmapAlphaMode,
+										BitmapAlphaMode::Premultiplied,
 										frame->OrientedPixelWidth,
 										frame->OrientedPixelHeight,
 										frame->DpiX,
