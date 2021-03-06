@@ -9,7 +9,7 @@
             </ResourceDictionary.MergedDictionaries>
 
             <Thickness x:Key="ContentDialogPadding">0</Thickness>
-            <x:Double x:Key="DefaultFontSize">12</x:Double>
+            <x:Double x:Key="DefaultFontSize">14</x:Double>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

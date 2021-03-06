@@ -4,18 +4,23 @@
                     xmlns:local="using:ImageConverter">
 
     <Style TargetType="common:OptionPresenter">
-        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Foreground" Value="{StaticResource SystemControlForegroundBaseMediumBrush}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="common:OptionPresenter">
-                    <StackPanel Background="{TemplateBinding Background}"
+                    <StackPanel Padding="{TemplateBinding Padding}"
+                                Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}">
-                        <TextBlock FontSize="{TemplateBinding FontSize}" Text="{TemplateBinding Header}" />
+                        <TextBlock FontSize="{TemplateBinding FontSize}"
+                                  FontWeight="SemiBold"
+                                   Foreground="{ThemeResource ButtonForeground}"
+                                   Text="{TemplateBinding Header}" />
                         <TextBlock x:Name="tbDescriptionBelowHeader"
                                    x:Load="False"
                                    FontSize="{TemplateBinding FontSize}"
-                                   Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}"
+                                   Foreground="{TemplateBinding Foreground}"
                                    Text="{TemplateBinding Description}"
                                    TextWrapping="Wrap"
                                    Visibility="Collapsed" />
@@ -26,7 +31,7 @@
                         <TextBlock x:Name="tbDescriptionBelowContent"
                                    x:Load="False"
                                    FontSize="{TemplateBinding FontSize}"
-                                   Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}"
+                                   Foreground="{TemplateBinding Foreground}"
                                    Text="{TemplateBinding Description}"
                                    TextWrapping="Wrap"
                                    Visibility="Collapsed" />

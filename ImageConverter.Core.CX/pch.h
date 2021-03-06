@@ -7,3 +7,4 @@
 #include "BitmapOption.h"
 #include "IBitmapEncodingOption.h"
 #include "CodecSupport.h"
+#include "Format.h"

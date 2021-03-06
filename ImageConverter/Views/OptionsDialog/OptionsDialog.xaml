@@ -7,6 +7,7 @@
                xmlns:local="using:ImageConverter.Views"
                xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                Padding="0"
+               HorizontalAlignment="Right"
                CornerRadius="8"
                FontSize="{StaticResource DefaultFontSize}"
                IsPrimaryButtonEnabled="False"
@@ -20,6 +21,7 @@
 
         <Style TargetType="common:OptionPresenter">
             <Setter Property="Margin" Value="{StaticResource ItemSpacingThickess}" />
+            <Setter Property="FontSize" Value="{StaticResource DefaultFontSize}" />
         </Style>
 
         <Style BasedOn="{StaticResource DefaultCheckBoxStyle}" TargetType="CheckBox">
@@ -46,7 +48,7 @@
                     Click="{x:Bind Close}"
                     CornerRadius="0 8 0 0"
                     Style="{StaticResource ButtonRevealStyle}">
-                <SymbolIcon Symbol="Cancel" />
+                <SymbolIcon Symbol="Accept" />
             </Button>
             <TextBlock Margin="20 20 20 12"
                        FontSize="24"
@@ -81,6 +83,18 @@
                         <CheckBox Content="Lossless"
                                   FontSize="{StaticResource DefaultFontSize}"
                                   IsChecked="{x:Bind ViewModel.IsLossless, Mode=TwoWay}" />
+                    </common:OptionPresenter>
+
+                    <common:OptionPresenter x:Name="ChromaOption"
+                                            x:Load="{x:Bind ViewModel.IsJpeg}"
+                                            Header="Chroma Subsampling Mode"
+                                            Description="{x:Bind c:JpegChromaSubsamplingOption.Description}"
+                                            DescriptionStackingMode="BelowContent">
+                        <ComboBox Width="120"
+                                  Margin="0 4 0 0"
+                                  FontSize="{StaticResource DefaultFontSize}"
+                                  ItemsSource="{x:Bind ViewModel.ChromaOptions}"
+                                  SelectedItem="{x:Bind ViewModel.Chroma, Mode=TwoWay}" />
                     </common:OptionPresenter>
 
                     <common:OptionPresenter x:Name="ProgressiveModeOption"
@@ -150,14 +164,21 @@
 
                     <common:OptionPresenter x:Name="HeicWarning"
                                             x:Load="{x:Bind ViewModel.IsHeif}"
+                                            Margin="-20 12 -20 0"
+                                            Padding="20 10 20 12"
+                                            Background="{ThemeResource SystemColorControlAccentBrush}"
                                             Description="Windows 10 does not currently recognise images created with the .heif file extension as valid images. It is recommended to use .heic on Windows."
-                                            Header="Note" />
+                                            Foreground="White"
+                                            Header="NOTE" />
 
                     <common:OptionPresenter x:Name="HeifWarning"
                                             x:Load="{x:Bind ViewModel.IsHeif}"
+                                            Margin="-20 12 -20 0"
+                                            Padding="20 10 20 12"
+                                            Background="{ThemeResource SystemColorControlAccentBrush}"
                                             Description="{x:Bind local:OptionsViewModel.HeifWarning}"
-                                            Header="Warning!" />
-
+                                            Foreground="White"
+                                            Header="WARNING!" />
 
                 </StackPanel>
 

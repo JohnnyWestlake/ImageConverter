@@ -22,5 +22,6 @@
     <ClInclude Include="BitmapFrameHandling.h" />
     <ClInclude Include="IBitmapEncodingOption.h" />
     <ClInclude Include="BitmapEncodingOption.h" />
+    <ClInclude Include="Format.h" />
   </ItemGroup>
 </Project>

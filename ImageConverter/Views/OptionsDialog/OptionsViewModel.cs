@@ -31,6 +31,9 @@ namespace ImageConverter.Views
         public PngFilterMode[] PngOptions { get; } 
             = Enum.GetValues(typeof(PngFilterMode)).Cast<PngFilterMode>().ToArray();
 
+        public JpegSubsamplingMode[] ChromaOptions { get; }
+            = Enum.GetValues(typeof(JpegSubsamplingMode)).Cast<JpegSubsamplingMode>().ToArray();
+
         // Bindable Properties
 
         public List<String> FileFormats         { get; set; }
@@ -41,6 +44,7 @@ namespace ImageConverter.Views
         public bool Interlace                   { get => GetV(false); set => Set(value); }
         public bool BitmapAlpha                 { get => GetV(false); set => Set(value); }
         public PngFilterMode PngFilter          { get => GetV(PngFilterMode.Automatic); set => Set(value); }
+        public JpegSubsamplingMode Chroma       { get => GetV(JpegSubsamplingMode.Default); set => Set(value); }
 
         public bool IsLossless
         {
@@ -80,6 +84,9 @@ namespace ImageConverter.Views
 
             if (SupportsBitmapAlpha)
                 options.Add(new BitmapV5BGRAOption { EnableAlpha = BitmapAlpha });
+
+            if (IsJpeg)
+                options.Add(new JpegChromaSubsamplingOption { JpegYCrCbSubsampling = Chroma });
 
             if (IsTiff)
                 options.Add(new TiffCompressionQualityOption { CompressionQuality = (float)TiffCompressionQuality });

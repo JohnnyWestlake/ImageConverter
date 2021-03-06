@@ -89,6 +89,12 @@ namespace ImageConverter
             }
         }
 
+        private void FilesList_ContainerContentChanging(ListViewBase sender, ContainerContentChangingEventArgs args)
+        {
+            if (!args.InRecycleQueue)
+                args.ItemContainer.Background = args.ItemIndex % 2 == 0 ? UnBandedBrush : BandedBrush;
+        }
+
         private void Files_DragOver(object sender, Windows.UI.Xaml.DragEventArgs e)
         {
             if (e.DataView.Contains(StandardDataFormats.StorageItems))
@@ -148,5 +154,6 @@ namespace ImageConverter
         public Visibility FalseToVis(bool a) => a ? Visibility.Collapsed : Visibility.Visible;
 
         public static Visibility NullOrEmptyToVis(string s) => string.IsNullOrEmpty(s) ? Visibility.Collapsed : Visibility.Visible;
+
     }
 }

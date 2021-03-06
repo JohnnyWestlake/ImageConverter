@@ -221,6 +221,7 @@
     <ClInclude Include="BitmapFrameHandling.h" />
     <ClInclude Include="CodecSupport.h" />
     <ClInclude Include="BitmapEncoderFactory.h" />
+    <ClInclude Include="Format.h" />
     <ClInclude Include="IBitmapEncodingOption.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="BitmapOption.h" />

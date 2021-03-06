@@ -11,12 +11,16 @@
       xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
       xmlns:win1903="http://schemas.microsoft.com/winfx/2006/xaml/presentation?IsApiContractPresent(Windows.Foundation.UniversalApiContract, 8)"
       d:DesignHeight="720"
-      FontSize="{StaticResource DefaultFontSize}"
       mc:Ignorable="d">
 
     <Page.Resources>
+        <SolidColorBrush x:Name="BandedBrush"
+                         Opacity="0.05"
+                         Color="{ThemeResource SystemChromeAltLowColor}" />
+        <SolidColorBrush x:Name="UnBandedBrush" Color="Transparent" />
+
         <Style BasedOn="{StaticResource ButtonRevealStyle}" TargetType="Button">
-            <Setter Property="FontSize" Value="{StaticResource DefaultFontSize}" />
+            <!--<Setter Property="FontSize" Value="{StaticResource DefaultFontSize}" />-->
         </Style>
 
         <Style TargetType="ListViewItem">
@@ -341,7 +345,7 @@
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="FontFamily" Value="{ThemeResource ContentControlThemeFontFamily}" />
             <Setter Property="FontWeight" Value="Normal" />
-            <Setter Property="FontSize" Value="{StaticResource DefaultFontSize}" />
+            <!--<Setter Property="FontSize" Value="{StaticResource DefaultFontSize}" />-->
             <Setter Property="UseSystemFocusVisuals" Value="{StaticResource UseSystemFocusVisuals}" />
             <Setter Property="FocusVisualMargin" Value="-3" />
             <Setter Property="CornerRadius" Value="2" />
@@ -414,6 +418,10 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <Style x:Key="HeaderStyle" TargetType="ContentPresenter">
+            <Setter Target="FontWeight" Value="Bold" />
+        </Style>
     </Page.Resources>
 
     <Grid AllowDrop="True"
@@ -433,9 +441,17 @@
 
         <!--  TITLE BAR  -->
         <Grid x:Name="TitleBar"
-              Grid.ColumnSpan="1"
+              Grid.ColumnSpan="2"
               Canvas.ZIndex="1">
-            <Border x:Name="TitleBarBackground" Background="Transparent" />
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="{x:Bind OutputGridColumn.Width}" />
+            </Grid.ColumnDefinitions>
+
+            <Border x:Name="TitleBarBackground"
+                    Grid.ColumnSpan="2"
+                    Background="Transparent" />
 
             <TextBlock Margin="14 36 0 0"
                        FontSize="24"
@@ -463,7 +479,7 @@
                 Grid.RowSpan="10"
                 Grid.Column="10">
             <Border.Background>
-                <AcrylicBrush win1903:TintLuminosityOpacity="0.6"
+                <AcrylicBrush win1903:TintLuminosityOpacity="0.8"
                               BackgroundSource="HostBackdrop"
                               FallbackColor="{ThemeResource SystemChromeMediumColor}"
                               TintColor="{ThemeResource SystemAltHighColor}"
@@ -502,33 +518,27 @@
             </Grid.RowDefinitions>
 
             <!--  INPUT ROW  -->
-            <Grid Margin="8 14 12 12" ColumnSpacing="8">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-
-                <Button x:Name="AddFilesButton"
-                        Grid.Column="0"
-                        Click="{x:Bind ViewModel.AddFilesClick}"
-                        Content="Add Files"
-                        IsEnabled="{x:Bind False(ViewModel.IsBusy), Mode=OneWay}"
-                        Style="{StaticResource GhostButtonStyle}" />
-                <Button Grid.Column="1"
-                        Click="{x:Bind ViewModel.RemoveFilesClick}"
-                        Content="Remove Selected"
-                        IsEnabled="{x:Bind TrueAndFalse(ViewModel.HasSelectedItems, ViewModel.IsBusy), Mode=OneWay}"
-                        Style="{StaticResource GhostButtonStyle}" />
-                <Button Grid.Column="2"
-                        Click="{x:Bind ViewModel.ClearClick}"
-                        Content="Remove All"
-                        IsEnabled="{x:Bind TrueAndFalse(ViewModel.HasItems, ViewModel.IsBusy), Mode=OneWay}"
-                        Style="{StaticResource GhostButtonStyle}" />
-
+            <Grid Margin="8 14 12 4" ColumnSpacing="8">
+                <CommandBar HorizontalAlignment="Left"
+                            Background="Transparent"
+                            DefaultLabelPosition="Right"
+                            IsOpen="False"
+                            OverflowButtonVisibility="Auto">
+                    <AppBarButton x:Name="AddFilesButton"
+                                  Grid.Column="0"
+                                  Click="{x:Bind ViewModel.AddFilesClick}"
+                                  Icon="Add"
+                                  IsEnabled="{x:Bind False(ViewModel.IsBusy), Mode=OneWay}"
+                                  Label="Add Files" />
+                    <AppBarButton Click="{x:Bind ViewModel.RemoveFilesClick}"
+                                  Icon="Remove"
+                                  IsEnabled="{x:Bind TrueAndFalse(ViewModel.HasSelectedItems, ViewModel.IsBusy), Mode=OneWay}"
+                                  Label="Remove Selected" />
+                    <AppBarButton Click="{x:Bind ViewModel.ClearClick}"
+                                  Icon="Delete"
+                                  IsEnabled="{x:Bind TrueAndFalse(ViewModel.HasItems, ViewModel.IsBusy), Mode=OneWay}"
+                                  Label="Remove All" />
+                </CommandBar>
             </Grid>
 
             <!--  FILES VIEW  -->
@@ -538,6 +548,7 @@
                           Margin="0 0 0 0"
                           Padding="0 12 0 40"
                           Background="Transparent"
+                          ContainerContentChanging="FilesList_ContainerContentChanging"
                           IsEnabled="{x:Bind False(ViewModel.IsBusy), Mode=OneWay}"
                           ItemsSource="{x:Bind ViewModel.FileList}"
                           SelectionMode="Multiple">
@@ -612,43 +623,21 @@
               Grid.Row="1"
               Grid.RowSpan="4"
               Grid.Column="1">
-            <Grid.ChildrenTransitions>
-                <TransitionCollection>
-                    <RepositionThemeTransition IsStaggeringEnabled="False" />
-                </TransitionCollection>
-            </Grid.ChildrenTransitions>
 
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+
             </Grid.RowDefinitions>
 
-            <StackPanel Padding="12" Spacing="12">
-                <Button Grid.Column="5"
-                        MinHeight="32"
-                        HorizontalAlignment="Stretch"
-                        Background="{ThemeResource SystemControlHighlightBaseMediumLowRevealAccentBackgroundBrush}"
-                        Click="{x:Bind ViewModel.ConvertClick}"
-                        Content="Convert All Files"
-                        Foreground="{ThemeResource AccentButtonForeground}"
-                        IsEnabled="{x:Bind TrueAndTrueAndFalse(ViewModel.HasItems, ViewModel.HasExportFolder, ViewModel.IsBusy), Mode=OneWay}" />
-                <TextBlock FontSize="12.333"
-                           FontWeight="Bold"
-                           Foreground="{ThemeResource ApplicationForegroundThemeBrush}"
-                           TextWrapping="Wrap"
-                           Visibility="{x:Bind FalseToVis(ViewModel.HasExportFolder), Mode=OneWay}">
-                    Please choose an output folder below before converting.
-                </TextBlock>
-            </StackPanel>
-
-
-            <ScrollViewer Grid.Row="1" Padding="12 8 12 0">
-                <StackPanel Margin="0 0 0 12" Spacing="20">
+            <ScrollViewer Padding="12 8 12 0">
+                <StackPanel Margin="0 0 0 12" Spacing="24">
                     <StackPanel>
                         <TextBlock Margin="0 0 0 4"
-                                   FontSize="{StaticResource DefaultFontSize}"
+                                   FontSize="12"
+                                   FontWeight="SemiBold"
                                    Opacity="0.7"
-                                   Text="Output Folder" />
+                                   Text="OUTPUT FOLDER" />
 
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -666,7 +655,6 @@
                                     CornerRadius="2 0 0 2"
                                     DragOver="Output_DragOver"
                                     Drop="Output_Drop"
-                                    FontSize="{StaticResource DefaultFontSize}"
                                     IsEnabled="{x:Bind False(ViewModel.IsBusy), Mode=OneWay}"
                                     ToolTipService.ToolTip="{Binding Content, RelativeSource={RelativeSource Mode=Self}}" />
 
@@ -714,9 +702,10 @@
 
                     <StackPanel>
                         <TextBlock Margin="0 0 0 4"
-                                   FontSize="{StaticResource DefaultFontSize}"
+                                   FontSize="12"
+                                   FontWeight="SemiBold"
                                    Opacity="0.7"
-                                   Text="Output Format" />
+                                   Text="OUTPUT FORMAT" />
 
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -729,7 +718,6 @@
                                       VerticalAlignment="Stretch"
                                       VerticalContentAlignment="Center"
                                       CornerRadius="2 0 0 2"
-                                      FontSize="12"
                                       IsEnabled="{x:Bind False(ViewModel.IsBusy), Mode=OneWay}"
                                       ItemsSource="{x:Bind ViewModel.ImageFormats}"
                                       SelectedItem="{x:Bind ViewModel.SelectedFormat, Mode=TwoWay}">
@@ -743,7 +731,6 @@
                             <Button x:Name="OutputFormatOptionsButton"
                                     Grid.Column="1"
                                     MinHeight="32"
-                                    Margin="0 0 0 0"
                                     VerticalAlignment="Stretch"
                                     Click="{x:Bind ViewModel.OptionsClick}"
                                     CornerRadius=" 0 2 2 0"
@@ -759,33 +746,34 @@
                         </Grid>
                     </StackPanel>
 
-
-
                     <Button x:Name="ResizeOptionsButton"
                             Grid.Column="4"
                             MinHeight="32"
-                            Margin="0 0 0 0"
                             HorizontalAlignment="Stretch"
                             Click="{x:Bind ViewModel.TransformClick}"
                             IsEnabled="{x:Bind False(ViewModel.IsBusy), Mode=OneWay}">
                         Configure Resizing
                     </Button>
 
-                    <StackPanel>
+                    <StackPanel Margin="0 -4 0 0" Spacing="8">
                         <StackPanel.Resources>
                             <Style BasedOn="{StaticResource DefaultCheckBoxStyle}" TargetType="CheckBox">
                                 <Setter Property="Padding" Value="8 0" />
                                 <Setter Property="VerticalContentAlignment" Value="Center" />
                                 <Setter Property="Padding" Value="8 0" />
-                                <Setter Property="FontSize" Value="{StaticResource DefaultFontSize}" />
                                 <Setter Property="HorizontalAlignment" Value="Stretch" />
                             </Style>
                         </StackPanel.Resources>
 
-                        <CheckBox IsChecked="{x:Bind ViewModel.CopyMetadata, Mode=TwoWay}" IsEnabled="{x:Bind False(ViewModel.IsBusy), Mode=OneWay}">
-                            Enable metadata copy
+                        <CheckBox Content="Copy metadata"
+                                  IsChecked="{x:Bind ViewModel.CopyMetadata, Mode=TwoWay}"
+                                  IsEnabled="{x:Bind False(ViewModel.IsBusy), Mode=OneWay}">
+                            <ToolTipService.ToolTip>
+                                When enabled, metadata containers like GPS Location, EXIF, XMP and IFD are copied to the output images.
+                                This can include information like Camera Model, GPS location the photo was taken at and more.
+                            </ToolTipService.ToolTip>
                         </CheckBox>
-                        <CheckBox Content="Enable multi-frame support"
+                        <CheckBox Content="Export multi-frame images"
                                   IsChecked="{x:Bind ViewModel.MultiframeSupport, Mode=TwoWay}"
                                   IsEnabled="{x:Bind False(ViewModel.IsBusy), Mode=OneWay}">
                             <ToolTipService.ToolTip>
@@ -799,6 +787,31 @@
 
                 </StackPanel>
             </ScrollViewer>
+
+            <StackPanel Grid.Row="1"
+                        Padding="12"
+                        Spacing="12">
+                <Border Margin="-12 0"
+                        Padding="12 6 12 10"
+                        Background="{ThemeResource SystemColorControlAccentBrush}"
+                        Visibility="{x:Bind FalseToVis(ViewModel.HasExportFolder), Mode=OneWay}">
+                    <TextBlock FontSize="12.333"
+                               FontWeight="Bold"
+                               Foreground="White"
+                               TextWrapping="Wrap">
+                        Please choose an output folder above before converting.
+                    </TextBlock>
+                </Border>
+
+                <Button MinHeight="32"
+                        HorizontalAlignment="Stretch"
+                        Background="{ThemeResource SystemControlHighlightBaseMediumLowRevealAccentBackgroundBrush}"
+                        Click="{x:Bind ViewModel.ConvertClick}"
+                        Content="Convert All Files"
+                        Foreground="{ThemeResource AccentButtonForeground}"
+                        IsEnabled="{x:Bind TrueAndTrueAndFalse(ViewModel.HasItems, ViewModel.HasExportFolder, ViewModel.IsBusy), Mode=OneWay}" />
+
+            </StackPanel>
         </Grid>
 
         <!--  HELP  -->
