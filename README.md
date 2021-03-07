@@ -64,20 +64,22 @@ Full supported decoding format list*:
 
 ## Using as a library
 
-The `ImageConverter.Core.CX` project contains all of the conversion logic as a Windows Runtime Component that can be used in UWP applications of any language as a library. Below is C#  example of converting a file to JPEG using the library.
+The `ImageConverter.Core.CX` project contains all of the conversion logic as a Windows Runtime Component that can be used in UWP applications of any language as a library. Below is C#  example of converting a file to JPEG using the library, using the file name `MyConvertedFile.jpg` for the output file.
 
 ````
 Task<BitmapConversionResult> ConvertAsync(StorageFile input, StorageFolder output)
 {
-    /* Converts an image to jpg 95% quality */
+    /* Converts an image to jpg 95% quality with 4:4:4 chroma subsampling */
     var settings = new BitmapConversionSettings
     {
         CollisionOption = CreationCollisionOption.ReplaceExisting,
         EncoderId = BitmapEncoder.JpegEncoderId,
         FileExtension = ".jpg",
+        TargetFileName = "MyConvertedFile",
         Options = new List<BitmapOption>
         {
-            new BitmapOption("ImageQuality", new BitmapTypedValue(0.95f, PropertyType.Single ))
+            new BitmapOption("ImageQuality", new BitmapTypedValue(0.95f, PropertyType.Single )),
+            new JpegChromaSubsamplingOption { JpegYCrCbSubsampling = JpegSubsamplingMode.Y4Cb4Cr4 }.GetValue()
         }
     };
 
@@ -85,4 +87,20 @@ Task<BitmapConversionResult> ConvertAsync(StorageFile input, StorageFolder outpu
 }
 ````
 
-Example bitmap options can be found in `ImageConverter.Core.BitmapEncodingOption.cs`. These map to WIC properties, more of which can be found in offical Microsoft documentation.
+Leaving `TargetFileName` as null will create the output file with the same file name (minus file extension) as the input file. 
+
+Example bitmap options can be found in `ImageConverter.Core.CX.BitmapEncodingOption.h`. These map to WIC properties, more of which can be found in offical Microsoft documentation. This file contains strongly typed BitmapOptions so you don't need to know the correct WIC property names and formats. For example,
+
+```
+/*
+ * Two ways to create a 95% quality JPEG option in C# 
+ */
+
+// Strongly-typed class from BitmapEncodingOption.h
+BitmapOption op1 = new JpegQualityOption { ImageQuality = 0.95f }.GetValue(); 
+
+// Loosely-typed class using native WinRT BitmapOption class directly
+BitmapOption op2 = new BitmapOption("ImageQuality", new BitmapTypedValue(0.95f, PropertyType.Single ));
+```
+
+Both techniques create the same `BitmapOption` class.
