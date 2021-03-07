@@ -87,9 +87,9 @@
 
                     <common:OptionPresenter x:Name="ChromaOption"
                                             x:Load="{x:Bind ViewModel.IsJpeg}"
-                                            Header="Chroma Subsampling Mode"
                                             Description="{x:Bind c:JpegChromaSubsamplingOption.Description}"
-                                            DescriptionStackingMode="BelowContent">
+                                            DescriptionStackingMode="BelowContent"
+                                            Header="Chroma Subsampling Mode">
                         <ComboBox Width="120"
                                   Margin="0 4 0 0"
                                   FontSize="{StaticResource DefaultFontSize}"

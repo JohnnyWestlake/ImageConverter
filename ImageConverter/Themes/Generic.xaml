@@ -14,7 +14,7 @@
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}">
                         <TextBlock FontSize="{TemplateBinding FontSize}"
-                                  FontWeight="SemiBold"
+                                   FontWeight="SemiBold"
                                    Foreground="{ThemeResource ButtonForeground}"
                                    Text="{TemplateBinding Header}" />
                         <TextBlock x:Name="tbDescriptionBelowHeader"
@@ -51,6 +51,57 @@
                             </VisualStateGroup>
                         </VisualStateManager.VisualStateGroups>
                     </StackPanel>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="common:InfoBar">
+        <Setter Property="Padding" Value="12 6" />
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="Background" Value="{ThemeResource SystemColorControlAccentBrush}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="common:InfoBar">
+                    <Grid Padding="{TemplateBinding Padding}"
+                          Background="{TemplateBinding Background}"
+                          BorderBrush="{TemplateBinding BorderBrush}"
+                          BorderThickness="{TemplateBinding BorderThickness}">
+
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <ContentPresenter Content="{TemplateBinding Icon}" />
+
+                        <ContentPresenter Grid.Column="1" />
+
+                        <Button x:Name="CloseButton"
+                                Grid.Column="2"
+                                Margin="0 0 -6 0"
+                                Background="Transparent"
+                                Foreground="{TemplateBinding Foreground}"
+                                Visibility="Collapsed">
+                            <FontIcon FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                                      FontSize="12"
+                                      Glyph="&#xE10A;" />
+                        </Button>
+
+
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup>
+                                <VisualState x:Name="CloseButtonHiddenState" />
+                                <VisualState x:Name="CloseButtonVisibleState">
+                                    <VisualState.Setters>
+                                        <Setter Target="CloseButton.Visibility" Value="Visible" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+
+                    </Grid>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

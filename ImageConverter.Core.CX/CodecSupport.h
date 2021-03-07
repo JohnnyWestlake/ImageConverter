@@ -24,6 +24,8 @@ namespace ImageConverter {
 
 				property bool HasRAWImageExtensions;
 
+				property bool IsMissingExtensions;
+
 				/// <summary>
 				/// Codec ID for Microsoft RAW Image Extension package.
 				/// </summary>
@@ -64,6 +66,9 @@ namespace ImageConverter {
 						else if (info->CodecId == RAWImageExtensionsDecoderID)
 							summary->HasRAWImageExtensions = true;
 					}
+
+					if (!summary->HasHEIFImageExtensions || !summary->HasWebPImageExtensions || !summary->HasRAWImageExtensions)
+						summary->IsMissingExtensions = true;
 
 					return summary;
 				}

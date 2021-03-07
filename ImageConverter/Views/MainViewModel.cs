@@ -94,6 +94,11 @@ namespace ImageConverter.Views
                 OnPropertyChanged(nameof(HasItems));
         }
 
+        public void FormatsClick()
+        {
+            FormatsDialog.Show(Support);
+        }
+
         public void OptionsClick()
         {
             OptionsDialog.Show(_optionsViewModel);

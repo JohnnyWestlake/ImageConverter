@@ -11,6 +11,7 @@
       xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
       xmlns:win1903="http://schemas.microsoft.com/winfx/2006/xaml/presentation?IsApiContractPresent(Windows.Foundation.UniversalApiContract, 8)"
       d:DesignHeight="720"
+      d:DesignWidth="1000"
       mc:Ignorable="d">
 
     <Page.Resources>
@@ -446,7 +447,8 @@
 
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="{x:Bind OutputGridColumn.Width}" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="{x:Bind OutputGridColumn.Width, Mode=OneWay}" d:Width="256" />
             </Grid.ColumnDefinitions>
 
             <Border x:Name="TitleBarBackground"
@@ -458,19 +460,49 @@
                        FontWeight="Bold"
                        IsHitTestVisible="False"
                        Text="Image Converter"
-                       TextLineBounds="Tight" />
+                       TextLineBounds="Tight"
+                       TextTrimming="CharacterEllipsis" />
 
-            <Button Margin="0 0 0 -6"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Bottom"
-                    Click="{x:Bind ShowHelp}"
-                    Style="{StaticResource GhostButtonStyle}">
-                <Image Width="20" Height="20">
-                    <Image.Source>
-                        <SvgImageSource UriSource="/Assets/Help.svg" />
-                    </Image.Source>
-                </Image>
-            </Button>
+            <StackPanel Grid.Column="1"
+                        Margin="0 0 0 -6"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Bottom"
+                        Orientation="Horizontal"
+                        Spacing="4">
+
+                <Button Click="{x:Bind ViewModel.FormatsClick}"
+                        Style="{StaticResource GhostButtonStyle}"
+                        ToolTipService.ToolTip="See supported formats">
+                    <Grid>
+                        <Image x:Name="AllFormatsImage"
+                               x:Load="{x:Bind False(ViewModel.Support.IsMissingExtensions)}"
+                               Width="20"
+                               Height="20">
+                            <Image.Source>
+                                <SvgImageSource UriSource="/Assets/SupportedFiles.svg" />
+                            </Image.Source>
+                        </Image>
+                        <Image x:Name="MissingFormatsImage"
+                               x:Load="{x:Bind ViewModel.Support.IsMissingExtensions}"
+                               Width="20"
+                               Height="20">
+                            <Image.Source>
+                                <SvgImageSource UriSource="/Assets/MissingFormats.svg" />
+                            </Image.Source>
+                        </Image>
+                    </Grid>
+                </Button>
+
+                <Button Click="{x:Bind ShowHelp}" Style="{StaticResource GhostButtonStyle}">
+                    <Image Width="20" Height="20">
+                        <Image.Source>
+                            <SvgImageSource UriSource="/Assets/Help.svg" />
+                        </Image.Source>
+                    </Image>
+                </Button>
+            </StackPanel>
+
+
 
         </Grid>
 
@@ -493,32 +525,40 @@
                 Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" />
 
         <!--  WARNING ROW  -->
-        <StackPanel Grid.Row="1">
-            <Grid MinHeight="40"
-                  Margin="0 12 0 0"
-                  Background="{ThemeResource SystemColorControlAccentBrush}"
-                  Visibility="{x:Bind FalseToVis(ViewModel.Support.HasHEIFImageExtensions)}">
-                <TextBlock Margin="12 6"
-                           VerticalAlignment="Center"
+        <StackPanel Grid.Row="1" Margin="0 12 0 0">
+            <common:InfoBar IsCloseButtonVisible="True" Visibility="{x:Bind FalseToVis(ViewModel.Support.HasHEIFImageExtensions)}">
+                <common:InfoBar.Icon>
+                    <PathIcon Margin="0 0 12 0"
+                              HorizontalAlignment="Center"
+                              VerticalAlignment="Center"
+                              Data="F1 M 2.021484 18.59375 C 1.695964 18.59375 1.391602 18.515625 1.108398 18.359375 C 0.825195 18.203125 0.598958 17.985025 0.429688 17.705078 C 0.240885 17.399088 0.146484 17.067057 0.146484 16.708984 C 0.146484 16.409506 0.211589 16.132812 0.341797 15.878906 L 7.695312 1.171875 C 7.858072 0.852865 8.089192 0.600586 8.388672 0.415039 C 8.68815 0.229492 9.016927 0.136719 9.375 0.136719 C 9.733072 0.136719 10.061849 0.229492 10.361328 0.415039 C 10.660807 0.600586 10.891927 0.852865 11.054688 1.171875 L 18.408203 15.878906 C 18.53841 16.132812 18.603516 16.409506 18.603516 16.708984 C 18.603516 17.067057 18.509113 17.399088 18.320312 17.705078 C 18.151041 17.985025 17.924805 18.203125 17.641602 18.359375 C 17.358398 18.515625 17.054035 18.59375 16.728516 18.59375 Z M 16.728516 17.34375 C 16.865234 17.34375 16.977539 17.311197 17.06543 17.246094 C 17.15332 17.18099 17.216797 17.115885 17.255859 17.050781 C 17.320963 16.953125 17.353516 16.842447 17.353516 16.71875 C 17.353516 16.621094 17.330729 16.526693 17.285156 16.435547 L 9.931641 1.738281 C 9.879557 1.627605 9.804688 1.541342 9.707031 1.479492 C 9.609375 1.417645 9.498697 1.386719 9.375 1.386719 C 9.251302 1.386719 9.140625 1.417645 9.042969 1.479492 C 8.945312 1.541342 8.870442 1.627605 8.818359 1.738281 L 1.464844 16.435547 C 1.419271 16.526693 1.396484 16.621094 1.396484 16.71875 C 1.396484 16.842447 1.429036 16.953125 1.494141 17.050781 C 1.533203 17.115885 1.59668 17.18099 1.68457 17.246094 C 1.772461 17.311197 1.884766 17.34375 2.021484 17.34375 Z M 9.375 12.5 C 9.205729 12.5 9.059244 12.438151 8.935547 12.314453 C 8.811849 12.190756 8.75 12.044271 8.75 11.875 L 8.75 6.875 C 8.75 6.705729 8.811849 6.559245 8.935547 6.435547 C 9.059244 6.31185 9.205729 6.25 9.375 6.25 C 9.544271 6.25 9.690755 6.31185 9.814453 6.435547 C 9.93815 6.559245 10 6.705729 10 6.875 L 10 11.875 C 10 12.044271 9.93815 12.190756 9.814453 12.314453 C 9.690755 12.438151 9.544271 12.5 9.375 12.5 Z M 9.375 15.3125 C 9.114583 15.3125 8.893229 15.221354 8.710938 15.039062 C 8.528646 14.856771 8.4375 14.635417 8.4375 14.375 C 8.4375 14.114584 8.528646 13.893229 8.710938 13.710938 C 8.893229 13.528646 9.114583 13.4375 9.375 13.4375 C 9.635416 13.4375 9.856771 13.528646 10.039062 13.710938 C 10.221354 13.893229 10.3125 14.114584 10.3125 14.375 C 10.3125 14.635417 10.221354 14.856771 10.039062 15.039062 C 9.856771 15.221354 9.635416 15.3125 9.375 15.3125 Z " />
+                </common:InfoBar.Icon>
+                <TextBlock VerticalAlignment="Center"
                            Foreground="White"
                            TextWrapping="Wrap">
-                    <Run FontWeight="Bold" Text="WARNING" />
                     <Run Text="To convert HEIC files, you need the" />
                     <Hyperlink Foreground="White" NavigateUri="{x:Bind cx:CodecSupport.HEIFImageExtensionsWebLink}">HEIF Image Extensions from the Microsoft Store.</Hyperlink>
                     <Run Text="Restart the app after installing." />
                 </TextBlock>
-            </Grid>
+            </common:InfoBar>
+
+
         </StackPanel>
 
         <!--  INPUT COLUMN  -->
         <Grid x:Name="InputContainer" Grid.Row="2">
+            <Grid.Transitions>
+                <TransitionCollection>
+                    <RepositionThemeTransition />
+                </TransitionCollection>
+            </Grid.Transitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
             <!--  INPUT ROW  -->
-            <Grid Margin="8 14 12 4" ColumnSpacing="8">
+            <Grid Margin="4 14 0 4" ColumnSpacing="8">
                 <CommandBar HorizontalAlignment="Left"
                             Background="Transparent"
                             DefaultLabelPosition="Right"
@@ -529,15 +569,15 @@
                                   Click="{x:Bind ViewModel.AddFilesClick}"
                                   Icon="Add"
                                   IsEnabled="{x:Bind False(ViewModel.IsBusy), Mode=OneWay}"
-                                  Label="Add Files" />
+                                  Label="Add Images" />
                     <AppBarButton Click="{x:Bind ViewModel.RemoveFilesClick}"
                                   Icon="Remove"
                                   IsEnabled="{x:Bind TrueAndFalse(ViewModel.HasSelectedItems, ViewModel.IsBusy), Mode=OneWay}"
-                                  Label="Remove Selected" />
+                                  Label="Remove Images" />
                     <AppBarButton Click="{x:Bind ViewModel.ClearClick}"
                                   Icon="Delete"
                                   IsEnabled="{x:Bind TrueAndFalse(ViewModel.HasItems, ViewModel.IsBusy), Mode=OneWay}"
-                                  Label="Remove All" />
+                                  Label="Clear All" />
                 </CommandBar>
             </Grid>
 
@@ -602,6 +642,26 @@
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>
+
+                <TextBlock x:Name="HintBlock"
+                           Margin="24"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           FontSize="32"
+                           FontWeight="Bold"
+                           Opacity="0.4"
+                           Tapped="{x:Bind FocusAddFiles}"
+                           TextAlignment="Center"
+                           TextTrimming="CharacterEllipsis"
+                           TextWrapping="Wrap"
+                           Visibility="{x:Bind FalseToVis(ViewModel.HasItems), Mode=OneWay, FallbackValue=Collapsed}">
+                    <Run Text="Use the" />
+                    <Run FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                         FontSize="22"
+                         Text="&#xE109;" />
+                    <Run FontWeight="Light" Text="Add Images" />
+                    <Run Text="button above or drag and drop files here to get started" />
+                </TextBlock>
 
                 <ScrollViewer VerticalAlignment="Bottom" Visibility="{x:Bind FalseToVis(ViewModel.HasItems), Mode=OneWay}" />
 
@@ -807,7 +867,7 @@
                         HorizontalAlignment="Stretch"
                         Background="{ThemeResource SystemControlHighlightBaseMediumLowRevealAccentBackgroundBrush}"
                         Click="{x:Bind ViewModel.ConvertClick}"
-                        Content="Convert All Files"
+                        Content="Convert All Images"
                         Foreground="{ThemeResource AccentButtonForeground}"
                         IsEnabled="{x:Bind TrueAndTrueAndFalse(ViewModel.HasItems, ViewModel.HasExportFolder, ViewModel.IsBusy), Mode=OneWay}" />
 
@@ -821,11 +881,11 @@
                           Grid.RowSpan="2"
                           d:IsHidden="True"
                           PreferredPlacement="BottomLeft">
-            <TextBlock FontSize="{StaticResource DefaultFontSize}"
+            <TextBlock FontSize="13"
                        Foreground="{ThemeResource TextControlPlaceholderForeground}"
                        TextWrapping="Wrap">
                 <Run Text="To get started: " />
-                <LineBreak /><Run Text=" 1. Click the" /> <Hyperlink Click="FocusAddFiles">Add Files</Hyperlink> <Run Text="button above to add files." />
+                <LineBreak /><Run Text=" 1. Click the" /> <Hyperlink Click="{x:Bind FocusAddFiles}">Add Files</Hyperlink> <Run Text="button above to add files." />
                 <LineBreak /><Run Text=" 2. Choose the" /> <Hyperlink Click="FocusOutputFolder">Output folder</Hyperlink> <Run Text="from the panel on the left." />
                 <LineBreak /><Run Text=" 3. Choose your" /> <Hyperlink Click="FocusOutputFormat">Output format</Hyperlink> <Run Text="and" /> <Hyperlink Click="FocusFormatOptions">options.</Hyperlink>
                 <LineBreak /><Run Text=" 4. Optionally, choose if you want to" /> <Hyperlink Click="FocusResize">resize images.</Hyperlink>
@@ -868,6 +928,16 @@
                     </VisualState.StateTriggers>
                     <VisualState.Setters>
                         <Setter Target="OutputGridColumn.Width" Value="200" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+            <VisualStateGroup>
+                <VisualState>
+                    <VisualState.StateTriggers>
+                        <StateTrigger IsActive="{x:Bind HintBlock.IsTextTrimmed, Mode=OneWay}" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="HintBlock.(ToolTipService.ToolTip)" Value="Use the + Add Files button above or drag and drop files here to get started" />
                     </VisualState.Setters>
                 </VisualState>
             </VisualStateGroup>

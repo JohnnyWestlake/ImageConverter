@@ -133,7 +133,7 @@ namespace ImageConverter
 
         private void ShowHelp() => HelpToolTip.IsOpen = true;
 
-        private void FocusAddFiles(Hyperlink sender, HyperlinkClickEventArgs args) => FocusTarget(AddFilesButton);
+        private void FocusAddFiles() => FocusTarget(AddFilesButton);
 
         private void FocusOutputFolder(Hyperlink sender, HyperlinkClickEventArgs args) => FocusTarget(OutputFolderButton);
 
@@ -154,6 +154,5 @@ namespace ImageConverter
         public Visibility FalseToVis(bool a) => a ? Visibility.Collapsed : Visibility.Visible;
 
         public static Visibility NullOrEmptyToVis(string s) => string.IsNullOrEmpty(s) ? Visibility.Collapsed : Visibility.Visible;
-
     }
 }
