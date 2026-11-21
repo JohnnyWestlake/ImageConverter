@@ -30,6 +30,86 @@ public sealed partial class MainPage : Page
 
         ViewModel = new MainViewModel();
         SetThemeShadow(InputBackground, 40, OutputBackground);
+        this.Loaded += MainPage_Loaded;
+    }
+
+    private bool _startupActivationHandled;
+
+    private async void MainPage_Loaded(object sender, RoutedEventArgs e)
+    {
+        if (_startupActivationHandled)
+            return;
+        _startupActivationHandled = true;
+
+        var items = new List<IStorageItem>();
+        var seenPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        try
+        {
+            var activatedArgs = Microsoft.Windows.AppLifecycle.AppInstance.GetCurrent().GetActivatedEventArgs();
+            if (activatedArgs?.Kind == Microsoft.Windows.AppLifecycle.ExtendedActivationKind.File &&
+                activatedArgs.Data is Windows.ApplicationModel.Activation.IFileActivatedEventArgs fileArgs &&
+                fileArgs.Files != null)
+            {
+                foreach (IStorageItem item in fileArgs.Files)
+                {
+                    if (item != null && (string.IsNullOrEmpty(item.Path) || seenPaths.Add(item.Path)))
+                    {
+                        items.Add(item);
+                    }
+                }
+            }
+        }
+        catch
+        {
+        }
+
+        try
+        {
+            string[] cliArgs = Environment.GetCommandLineArgs();
+            for (int i = 1; i < cliArgs.Length; i++)
+            {
+                string arg = cliArgs[i];
+                if (string.IsNullOrWhiteSpace(arg))
+                    continue;
+
+                string fullPath;
+                try
+                {
+                    fullPath = Path.GetFullPath(arg);
+                }
+                catch
+                {
+                    continue;
+                }
+
+                if (!seenPaths.Add(fullPath))
+                    continue;
+
+                try
+                {
+                    if (File.Exists(fullPath))
+                    {
+                        items.Add(await StorageFile.GetFileFromPathAsync(fullPath));
+                    }
+                    else if (Directory.Exists(fullPath))
+                    {
+                        items.Add(await StorageFolder.GetFolderFromPathAsync(fullPath));
+                    }
+                }
+                catch
+                {
+                }
+            }
+        }
+        catch
+        {
+        }
+
+        if (items.Count > 0)
+        {
+            ViewModel.ProcessDroppedFiles(items);
+        }
     }
 
     private void UISettings_ColorValuesChanged(UISettings sender, object args)

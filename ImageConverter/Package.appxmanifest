@@ -25,6 +25,33 @@
         </uap:DefaultTile>
         <uap:SplashScreen Image="Assets\SplashScreen.png" BackgroundColor="black" a:Optional="true" xmlns:a="http://schemas.microsoft.com/appx/manifest/uap/windows10/5" />
       </uap:VisualElements>
+      <Extensions>
+        <uap:Extension Category="windows.fileTypeAssociation">
+          <uap:FileTypeAssociation Name="imageconverter.files">
+            <uap:DisplayName>Image File</uap:DisplayName>
+            <uap:SupportedFileTypes>
+              <uap:FileType>.jpg</uap:FileType>
+              <uap:FileType>.jpeg</uap:FileType>
+              <uap:FileType>.png</uap:FileType>
+              <uap:FileType>.bmp</uap:FileType>
+              <uap:FileType>.gif</uap:FileType>
+              <uap:FileType>.tif</uap:FileType>
+              <uap:FileType>.tiff</uap:FileType>
+              <uap:FileType>.jxr</uap:FileType>
+              <uap:FileType>.wdp</uap:FileType>
+              <uap:FileType>.dds</uap:FileType>
+              <uap:FileType>.heic</uap:FileType>
+              <uap:FileType>.heif</uap:FileType>
+              <uap:FileType>.avif</uap:FileType>
+              <uap:FileType>.webp</uap:FileType>
+              <uap:FileType>.cr2</uap:FileType>
+              <uap:FileType>.nef</uap:FileType>
+              <uap:FileType>.arw</uap:FileType>
+              <uap:FileType>.dng</uap:FileType>
+            </uap:SupportedFileTypes>
+          </uap:FileTypeAssociation>
+        </uap:Extension>
+      </Extensions>
     </Application>
   </Applications>
   <Capabilities>
