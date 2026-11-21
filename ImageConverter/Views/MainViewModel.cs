@@ -25,6 +25,7 @@ public partial class MainViewModel : BindableBase
     public bool IsOverwrite         { get => GetV(false); set => Set(value); }
     public bool CopyMetadata        { get => GetV(true); set => Set(value); }
     public bool MultiframeSupport   { get => GetV(false); set => Set(value); }
+    public bool DeleteSourceFiles   { get => GetV(false); set => Set(value); }
     public bool HasSelectedItems    => SelectedFiles.Count > 0;
     public bool HasItems            => FileList.Count > 0;
     public bool OutputToSourceFolder
@@ -394,12 +395,52 @@ public partial class MainViewModel : BindableBase
 
         _transformViewModel.ApplyTo(options);
 
-        int count = FileList.Count;
-        var result = await ImageConverterCore.ConvertAsync(FileList.ToList(), OutputToSourceFolder ? null : ExportFolder, options, completed =>
+        var convertedItems = FileList.ToList();
+        int count = convertedItems.Count;
+        var result = await ImageConverterCore.ConvertAsync(convertedItems, OutputToSourceFolder ? null : ExportFolder, options, completed =>
         {
             ConvertIndex = completed - 1;
             StatusBarRight = $"Converting {completed} of {count}...";
         });
+
+        if (DeleteSourceFiles)
+        {
+            foreach (var item in convertedItems)
+            {
+                if (!item.LastSuccess)
+                    continue;
+
+                string sourceDir = !string.IsNullOrEmpty(item.File.Path) ? Path.GetDirectoryName(item.File.Path) : null;
+                string targetDir = OutputToSourceFolder ? sourceDir : ExportFolder?.Path;
+                bool sameFolder = OutputToSourceFolder || (
+                    !string.IsNullOrEmpty(sourceDir) &&
+                    !string.IsNullOrEmpty(targetDir) &&
+                    string.Equals(Path.TrimEndingDirectorySeparator(sourceDir), Path.TrimEndingDirectorySeparator(targetDir), StringComparison.OrdinalIgnoreCase));
+
+                bool overwrittenInPlace = IsOverwrite
+                    && sameFolder
+                    && string.Equals(item.File.FileType, options.FileExtension, StringComparison.OrdinalIgnoreCase);
+
+                if (overwrittenInPlace)
+                    continue;
+
+                try
+                {
+                    if (!string.IsNullOrEmpty(item.File.Path))
+                        File.Delete(item.File.Path);
+                    else
+                        await item.File.DeleteAsync().AsTask();
+
+                    SelectedFiles.Remove(item);
+                    FileList.Remove(item);
+                }
+                catch
+                {
+                }
+            }
+
+            UpdateStatusText();
+        }
 
         if (result.Width > 0 && result.Height == 0)
             StatusBarRight = $"Result: {result.Width} items converted";

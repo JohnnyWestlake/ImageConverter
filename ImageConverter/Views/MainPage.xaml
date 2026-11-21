@@ -758,6 +758,13 @@
                                 If disabled, only the first frame of each image will be converted.
                             </ToolTipService.ToolTip>
                         </CheckBox>
+                        <CheckBox Content="Delete original files after successful conversion"
+                                  IsChecked="{x:Bind ViewModel.DeleteSourceFiles, Mode=TwoWay}"
+                                  IsEnabled="{x:Bind False(ViewModel.IsBusy), Mode=OneWay}">
+                            <ToolTipService.ToolTip>
+                                When enabled, original source files will be deleted from disk after they are successfully converted.
+                            </ToolTipService.ToolTip>
+                        </CheckBox>
                     </StackPanel>
 
 
