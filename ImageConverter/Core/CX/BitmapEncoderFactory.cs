@@ -116,20 +116,40 @@ public static class BitmapEncoderFactory
 
             if (useWin32Target)
             {
-                using FileStream fileStream = CreateOutputFileStream(targetFolder.Path, baseName, frameSuffix, settings.FileExtension, settings.CollisionOption);
-                using IRandomAccessStream outputStream = fileStream.AsRandomAccessStream();
-                await EncodeInternalAsync(decoder, frameIndex, outputStream, settings).ConfigureAwait(false);
-                result.ResultFileSize += outputStream.Size;
-                result.Success = true;
+                string createdFilePath = null;
+                try
+                {
+                    using FileStream fileStream = CreateOutputFileStream(targetFolder.Path, baseName, frameSuffix, settings.FileExtension, settings.CollisionOption, out createdFilePath);
+                    using IRandomAccessStream outputStream = fileStream.AsRandomAccessStream();
+                    await EncodeInternalAsync(decoder, frameIndex, outputStream, settings).ConfigureAwait(false);
+                    result.ResultFileSize += outputStream.Size;
+                    result.Success = true;
+                }
+                catch
+                {
+                    if (!string.IsNullOrEmpty(createdFilePath))
+                    {
+                        try { File.Delete(createdFilePath); } catch { }
+                    }
+                    throw;
+                }
             }
             else
             {
                 string fileName = $"{baseName}{frameSuffix}{settings.FileExtension}";
                 StorageFile outputFile = await targetFolder.CreateFileAsync(fileName, settings.CollisionOption).AsTask().ConfigureAwait(false);
-                using IRandomAccessStream outputStream = await outputFile.OpenAsync(FileAccessMode.ReadWrite).AsTask().ConfigureAwait(false);
-                await EncodeInternalAsync(decoder, frameIndex, outputStream, settings).ConfigureAwait(false);
-                result.ResultFileSize += outputStream.Size;
-                result.Success = true;
+                try
+                {
+                    using IRandomAccessStream outputStream = await outputFile.OpenAsync(FileAccessMode.ReadWrite).AsTask().ConfigureAwait(false);
+                    await EncodeInternalAsync(decoder, frameIndex, outputStream, settings).ConfigureAwait(false);
+                    result.ResultFileSize += outputStream.Size;
+                    result.Success = true;
+                }
+                catch
+                {
+                    try { await outputFile.DeleteAsync(StorageDeleteOption.PermanentDelete).AsTask().ConfigureAwait(false); } catch { }
+                    throw;
+                }
             }
         }
     }
@@ -139,19 +159,26 @@ public static class BitmapEncoderFactory
         string baseName,
         string frameSuffix,
         string extension,
-        CreationCollisionOption collisionOption)
+        CreationCollisionOption collisionOption,
+        out string createdFilePath)
     {
         string basePath = Path.Combine(folderPath, $"{baseName}{frameSuffix}{extension}");
 
         switch (collisionOption)
         {
             case CreationCollisionOption.ReplaceExisting:
-                return new FileStream(basePath, FileMode.Create, FileAccess.ReadWrite, FileShare.None, 4096, FileOptions.Asynchronous);
+            {
+                var stream = new FileStream(basePath, FileMode.Create, FileAccess.ReadWrite, FileShare.None, 4096, FileOptions.Asynchronous);
+                createdFilePath = basePath;
+                return stream;
+            }
 
             case CreationCollisionOption.GenerateUniqueName:
                 try
                 {
-                    return new FileStream(basePath, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None, 4096, FileOptions.Asynchronous);
+                    var stream = new FileStream(basePath, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None, 4096, FileOptions.Asynchronous);
+                    createdFilePath = basePath;
+                    return stream;
                 }
                 catch (IOException) when (File.Exists(basePath))
                 {
@@ -160,7 +187,9 @@ public static class BitmapEncoderFactory
                         string candidate = Path.Combine(folderPath, $"{baseName}{frameSuffix} ({i}){extension}");
                         try
                         {
-                            return new FileStream(candidate, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None, 4096, FileOptions.Asynchronous);
+                            var stream = new FileStream(candidate, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None, 4096, FileOptions.Asynchronous);
+                            createdFilePath = candidate;
+                            return stream;
                         }
                         catch (IOException) when (File.Exists(candidate))
                         {
@@ -169,11 +198,19 @@ public static class BitmapEncoderFactory
                 }
 
             case CreationCollisionOption.OpenIfExists:
-                return new FileStream(basePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 4096, FileOptions.Asynchronous);
+            {
+                var stream = new FileStream(basePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 4096, FileOptions.Asynchronous);
+                createdFilePath = basePath;
+                return stream;
+            }
 
             case CreationCollisionOption.FailIfExists:
             default:
-                return new FileStream(basePath, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None, 4096, FileOptions.Asynchronous);
+            {
+                var stream = new FileStream(basePath, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None, 4096, FileOptions.Asynchronous);
+                createdFilePath = basePath;
+                return stream;
+            }
         }
     }
 
