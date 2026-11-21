@@ -2,6 +2,7 @@
 
 namespace ImageConverter.Common;
 
+[WinRT.GeneratedBindableCustomProperty]
 public partial class ImageViewModel : BindableBase
 {
     public StorageFile File         { get; private set; }

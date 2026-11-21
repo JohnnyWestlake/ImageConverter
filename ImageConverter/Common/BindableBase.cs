@@ -6,7 +6,7 @@
 /// at cost of performance
 /// </summary>
 //[QualityBand(QualityBand.Mature)]
-public class BindableBase : INotifyPropertyChanged, IDisposable
+public partial class BindableBase : INotifyPropertyChanged, IDisposable
 {
     /// <summary>
     /// Private data store that contains all of the properties access through GetProperty 
@@ -165,11 +165,11 @@ public class BindableBase : INotifyPropertyChanged, IDisposable
 
     private void Marshall(Action action)
     {
-        if (App.Dispatcher.HasThreadAccess)
+        if (App.Dispatcher == null || App.Dispatcher.HasThreadAccess)
             action();
         else
         {
-            var _ =  App.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, new Windows.UI.Core.DispatchedHandler(action));
+            App.Dispatcher.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Normal, () => action());
         }
     }
 

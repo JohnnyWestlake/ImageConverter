@@ -1,24 +1,19 @@
 ﻿using ImageConverter.Views;
+using Microsoft.UI;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Documents;
+using Microsoft.UI.Xaml.Media;
 using System.Numerics;
 using Windows.ApplicationModel;
-using Windows.ApplicationModel.Core;
 using Windows.ApplicationModel.DataTransfer;
-using Windows.Foundation.Metadata;
 using Windows.Storage;
-using Windows.UI;
-using Windows.UI.Composition;
 using Windows.UI.ViewManagement;
-using Windows.UI.Xaml;
-using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Documents;
-using Windows.UI.Xaml.Media;
 
 namespace ImageConverter;
 
 public sealed partial class MainPage : Page
 {
-    public static bool Supports1903 { get; } = ApiInformation.IsApiContractPresent("Windows.Foundation.UniversalApiContract", 8);
-
     public MainViewModel ViewModel { get; }
     public UISettings UISettings { get; }
 
@@ -40,18 +35,30 @@ public sealed partial class MainPage : Page
 
     private void UISettings_ColorValuesChanged(UISettings sender, object args)
     {
-        _ = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.High, UdpateTitleBar);
+        App.Dispatcher?.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.High, UdpateTitleBar);
     }
 
     private void UdpateTitleBar()
     {
-        CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar = true;
-        Window.Current.SetTitleBar(TitleBarBackground);
-        var appView = ApplicationView.GetForCurrentView();
-        appView.TitleBar.ButtonBackgroundColor = Colors.Transparent;
-        appView.TitleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
-        appView.TitleBar.ButtonForegroundColor = ((SolidColorBrush)App.Current.Resources["ApplicationForegroundThemeBrush"]).Color;
-        appView.TitleBar.ButtonHoverForegroundColor = ((SolidColorBrush)App.Current.Resources["ApplicationForegroundThemeBrush"]).Color;
+        try
+        {
+            if (App.MainWindow == null)
+                return;
+
+            App.MainWindow.ExtendsContentIntoTitleBar = true;
+            App.MainWindow.SetTitleBar(TitleBarBackground);
+            if (App.MainWindow.AppWindow?.TitleBar is { } titleBar)
+            {
+                titleBar.ButtonBackgroundColor = Colors.Transparent;
+                titleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
+                if (Application.Current.Resources.TryGetValue("ApplicationForegroundThemeBrush", out var resource) && resource is SolidColorBrush brush)
+                {
+                    titleBar.ButtonForegroundColor = brush.Color;
+                    titleBar.ButtonHoverForegroundColor = brush.Color;
+                }
+            }
+        }
+        catch { }
     }
 
     private void ViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -63,7 +70,7 @@ public sealed partial class MainPage : Page
         }
     }
 
-    private void Output_DragOver(object sender, Windows.UI.Xaml.DragEventArgs e)
+    private void Output_DragOver(object sender, Microsoft.UI.Xaml.DragEventArgs e)
     {
         if (e.DataView.Contains(StandardDataFormats.StorageItems)
             )//&& !e.DataView.AvailableFormats.Contains("FileOpFlags")) // Removes special environment folders that don't "drop"
@@ -74,7 +81,7 @@ public sealed partial class MainPage : Page
         }
     }
 
-    private async void Output_Drop(object sender, Windows.UI.Xaml.DragEventArgs e)
+    private async void Output_Drop(object sender, Microsoft.UI.Xaml.DragEventArgs e)
     {
         if (e.DataView.Contains(StandardDataFormats.StorageItems))
         {
@@ -92,7 +99,7 @@ public sealed partial class MainPage : Page
             args.ItemContainer.Background = args.ItemIndex % 2 == 0 ? UnBandedBrush : BandedBrush;
     }
 
-    private void Files_DragOver(object sender, Windows.UI.Xaml.DragEventArgs e)
+    private void Files_DragOver(object sender, Microsoft.UI.Xaml.DragEventArgs e)
     {
         if (e.DataView.Contains(StandardDataFormats.StorageItems))
         {
@@ -102,7 +109,7 @@ public sealed partial class MainPage : Page
         }
     }
 
-    private async void Files_Drop(object sender, Windows.UI.Xaml.DragEventArgs e)
+    private async void Files_Drop(object sender, Microsoft.UI.Xaml.DragEventArgs e)
     {
         if (e.DataView.Contains(StandardDataFormats.StorageItems))
         {
@@ -115,9 +122,6 @@ public sealed partial class MainPage : Page
     {
         try
         {
-            if (!Supports1903 || !CompositionCapabilities.GetForCurrentView().AreEffectsFast())
-                return;
-
             target.Translation = new Vector3(0, 0, depth);
 
             var shadow = new ThemeShadow();

@@ -5,8 +5,6 @@ VisualStudioVersion = 16.0.28527.54
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageConverter", "ImageConverter\ImageConverter.csproj", "{79FC4E23-7372-4287-8B3B-78B2841863E4}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ImageConverter.Core.CX", "ImageConverter.Core.CX\ImageConverter.Core.CX.vcxproj", "{E93DF246-F611-4E1B-8F11-7885CF33AD54}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM64 = Debug|ARM64
@@ -27,14 +25,6 @@ Global
 		{79FC4E23-7372-4287-8B3B-78B2841863E4}.Release|x64.ActiveCfg = Release|x64
 		{79FC4E23-7372-4287-8B3B-78B2841863E4}.Release|x64.Build.0 = Release|x64
 		{79FC4E23-7372-4287-8B3B-78B2841863E4}.Release|x64.Deploy.0 = Release|x64
-		{E93DF246-F611-4E1B-8F11-7885CF33AD54}.Debug|ARM64.ActiveCfg = Debug|ARM64
-		{E93DF246-F611-4E1B-8F11-7885CF33AD54}.Debug|ARM64.Build.0 = Debug|ARM64
-		{E93DF246-F611-4E1B-8F11-7885CF33AD54}.Debug|x64.ActiveCfg = Debug|x64
-		{E93DF246-F611-4E1B-8F11-7885CF33AD54}.Debug|x64.Build.0 = Debug|x64
-		{E93DF246-F611-4E1B-8F11-7885CF33AD54}.Release|ARM64.ActiveCfg = Release|ARM64
-		{E93DF246-F611-4E1B-8F11-7885CF33AD54}.Release|ARM64.Build.0 = Release|ARM64
-		{E93DF246-F611-4E1B-8F11-7885CF33AD54}.Release|x64.ActiveCfg = Release|x64
-		{E93DF246-F611-4E1B-8F11-7885CF33AD54}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

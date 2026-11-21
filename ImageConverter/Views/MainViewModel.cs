@@ -1,7 +1,6 @@
 ﻿using ImageConverter.Common;
 using System.Collections.ObjectModel;
 using System.Text;
-using Windows.ApplicationModel.ExtendedExecution;
 using Windows.Graphics.Imaging;
 using Windows.Storage;
 using Windows.Storage.Pickers;
@@ -9,7 +8,8 @@ using Windows.System;
 
 namespace ImageConverter.Views;
 
-public class MainViewModel : BindableBase
+[WinRT.GeneratedBindableCustomProperty]
+public partial class MainViewModel : BindableBase
 {
     public List<ImageFormat> ImageFormats { get; }
     private OptionsViewModel _optionsViewModel { get; } = new OptionsViewModel();
@@ -153,6 +153,10 @@ public class MainViewModel : BindableBase
     async Task ChooseExportFolderAsync()
     {
         FolderPicker picker = new FolderPicker();
+        if (App.WindowHandle != IntPtr.Zero)
+        {
+            WinRT.Interop.InitializeWithWindow.Initialize(picker, App.WindowHandle);
+        }
         picker.FileTypeFilter.Add("*");
         var folder = await picker.PickSingleFolderAsync();
         ProcessExportFolder(folder);
@@ -181,6 +185,10 @@ public class MainViewModel : BindableBase
         {
             CommitButtonText = "Select"
         };
+        if (App.WindowHandle != IntPtr.Zero)
+        {
+            WinRT.Interop.InitializeWithWindow.Initialize(picker, App.WindowHandle);
+        }
 
         foreach (var type in ImageConverterCore.SupportedDecodeFileTypes)
             picker.FileTypeFilter.Add(type);
@@ -193,6 +201,13 @@ public class MainViewModel : BindableBase
 
     async Task ProcessAddFilesAsync(IEnumerable<StorageFile> files)
     {
+        if (files == null)
+        {
+            IsProcessing = false;
+            IsBusy = false;
+            return;
+        }
+
         IsBusy = true;
         IsProcessing = true;
 
@@ -291,40 +306,30 @@ public class MainViewModel : BindableBase
         IsBusy = true;
         ConvertIndex = 0;
 
-        using (ExtendedExecutionSession ex = new ExtendedExecutionSession())
+        var options = new BitmapConversionSettings(
+            SelectedFormat.CodecInfo.CodecId,
+            _optionsViewModel.CurrentFileFormat,
+            _optionsViewModel.GetEffectiveOptions().Select(o => o.GetValue()).ToList())
         {
-            ex.Reason = ExtendedExecutionReason.Unspecified;
-            bool extended = await ex.RequestExtensionAsync() == ExtendedExecutionResult.Allowed;
+            CollisionOption = IsOverwrite ? CreationCollisionOption.ReplaceExisting : CreationCollisionOption.GenerateUniqueName,
+            CopyMetadata = CopyMetadata,
+            FrameHandling = MultiframeSupport ? BitmapFrameHandling.ExtractAllSeperately : BitmapFrameHandling.FirstFrameOnly
+        };
 
-            var options = new BitmapConversionSettings(
-                SelectedFormat.CodecInfo.CodecId,
-                _optionsViewModel.CurrentFileFormat,
-                _optionsViewModel.GetEffectiveOptions().Select(o => o.GetValue()).ToList())
-            {
-                CollisionOption = IsOverwrite ? CreationCollisionOption.ReplaceExisting : CreationCollisionOption.GenerateUniqueName,
-                CopyMetadata = CopyMetadata,
-                FrameHandling = MultiframeSupport ? BitmapFrameHandling.ExtractAllSeperately : BitmapFrameHandling.FirstFrameOnly
-            };
+        _transformViewModel.ApplyTo(options);
 
-            _transformViewModel.ApplyTo(options);
+        int count = FileList.Count;
+        var result = await ImageConverterCore.ConvertAsync(FileList.ToList(), ExportFolder, options, i =>
+        {
+            ConvertIndex = i - 1;
+            StatusBarRight = $"Converting {i} of {count}...";
+        });
 
-            int count = FileList.Count;
-            var result = await ImageConverterCore.ConvertAsync(FileList.ToList(), ExportFolder, options, i =>
-            {
-                ConvertIndex = i - 1;
-                StatusBarRight = $"Converting {i} of {count}...";
-                ex.PercentProgress = (uint)(i / count);
-            });
+        if (result.Width > 0 && result.Height == 0)
+            StatusBarRight = $"Result: {result.Width} items converted";
+        else
+            StatusBarRight = $"Result: {result.Width} items converted, {result.Height} failed";
 
-            StringBuilder b = new StringBuilder();
-            if (result.Width > 0 && result.Height == 0)
-                StatusBarRight = $"Result: {result.Width} items converted";
-            else
-                StatusBarRight = $"Result: {result.Width} items converted, {result.Height} failed";
-
-            ex.PercentProgress = 100;
-        }
-           
         IsBusy = false;
     }
 

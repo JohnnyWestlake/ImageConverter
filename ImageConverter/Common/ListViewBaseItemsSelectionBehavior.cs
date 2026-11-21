@@ -2,13 +2,13 @@
 using System.Collections;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using Windows.UI.Xaml;
-using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Data;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Data;
 
 namespace ImageConverter.Common;
 
-public class ListViewBaseItemsSelectionBehavior : Behavior<ListViewBase>
+public partial class ListViewBaseItemsSelectionBehavior : Behavior<ListViewBase>
 {
     #region Dependency Properties
 

@@ -1,5 +1,5 @@
-﻿using Windows.UI.Xaml;
-using Windows.UI.Xaml.Controls;
+﻿using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 
 namespace ImageConverter.Views;
 
@@ -15,13 +15,19 @@ public sealed partial class FormatsDialog : ContentDialog
 
     private void ContentDialog_Loaded(object sender, RoutedEventArgs e)
     {
-        Border b = (Border)this.GetTemplateChild("BackgroundElement");
-        b.Margin = new Thickness(40);
+        if (this.GetTemplateChild("BackgroundElement") is Border b)
+        {
+            b.Margin = new Thickness(40);
+        }
     }
 
     internal static void Show(CodecSupport support)
     {
-        _ = (new FormatsDialog(support)).ShowAsync();
+        var dialog = new FormatsDialog(support)
+        {
+            XamlRoot = App.MainWindow?.Content?.XamlRoot
+        };
+        _ = dialog.ShowAsync();
     }
 
     public Visibility FalseToVis(bool a) => a ? Visibility.Collapsed : Visibility.Visible;

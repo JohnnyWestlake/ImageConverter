@@ -8,8 +8,6 @@
       xmlns:i="using:Microsoft.Xaml.Interactivity"
       xmlns:local="using:ImageConverter"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-      xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
-      xmlns:win1903="http://schemas.microsoft.com/winfx/2006/xaml/presentation?IsApiContractPresent(Windows.Foundation.UniversalApiContract, 8)"
       d:DesignHeight="720"
       d:DesignWidth="1000"
       mc:Ignorable="d">
@@ -19,10 +17,6 @@
                          Opacity="0.05"
                          Color="{ThemeResource SystemChromeAltLowColor}" />
         <SolidColorBrush x:Name="UnBandedBrush" Color="Transparent" />
-
-        <Style BasedOn="{StaticResource ButtonRevealStyle}" TargetType="Button">
-            <!--<Setter Property="FontSize" Value="{StaticResource DefaultFontSize}" />-->
-        </Style>
 
         <Style TargetType="ListViewItem">
             <Setter Property="FontFamily" Value="{ThemeResource ContentControlThemeFontFamily}" />
@@ -336,92 +330,12 @@
             </Setter>
         </Style>
 
-        <Style x:Key="GhostButtonStyle" TargetType="Button">
+        <Style x:Key="GhostButtonStyle" BasedOn="{StaticResource SubtleButtonStyle}" TargetType="Button">
             <Setter Property="Background" Value="Transparent" />
-            <Setter Property="Foreground" Value="{ThemeResource ButtonForeground}" />
-            <Setter Property="BorderBrush" Value="{ThemeResource ButtonRevealBorderBrush}" />
-            <Setter Property="BorderThickness" Value="{ThemeResource ButtonRevealBorderThemeThickness}" />
-            <Setter Property="Padding" Value="{ThemeResource ButtonPadding}" />
+            <Setter Property="BorderThickness" Value="0" />
             <Setter Property="HorizontalAlignment" Value="Left" />
             <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="FontFamily" Value="{ThemeResource ContentControlThemeFontFamily}" />
-            <Setter Property="FontWeight" Value="Normal" />
-            <!--<Setter Property="FontSize" Value="{StaticResource DefaultFontSize}" />-->
-            <Setter Property="UseSystemFocusVisuals" Value="{StaticResource UseSystemFocusVisuals}" />
-            <Setter Property="FocusVisualMargin" Value="-3" />
             <Setter Property="CornerRadius" Value="2" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Grid x:Name="RootGrid"
-                              Background="{TemplateBinding Background}"
-                              CornerRadius="{TemplateBinding CornerRadius}">
-                            <ContentPresenter x:Name="ContentPresenter"
-                                              Padding="{TemplateBinding Padding}"
-                                              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
-                                              AutomationProperties.AccessibilityView="Raw"
-                                              BorderBrush="{TemplateBinding BorderBrush}"
-                                              BorderThickness="{TemplateBinding BorderThickness}"
-                                              Content="{TemplateBinding Content}"
-                                              ContentTemplate="{TemplateBinding ContentTemplate}"
-                                              ContentTransitions="{TemplateBinding ContentTransitions}"
-                                              CornerRadius="{TemplateBinding CornerRadius}" />
-
-                            <VisualStateManager.VisualStateGroups>
-                                <VisualStateGroup x:Name="CommonStates">
-                                    <VisualState x:Name="Normal">
-
-                                        <Storyboard>
-                                            <PointerUpThemeAnimation Storyboard.TargetName="RootGrid" />
-                                        </Storyboard>
-                                    </VisualState>
-
-                                    <VisualState x:Name="PointerOver">
-                                        <VisualState.Setters>
-                                            <Setter Target="RootGrid.(RevealBrush.State)" Value="PointerOver" />
-                                            <Setter Target="RootGrid.Background" Value="{ThemeResource ButtonRevealBackgroundPointerOver}" />
-                                            <Setter Target="ContentPresenter.BorderBrush" Value="{ThemeResource ButtonRevealBorderBrushPointerOver}" />
-                                            <Setter Target="ContentPresenter.Foreground" Value="{ThemeResource ButtonForegroundPointerOver}" />
-                                        </VisualState.Setters>
-
-                                        <Storyboard>
-                                            <PointerUpThemeAnimation Storyboard.TargetName="RootGrid" />
-                                        </Storyboard>
-                                    </VisualState>
-
-                                    <VisualState x:Name="Pressed">
-                                        <VisualState.Setters>
-                                            <Setter Target="RootGrid.(RevealBrush.State)" Value="Pressed" />
-                                            <Setter Target="RootGrid.Background" Value="{ThemeResource ButtonRevealBackgroundPressed}" />
-                                            <Setter Target="ContentPresenter.BorderBrush" Value="{ThemeResource ButtonRevealBorderBrushPressed}" />
-                                            <Setter Target="ContentPresenter.Foreground" Value="{ThemeResource ButtonForegroundPressed}" />
-                                        </VisualState.Setters>
-
-                                        <Storyboard>
-                                            <PointerDownThemeAnimation Storyboard.TargetName="RootGrid" />
-                                        </Storyboard>
-                                    </VisualState>
-
-                                    <VisualState x:Name="Disabled">
-                                        <VisualState.Setters>
-                                            <Setter Target="RootGrid.Opacity" Value="0.4" />
-                                            <Setter Target="ContentPresenter.BorderBrush" Value="{ThemeResource ButtonRevealBorderBrushDisabled}" />
-                                        </VisualState.Setters>
-                                    </VisualState>
-
-                                </VisualStateGroup>
-
-                            </VisualStateManager.VisualStateGroups>
-                        </Grid>
-
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="HeaderStyle" TargetType="ContentPresenter">
-            <Setter Target="FontWeight" Value="Bold" />
         </Style>
     </Page.Resources>
 
@@ -479,7 +393,7 @@
                                Width="20"
                                Height="20">
                             <Image.Source>
-                                <SvgImageSource UriSource="/Assets/SupportedFiles.svg" />
+                                <SvgImageSource UriSource="ms-appx:///Assets/SupportedFiles.svg" />
                             </Image.Source>
                         </Image>
                         <Image x:Name="MissingFormatsImage"
@@ -487,7 +401,7 @@
                                Width="20"
                                Height="20">
                             <Image.Source>
-                                <SvgImageSource UriSource="/Assets/MissingFormats.svg" />
+                                <SvgImageSource UriSource="ms-appx:///Assets/MissingFormats.svg" />
                             </Image.Source>
                         </Image>
                     </Grid>
@@ -496,7 +410,7 @@
                 <Button Click="{x:Bind ShowHelp}" Style="{StaticResource GhostButtonStyle}">
                     <Image Width="20" Height="20">
                         <Image.Source>
-                            <SvgImageSource UriSource="/Assets/Help.svg" />
+                            <SvgImageSource UriSource="ms-appx:///Assets/Help.svg" />
                         </Image.Source>
                     </Image>
                 </Button>
@@ -508,11 +422,10 @@
 
         <!--  OUTPUT BACKGROUND  -->
         <Border x:Name="OutputBackground"
-                Grid.RowSpan="10"
-                Grid.Column="10">
+                Grid.RowSpan="4"
+                Grid.Column="1">
             <Border.Background>
-                <AcrylicBrush win1903:TintLuminosityOpacity="0.8"
-                              BackgroundSource="HostBackdrop"
+                <AcrylicBrush TintLuminosityOpacity="0.8"
                               FallbackColor="{ThemeResource SystemChromeMediumColor}"
                               TintColor="{ThemeResource SystemAltHighColor}"
                               TintOpacity="0.8" />
@@ -716,7 +629,7 @@
                                     DragOver="Output_DragOver"
                                     Drop="Output_Drop"
                                     IsEnabled="{x:Bind False(ViewModel.IsBusy), Mode=OneWay}"
-                                    ToolTipService.ToolTip="{Binding Content, RelativeSource={RelativeSource Mode=Self}}" />
+                                    ToolTipService.ToolTip="{x:Bind ViewModel.ExportFolder.Path, FallbackValue='Click to choose', TargetNullValue='Click to choose', Mode=OneWay}" />
 
                             <Button x:Name="SecondaryButton"
                                     Grid.Column="1"
@@ -853,7 +766,7 @@
                         Spacing="12">
                 <Border Margin="-12 0"
                         Padding="12 6 12 10"
-                        Background="{ThemeResource SystemColorControlAccentBrush}"
+                        Background="{ThemeResource SystemAccentColor}"
                         Visibility="{x:Bind FalseToVis(ViewModel.HasExportFolder), Mode=OneWay}">
                     <TextBlock FontSize="12.333"
                                FontWeight="Bold"
@@ -865,22 +778,21 @@
 
                 <Button MinHeight="32"
                         HorizontalAlignment="Stretch"
-                        Background="{ThemeResource SystemControlHighlightBaseMediumLowRevealAccentBackgroundBrush}"
                         Click="{x:Bind ViewModel.ConvertClick}"
                         Content="Convert All Images"
-                        Foreground="{ThemeResource AccentButtonForeground}"
-                        IsEnabled="{x:Bind TrueAndTrueAndFalse(ViewModel.HasItems, ViewModel.HasExportFolder, ViewModel.IsBusy), Mode=OneWay}" />
+                        IsEnabled="{x:Bind TrueAndTrueAndFalse(ViewModel.HasItems, ViewModel.HasExportFolder, ViewModel.IsBusy), Mode=OneWay}"
+                        Style="{StaticResource AccentButtonStyle}" />
 
             </StackPanel>
         </Grid>
 
         <!--  HELP  -->
-        <muxc:TeachingTip x:Name="HelpToolTip"
-                          Title="Help"
-                          Grid.Row="1"
-                          Grid.RowSpan="2"
-                          d:IsHidden="True"
-                          PreferredPlacement="BottomLeft">
+        <TeachingTip x:Name="HelpToolTip"
+                     Title="Help"
+                     Grid.Row="1"
+                     Grid.RowSpan="2"
+                     d:IsHidden="True"
+                     PreferredPlacement="BottomLeft">
             <TextBlock FontSize="13"
                        Foreground="{ThemeResource TextControlPlaceholderForeground}"
                        TextWrapping="Wrap">
@@ -891,7 +803,7 @@
                 <LineBreak /><Run Text=" 4. Optionally, choose if you want to" /> <Hyperlink Click="FocusResize">resize images.</Hyperlink>
                 <LineBreak /><Run Text=" 5. Press Convert!" />
             </TextBlock>
-        </muxc:TeachingTip>
+        </TeachingTip>
 
         <!--  STATUS BAR  -->
         <Border Grid.Row="3">

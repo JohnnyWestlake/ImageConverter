@@ -127,7 +127,7 @@ public static class ImageConverterCore
             try
             {
                 BitmapConversionResult result =
-                    await BitmapEncoderFactory.EncodeAsync(image.File, targetFolder, settings).AsTask().ConfigureAwait(false);
+                    await BitmapEncoderFactory.EncodeAsync(image.File, targetFolder, settings).ConfigureAwait(false);
 
                 if (result.Success)
                 {

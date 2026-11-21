@@ -9,6 +9,10 @@ public static class MessageBox
         try
         {
             var md = new MessageDialog(message, title);
+            if (App.WindowHandle != IntPtr.Zero)
+            {
+                WinRT.Interop.InitializeWithWindow.Initialize(md, App.WindowHandle);
+            }
             _ = md.ShowAsync();
         }
         catch (Exception ex)

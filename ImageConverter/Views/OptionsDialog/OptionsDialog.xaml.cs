@@ -1,5 +1,5 @@
-﻿using Windows.UI.Xaml;
-using Windows.UI.Xaml.Controls;
+﻿using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 
 namespace ImageConverter.Views;
 
@@ -15,7 +15,11 @@ public sealed partial class OptionsDialog : ContentDialog
 
     public static void Show(OptionsViewModel viewModel)
     {
-        _ = (new OptionsDialog(viewModel)).ShowAsync();
+        var dialog = new OptionsDialog(viewModel)
+        {
+            XamlRoot = App.MainWindow?.Content?.XamlRoot
+        };
+        _ = dialog.ShowAsync();
     }
 
     public void Close()
@@ -26,7 +30,9 @@ public sealed partial class OptionsDialog : ContentDialog
 
     private void ContentDialog_Loaded(object sender, RoutedEventArgs e)
     {
-        Border b = (Border)this.GetTemplateChild("BackgroundElement");
-        b.Margin = new Thickness(40);
+        if (this.GetTemplateChild("BackgroundElement") is Border b)
+        {
+            b.Margin = new Thickness(40);
+        }
     }
 }
