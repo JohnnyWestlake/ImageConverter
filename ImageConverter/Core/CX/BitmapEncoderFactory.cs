@@ -68,7 +68,7 @@ public static class BitmapEncoderFactory
                 ? Path.GetFileNameWithoutExtension(sourceFile.Name)
                 : sourceFile.DisplayName;
 
-            await EncodeFramesAsync(decoder, result, defaultName, sourceFile.Path, settings, targetFolder).ConfigureAwait(false);
+            await EncodeFramesAsync(decoder, result, defaultName, sourceFile, settings, targetFolder).ConfigureAwait(false);
         }
         catch
         {
@@ -132,7 +132,7 @@ public static class BitmapEncoderFactory
         BitmapDecoder decoder,
         BitmapConversionResult result,
         string defaultName,
-        string sourceFilePath,
+        StorageFile sourceFile,
         BitmapConversionSettings settings,
         IStorageFolder targetFolder)
     {
@@ -141,7 +141,11 @@ public static class BitmapEncoderFactory
             ? 1u
             : decoder.FrameCount;
 
-        bool useWin32Target = !string.IsNullOrEmpty(targetFolder.Path);
+        string sourceFilePath = sourceFile.Path;
+        string targetFolderPath = !string.IsNullOrEmpty(targetFolder?.Path)
+            ? targetFolder.Path
+            : (!string.IsNullOrEmpty(sourceFilePath) ? Path.GetDirectoryName(sourceFilePath) : null);
+        bool useWin32Target = !string.IsNullOrEmpty(targetFolderPath);
 
         for (uint frameIndex = 0; frameIndex < frameCount; frameIndex++)
         {
@@ -154,7 +158,7 @@ public static class BitmapEncoderFactory
                 string createdFilePath = null;
                 try
                 {
-                    using (FileStream fileStream = CreateOutputFileStream(targetFolder.Path, baseName, frameSuffix, settings.FileExtension, settings.CollisionOption, out createdFilePath))
+                    using (FileStream fileStream = CreateOutputFileStream(targetFolderPath, baseName, frameSuffix, settings.FileExtension, settings.CollisionOption, out createdFilePath))
                     using (IRandomAccessStream outputStream = fileStream.AsRandomAccessStream())
                     {
                         await EncodeInternalAsync(decoder, frameIndex, outputStream, settings).ConfigureAwait(false);
@@ -185,6 +189,10 @@ public static class BitmapEncoderFactory
             }
             else
             {
+                targetFolder ??= await sourceFile.GetParentAsync().AsTask().ConfigureAwait(false);
+                if (targetFolder == null)
+                    throw new InvalidOperationException("Target folder unavailable.");
+
                 string fileName = $"{baseName}{frameSuffix}{settings.FileExtension}";
                 StorageFile outputFile = await targetFolder.CreateFileAsync(fileName, settings.CollisionOption).AsTask().ConfigureAwait(false);
                 try

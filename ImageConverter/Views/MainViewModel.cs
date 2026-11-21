@@ -27,7 +27,15 @@ public partial class MainViewModel : BindableBase
     public bool MultiframeSupport   { get => GetV(false); set => Set(value); }
     public bool HasSelectedItems    => SelectedFiles.Count > 0;
     public bool HasItems            => FileList.Count > 0;
-    public bool HasExportFolder     => ExportFolder != null;
+    public bool OutputToSourceFolder
+    {
+        get => GetV(false);
+        set => Set(value, nameof(OutputToSourceFolder), nameof(HasExportFolder), nameof(CanOpenExportFolder), nameof(OutputFolderDisplayText));
+    }
+
+    public bool HasExportFolder     => OutputToSourceFolder || ExportFolder != null;
+    public bool CanOpenExportFolder => !OutputToSourceFolder && ExportFolder != null;
+    public string OutputFolderDisplayText => OutputToSourceFolder ? "Source file folder" : (ExportFolder?.Path ?? "Click to choose");
     public bool HasOptions          => true;
 
     public string StatusBarLeft     { get => Get<string>(); private set => Set(value); }
@@ -36,7 +44,7 @@ public partial class MainViewModel : BindableBase
     public StorageFolder ExportFolder
     {
         get => Get<StorageFolder>();
-        private set => Set(value, nameof(ExportFolder), nameof(HasExportFolder));
+        private set => Set(value, nameof(ExportFolder), nameof(HasExportFolder), nameof(CanOpenExportFolder), nameof(OutputFolderDisplayText));
     }
 
     public ImageFormat SelectedFormat
@@ -142,7 +150,29 @@ public partial class MainViewModel : BindableBase
 
     internal void ProcessDroppedFiles(IReadOnlyList<IStorageItem> items)
     {
-        _ = ProcessAddFilesAsync(items.OfType<StorageFile>().ToList());
+        _ = ProcessDroppedItemsAsync(items);
+    }
+
+    async Task ProcessDroppedItemsAsync(IReadOnlyList<IStorageItem> items)
+    {
+        if (items == null || items.Count == 0)
+            return;
+
+        var collectedFiles = new List<StorageFile>();
+        foreach (var item in items)
+        {
+            if (item is StorageFile file)
+            {
+                collectedFiles.Add(file);
+            }
+            else if (item is StorageFolder folder)
+            {
+                var folderFiles = await folder.GetFilesAsync();
+                collectedFiles.AddRange(folderFiles);
+            }
+        }
+
+        await ProcessAddFilesAsync(collectedFiles);
     }
 
 
@@ -167,6 +197,7 @@ public partial class MainViewModel : BindableBase
         if (folder == null ||string.IsNullOrWhiteSpace(folder.Path))
             return;
 
+        OutputToSourceFolder = false;
         ExportFolder = folder;
     }
 
@@ -364,7 +395,7 @@ public partial class MainViewModel : BindableBase
         _transformViewModel.ApplyTo(options);
 
         int count = FileList.Count;
-        var result = await ImageConverterCore.ConvertAsync(FileList.ToList(), ExportFolder, options, completed =>
+        var result = await ImageConverterCore.ConvertAsync(FileList.ToList(), OutputToSourceFolder ? null : ExportFolder, options, completed =>
         {
             ConvertIndex = completed - 1;
             StatusBarRight = $"Converting {completed} of {count}...";

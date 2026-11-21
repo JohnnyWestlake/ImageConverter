@@ -624,12 +624,12 @@
                                     HorizontalContentAlignment="Left"
                                     AllowDrop="False"
                                     Click="{x:Bind ViewModel.DestinationClick}"
-                                    Content="{x:Bind ViewModel.ExportFolder.Path, FallbackValue='Click to choose', TargetNullValue='Click to choose', Mode=OneWay}"
+                                    Content="{x:Bind ViewModel.OutputFolderDisplayText, Mode=OneWay}"
                                     CornerRadius="2 0 0 2"
                                     DragOver="Output_DragOver"
                                     Drop="Output_Drop"
                                     IsEnabled="{x:Bind False(ViewModel.IsBusy), Mode=OneWay}"
-                                    ToolTipService.ToolTip="{x:Bind ViewModel.ExportFolder.Path, FallbackValue='Click to choose', TargetNullValue='Click to choose', Mode=OneWay}" />
+                                    ToolTipService.ToolTip="{x:Bind ViewModel.OutputFolderDisplayText, Mode=OneWay}" />
 
                             <Button x:Name="SecondaryButton"
                                     Grid.Column="1"
@@ -644,9 +644,13 @@
                                     IsTextScaleFactorEnabled="False">
                                 <Button.Flyout>
                                     <MenuFlyout Placement="Bottom">
+                                        <ToggleMenuFlyoutItem FontSize="{StaticResource DefaultFontSize}"
+                                                              IsChecked="{x:Bind ViewModel.OutputToSourceFolder, Mode=TwoWay}"
+                                                              Text="Output to folder of source file" />
+                                        <MenuFlyoutSeparator />
                                         <MenuFlyoutItem Click="{x:Bind ViewModel.OpenExportFolderClick}"
                                                         FontSize="{StaticResource DefaultFontSize}"
-                                                        IsEnabled="{x:Bind ViewModel.HasExportFolder, Mode=OneWay}"
+                                                        IsEnabled="{x:Bind ViewModel.CanOpenExportFolder, Mode=OneWay}"
                                                         Text="Open in File Explorer" />
                                         <MenuFlyoutSubItem FontSize="{StaticResource DefaultFontSize}" Text="Output Folder File Options">
                                             <ToggleMenuFlyoutItem FontSize="{StaticResource DefaultFontSize}"
