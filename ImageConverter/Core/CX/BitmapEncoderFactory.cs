@@ -68,7 +68,7 @@ public static class BitmapEncoderFactory
                 ? Path.GetFileNameWithoutExtension(sourceFile.Name)
                 : sourceFile.DisplayName;
 
-            await EncodeFramesAsync(decoder, result, defaultName, settings, targetFolder).ConfigureAwait(false);
+            await EncodeFramesAsync(decoder, result, defaultName, sourceFile.Path, settings, targetFolder).ConfigureAwait(false);
         }
         catch
         {
@@ -132,6 +132,7 @@ public static class BitmapEncoderFactory
         BitmapDecoder decoder,
         BitmapConversionResult result,
         string defaultName,
+        string sourceFilePath,
         BitmapConversionSettings settings,
         IStorageFolder targetFolder)
     {
@@ -153,11 +154,25 @@ public static class BitmapEncoderFactory
                 string createdFilePath = null;
                 try
                 {
-                    using FileStream fileStream = CreateOutputFileStream(targetFolder.Path, baseName, frameSuffix, settings.FileExtension, settings.CollisionOption, out createdFilePath);
-                    using IRandomAccessStream outputStream = fileStream.AsRandomAccessStream();
-                    await EncodeInternalAsync(decoder, frameIndex, outputStream, settings).ConfigureAwait(false);
-                    result.ResultFileSize += outputStream.Size;
-                    result.Success = true;
+                    using (FileStream fileStream = CreateOutputFileStream(targetFolder.Path, baseName, frameSuffix, settings.FileExtension, settings.CollisionOption, out createdFilePath))
+                    using (IRandomAccessStream outputStream = fileStream.AsRandomAccessStream())
+                    {
+                        await EncodeInternalAsync(decoder, frameIndex, outputStream, settings).ConfigureAwait(false);
+                        result.ResultFileSize += outputStream.Size;
+                        result.Success = true;
+                    }
+
+                    if (settings.CopyMetadata && !string.IsNullOrEmpty(sourceFilePath) && !string.IsNullOrEmpty(createdFilePath))
+                    {
+                        try
+                        {
+                            File.SetCreationTimeUtc(createdFilePath, File.GetCreationTimeUtc(sourceFilePath));
+                            File.SetLastWriteTimeUtc(createdFilePath, File.GetLastWriteTimeUtc(sourceFilePath));
+                        }
+                        catch
+                        {
+                        }
+                    }
                 }
                 catch
                 {
