@@ -24,7 +24,7 @@ public partial class MainViewModel : BindableBase
     public bool IsProcessing        { get => GetV(false); private set => Set(value); }
     public bool IsOverwrite         { get => GetV(false); set => Set(value); }
     public bool CopyMetadata        { get => GetV(true); set => Set(value); }
-    public bool MultiframeSupport   { get => GetV(true); set => Set(value); }
+    public bool MultiframeSupport   { get => GetV(false); set => Set(value); }
     public bool HasSelectedItems    => SelectedFiles.Count > 0;
     public bool HasItems            => FileList.Count > 0;
     public bool HasExportFolder     => ExportFolder != null;
