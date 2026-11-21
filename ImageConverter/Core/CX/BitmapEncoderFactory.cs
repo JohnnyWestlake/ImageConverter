@@ -13,7 +13,9 @@ public static class BitmapEncoderFactory
     {
         var result = new BitmapConversionResult();
 
-        using IRandomAccessStream inputStream = await sourceFile.OpenAsync(FileAccessMode.Read).AsTask().ConfigureAwait(false);
+        using IRandomAccessStream inputStream = !string.IsNullOrEmpty(sourceFile.Path)
+            ? new FileStream(sourceFile.Path, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, FileOptions.SequentialScan | FileOptions.Asynchronous).AsRandomAccessStream()
+            : await sourceFile.OpenAsync(FileAccessMode.Read).AsTask().ConfigureAwait(false);
 
         BitmapDecoder decoder;
         try
@@ -28,7 +30,11 @@ public static class BitmapEncoderFactory
 
         try
         {
-            await EncodeFramesAsync(decoder, result, sourceFile.DisplayName, settings, targetFolder).ConfigureAwait(false);
+            string defaultName = !string.IsNullOrEmpty(sourceFile.Name)
+                ? Path.GetFileNameWithoutExtension(sourceFile.Name)
+                : sourceFile.DisplayName;
+
+            await EncodeFramesAsync(decoder, result, defaultName, settings, targetFolder).ConfigureAwait(false);
         }
         catch
         {
@@ -100,21 +106,74 @@ public static class BitmapEncoderFactory
             ? 1u
             : decoder.FrameCount;
 
+        bool useWin32Target = !string.IsNullOrEmpty(targetFolder.Path);
+
         for (uint frameIndex = 0; frameIndex < frameCount; frameIndex++)
         {
-            string fileName = (decoder.FrameCount > 1 && settings.FrameHandling == BitmapFrameHandling.ExtractAllSeperately)
-                ? $"{baseName} {frameIndex}{settings.FileExtension}"
-                : $"{baseName}{settings.FileExtension}";
+            string frameSuffix = (decoder.FrameCount > 1 && settings.FrameHandling == BitmapFrameHandling.ExtractAllSeperately)
+                ? $" {frameIndex}"
+                : string.Empty;
 
-            StorageFile outputFile = await targetFolder.CreateFileAsync(fileName, settings.CollisionOption).AsTask().ConfigureAwait(false);
-            using (IRandomAccessStream outputStream = await outputFile.OpenAsync(FileAccessMode.ReadWrite).AsTask().ConfigureAwait(false))
+            if (useWin32Target)
             {
+                using FileStream fileStream = CreateOutputFileStream(targetFolder.Path, baseName, frameSuffix, settings.FileExtension, settings.CollisionOption);
+                using IRandomAccessStream outputStream = fileStream.AsRandomAccessStream();
                 await EncodeInternalAsync(decoder, frameIndex, outputStream, settings).ConfigureAwait(false);
+                result.ResultFileSize += outputStream.Size;
+                result.Success = true;
             }
+            else
+            {
+                string fileName = $"{baseName}{frameSuffix}{settings.FileExtension}";
+                StorageFile outputFile = await targetFolder.CreateFileAsync(fileName, settings.CollisionOption).AsTask().ConfigureAwait(false);
+                using IRandomAccessStream outputStream = await outputFile.OpenAsync(FileAccessMode.ReadWrite).AsTask().ConfigureAwait(false);
+                await EncodeInternalAsync(decoder, frameIndex, outputStream, settings).ConfigureAwait(false);
+                result.ResultFileSize += outputStream.Size;
+                result.Success = true;
+            }
+        }
+    }
 
-            var properties = await outputFile.GetBasicPropertiesAsync().AsTask().ConfigureAwait(false);
-            result.ResultFileSize += properties.Size;
-            result.Success = true;
+    private static FileStream CreateOutputFileStream(
+        string folderPath,
+        string baseName,
+        string frameSuffix,
+        string extension,
+        CreationCollisionOption collisionOption)
+    {
+        string basePath = Path.Combine(folderPath, $"{baseName}{frameSuffix}{extension}");
+
+        switch (collisionOption)
+        {
+            case CreationCollisionOption.ReplaceExisting:
+                return new FileStream(basePath, FileMode.Create, FileAccess.ReadWrite, FileShare.None, 4096, FileOptions.Asynchronous);
+
+            case CreationCollisionOption.GenerateUniqueName:
+                try
+                {
+                    return new FileStream(basePath, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None, 4096, FileOptions.Asynchronous);
+                }
+                catch (IOException) when (File.Exists(basePath))
+                {
+                    for (int i = 1; ; i++)
+                    {
+                        string candidate = Path.Combine(folderPath, $"{baseName}{frameSuffix} ({i}){extension}");
+                        try
+                        {
+                            return new FileStream(candidate, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None, 4096, FileOptions.Asynchronous);
+                        }
+                        catch (IOException) when (File.Exists(candidate))
+                        {
+                        }
+                    }
+                }
+
+            case CreationCollisionOption.OpenIfExists:
+                return new FileStream(basePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 4096, FileOptions.Asynchronous);
+
+            case CreationCollisionOption.FailIfExists:
+            default:
+                return new FileStream(basePath, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None, 4096, FileOptions.Asynchronous);
         }
     }
 
@@ -163,20 +222,11 @@ public static class BitmapEncoderFactory
         await encoder.FlushAsync().AsTask().ConfigureAwait(false);
     }
 
-    private static async Task<BitmapEncoder> CreateEncoderAsync(
+    private static Task<BitmapEncoder> CreateEncoderAsync(
         IRandomAccessStream stream,
         BitmapConversionSettings settings)
     {
-        var map = new Dictionary<string, BitmapTypedValue>();
-        if (settings.Options != null)
-        {
-            foreach (BitmapOption option in settings.Options)
-            {
-                map[option.Name] = option.Value;
-            }
-        }
-
-        return await BitmapEncoder.CreateAsync(settings.EncoderId, stream, map).AsTask().ConfigureAwait(false);
+        return BitmapEncoder.CreateAsync(settings.EncoderId, stream, settings.GetEncoderOptionsMap()).AsTask();
     }
 
     private static async Task<bool> HandleMetadataAsync(
@@ -189,6 +239,12 @@ public static class BitmapEncoderFactory
 
         Guid decodeCodecId = decoder.DecoderInformation.CodecId;
         Guid encodeCodecId = encoder.EncoderInformation.CodecId;
+
+        if ((!IsJpegCodec(decodeCodecId) && !IsIfdBasedCodec(decodeCodecId)) ||
+            (!IsJpegCodec(encodeCodecId) && !IsIfdBasedCodec(encodeCodecId)))
+        {
+            return false;
+        }
 
         bool ifd = await TryCopyMetadataSetAsync(decoder, encoder, GetIFDPath(decodeCodecId), GetIFDPath(encodeCodecId)).ConfigureAwait(false);
         bool exif = await TryCopyMetadataSetAsync(decoder, encoder, GetExifPath(decodeCodecId), GetExifPath(encodeCodecId)).ConfigureAwait(false);

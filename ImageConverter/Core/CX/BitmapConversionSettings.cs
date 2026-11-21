@@ -38,7 +38,36 @@ public sealed class BitmapConversionSettings
 
     public BitmapInterpolationMode Interpolation { get; set; }
 
-    public IReadOnlyList<BitmapOption> Options { get; set; }
+    private IReadOnlyList<BitmapOption> _options;
+    private Dictionary<string, BitmapTypedValue> _cachedOptionsMap;
+
+    public IReadOnlyList<BitmapOption> Options
+    {
+        get => _options;
+        set
+        {
+            _options = value;
+            _cachedOptionsMap = null;
+        }
+    }
+
+    internal IDictionary<string, BitmapTypedValue> GetEncoderOptionsMap()
+    {
+        if (_cachedOptionsMap is not null)
+            return _cachedOptionsMap;
+
+        var map = new Dictionary<string, BitmapTypedValue>();
+        if (_options is not null)
+        {
+            foreach (BitmapOption option in _options)
+            {
+                map[option.Name] = option.Value;
+            }
+        }
+
+        _cachedOptionsMap = map;
+        return map;
+    }
 
     public CreationCollisionOption CollisionOption { get; set; }
 }
