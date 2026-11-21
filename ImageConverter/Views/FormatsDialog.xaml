@@ -98,9 +98,9 @@
                         <TextBlock VerticalAlignment="Center"
                                    Foreground="White"
                                    TextWrapping="Wrap">
-                            <Run Text="To convert WebP files, you need the" />
+                            <Run Text="To convert from WebP files (input only), you need the" />
                             <Hyperlink Foreground="White" NavigateUri="{x:Bind cx:CodecSupport.WebPImageExtensionsWebLink}">WebP Image Extensions from the Microsoft Store.</Hyperlink>
-                            <Run Text="Restart the app after installing." />
+                            <Run Text="Windows does not include a built-in WebP encoder for output. Restart the app after installing." />
                         </TextBlock>
                     </common:InfoBar>
 
