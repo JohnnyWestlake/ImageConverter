@@ -6,6 +6,40 @@ namespace ImageConverter.Core.CX;
 
 public static class BitmapEncoderFactory
 {
+    private static readonly string[] s_commonMetadataProperties =
+    [
+        "System.Photo.DateTaken",
+        "System.Photo.CameraManufacturer",
+        "System.Photo.CameraModel",
+        "System.Photo.FNumber",
+        "System.Photo.ExposureTime",
+        "System.Photo.ISOSpeed",
+        "System.Photo.FocalLength",
+        "System.Photo.FocalLengthInFilm",
+        "System.Photo.Flash",
+        "System.Photo.ExposureBias",
+        "System.Photo.ExposureProgram",
+        "System.Photo.MeteringMode",
+        "System.Photo.WhiteBalance",
+        "System.Photo.LensManufacturer",
+        "System.Photo.LensModel",
+        "System.GPS.LatitudeNumerator",
+        "System.GPS.LatitudeDenominator",
+        "System.GPS.LatitudeRef",
+        "System.GPS.LongitudeNumerator",
+        "System.GPS.LongitudeDenominator",
+        "System.GPS.LongitudeRef",
+        "System.GPS.AltitudeNumerator",
+        "System.GPS.AltitudeDenominator",
+        "System.GPS.AltitudeRef",
+        "System.ApplicationName",
+        "System.Author",
+        "System.Comment",
+        "System.Copyright",
+        "System.Title",
+        "System.Subject",
+        "System.Rating"
+    ];
     public static async Task<BitmapConversionResult> EncodeAsync(
         StorageFile sourceFile,
         IStorageFolder targetFolder,
@@ -277,18 +311,90 @@ public static class BitmapEncoderFactory
         Guid decodeCodecId = decoder.DecoderInformation.CodecId;
         Guid encodeCodecId = encoder.EncoderInformation.CodecId;
 
-        if ((!IsJpegCodec(decodeCodecId) && !IsIfdBasedCodec(decodeCodecId)) ||
-            (!IsJpegCodec(encodeCodecId) && !IsIfdBasedCodec(encodeCodecId)))
+        bool ifd = false;
+        bool exif = false;
+        bool xmp = false;
+        bool gps = false;
+
+        if ((IsJpegCodec(decodeCodecId) || IsIfdBasedCodec(decodeCodecId)) &&
+            (IsJpegCodec(encodeCodecId) || IsIfdBasedCodec(encodeCodecId)))
         {
-            return false;
+            ifd = await TryCopyMetadataSetAsync(decoder, encoder, GetIFDPath(decodeCodecId), GetIFDPath(encodeCodecId)).ConfigureAwait(false);
+            exif = await TryCopyMetadataSetAsync(decoder, encoder, GetExifPath(decodeCodecId), GetExifPath(encodeCodecId)).ConfigureAwait(false);
+            xmp = await TryCopyMetadataSetAsync(decoder, encoder, GetXMPPath(decodeCodecId), GetXMPPath(encodeCodecId)).ConfigureAwait(false);
+            gps = await TryCopyMetadataSetAsync(decoder, encoder, GetGPSPath(decodeCodecId), GetGPSPath(encodeCodecId)).ConfigureAwait(false);
         }
 
-        bool ifd = await TryCopyMetadataSetAsync(decoder, encoder, GetIFDPath(decodeCodecId), GetIFDPath(encodeCodecId)).ConfigureAwait(false);
-        bool exif = await TryCopyMetadataSetAsync(decoder, encoder, GetExifPath(decodeCodecId), GetExifPath(encodeCodecId)).ConfigureAwait(false);
-        bool xmp = await TryCopyMetadataSetAsync(decoder, encoder, GetXMPPath(decodeCodecId), GetXMPPath(encodeCodecId)).ConfigureAwait(false);
-        bool gps = await TryCopyMetadataSetAsync(decoder, encoder, GetGPSPath(decodeCodecId), GetGPSPath(encodeCodecId)).ConfigureAwait(false);
+        bool fallback = false;
+        if (!ifd || !exif || !gps)
+        {
+            fallback = await TryCopyFallbackPropertiesAsync(decoder, encoder).ConfigureAwait(false);
+        }
 
-        return ifd || exif || xmp || gps;
+        try
+        {
+            var orientationMap = new Dictionary<string, BitmapTypedValue>
+            {
+                ["System.Photo.Orientation"] = new BitmapTypedValue((ushort)1, Windows.Foundation.PropertyType.UInt16)
+            };
+            await encoder.BitmapProperties.SetPropertiesAsync(orientationMap).AsTask().ConfigureAwait(false);
+        }
+        catch
+        {
+        }
+
+        return ifd || exif || xmp || gps || fallback;
+    }
+
+    private static async Task<bool> TryCopyFallbackPropertiesAsync(
+        BitmapDecoder decoder,
+        BitmapEncoder encoder)
+    {
+        BitmapPropertySet props;
+        try
+        {
+            props = await decoder.BitmapProperties.GetPropertiesAsync(s_commonMetadataProperties).AsTask().ConfigureAwait(false);
+        }
+        catch
+        {
+            props = new BitmapPropertySet();
+            foreach (string key in s_commonMetadataProperties)
+            {
+                try
+                {
+                    BitmapPropertySet single = await decoder.BitmapProperties.GetPropertiesAsync(new[] { key }).AsTask().ConfigureAwait(false);
+                    if (single.TryGetValue(key, out BitmapTypedValue val))
+                    {
+                        props[key] = val;
+                    }
+                }
+                catch
+                {
+                }
+            }
+        }
+
+        if (props == null || props.Count == 0)
+            return false;
+
+        bool anyCopied = false;
+        foreach (var kvp in props)
+        {
+            try
+            {
+                var singleMap = new Dictionary<string, BitmapTypedValue>
+                {
+                    [kvp.Key] = kvp.Value
+                };
+                await encoder.BitmapProperties.SetPropertiesAsync(singleMap).AsTask().ConfigureAwait(false);
+                anyCopied = true;
+            }
+            catch
+            {
+            }
+        }
+
+        return anyCopied;
     }
 
     private static async Task<bool> TryCopyMetadataSetAsync(
@@ -335,7 +441,7 @@ public static class BitmapEncoderFactory
         id == BitmapDecoder.TiffDecoderId || id == BitmapDecoder.JpegXRDecoderId ||
         id == BitmapEncoder.TiffEncoderId || id == BitmapEncoder.JpegXREncoderId ||
         id == BitmapEncoder.HeifEncoderId || id == BitmapDecoder.HeifDecoderId ||
-        id == BitmapDecoder.WebpDecoderId;
+        id == BitmapDecoder.WebpDecoderId || id == CodecSupport.RAWImageExtensionsDecoderID;
 
     private static string GetExifPath(Guid id) =>
         IsJpegCodec(id) ? "/app1/ifd/exif" :
