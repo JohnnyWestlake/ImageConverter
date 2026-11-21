@@ -1,4 +1,5 @@
 ﻿using ImageConverter.Common;
+using System.Buffers;
 using System.Collections.ObjectModel;
 using System.Text;
 using Windows.Graphics.Imaging;
@@ -127,7 +128,6 @@ public partial class MainViewModel : BindableBase
         FileList.Clear();
         UpdateStatusText();
         ResetProgress();
-        GC.Collect();
     }
 
     public void ConvertClick()
@@ -215,10 +215,15 @@ public partial class MainViewModel : BindableBase
 
         List<StorageFile> heifImageSequence = new List<StorageFile>();
 
+        var existingPaths = new HashSet<string>(
+            FileList.Select(f => f.File.Path).Where(p => !string.IsNullOrEmpty(p)),
+            StringComparer.OrdinalIgnoreCase);
+
         List<StorageFile> _tooAdd = new List<StorageFile>();
         foreach (var file in files)
         {
-            if (!ImageConverterCore.SupportedDecodeFileTypes.Contains(file.FileType.ToLower()))
+            string fileType = file.FileType.ToLowerInvariant();
+            if (!ImageConverterCore.SupportedDecodeFileTypes.Contains(fileType))
                 continue;
 
             if (file.Attributes.HasFlag(Windows.Storage.FileAttributes.LocallyIncomplete))
@@ -228,25 +233,16 @@ public partial class MainViewModel : BindableBase
             }
 
             // We don't allow HEIC image sequences right now.
-            if (file.FileType == ".heic" || file.FileType == ".heif")
+            if (fileType is ".heic" or ".heif")
             {
-                using Stream s = await file.OpenStreamForReadAsync();
-                using StreamReader r = new StreamReader(s, Encoding.ASCII);
-                if (s.Length > 2048)
+                if (await IsHeifImageSequenceAsync(file))
                 {
-                    char[] buffer = new char[2048];
-                    r.Read(buffer, 0, 2048);
-
-                    var str = new String(buffer.Where(c => char.IsLetter(c)).ToArray());
-                    if (str.Contains("ImageSequencePictureHandler") || str.Contains("Derivedimage"))
-                    {
-                        heifImageSequence.Add(file);
-                        continue;
-                    }
+                    heifImageSequence.Add(file);
+                    continue;
                 }
             }
 
-            if (!FileList.Any(f => f.File.Path == file.Path))
+            if (string.IsNullOrEmpty(file.Path) || existingPaths.Add(file.Path))
             {
                 _tooAdd.Add(file);
             }
@@ -298,6 +294,55 @@ public partial class MainViewModel : BindableBase
         }
     }
 
+    private static async Task<bool> IsHeifImageSequenceAsync(StorageFile file)
+    {
+        using Stream s = !string.IsNullOrEmpty(file.Path)
+            ? new FileStream(file.Path, FileMode.Open, FileAccess.Read, FileShare.Read, 2048, FileOptions.SequentialScan | FileOptions.Asynchronous)
+            : await file.OpenStreamForReadAsync();
+
+        if (s.Length <= 2048)
+            return false;
+
+        byte[] buffer = ArrayPool<byte>.Shared.Rent(2048);
+        try
+        {
+            int totalRead = 0;
+            while (totalRead < 2048)
+            {
+                int read = await s.ReadAsync(buffer.AsMemory(totalRead, 2048 - totalRead)).ConfigureAwait(false);
+                if (read == 0)
+                    break;
+                totalRead += read;
+            }
+
+            char[] chars = ArrayPool<char>.Shared.Rent(totalRead);
+            try
+            {
+                int charCount = 0;
+                for (int i = 0; i < totalRead; i++)
+                {
+                    char c = (char)buffer[i];
+                    if (char.IsAsciiLetter(c))
+                    {
+                        chars[charCount++] = c;
+                    }
+                }
+
+                ReadOnlySpan<char> span = chars.AsSpan(0, charCount);
+                return span.Contains("ImageSequencePictureHandler", StringComparison.Ordinal)
+                    || span.Contains("Derivedimage", StringComparison.Ordinal);
+            }
+            finally
+            {
+                ArrayPool<char>.Shared.Return(chars);
+            }
+        }
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(buffer);
+        }
+    }
+
     async Task ConvertAsync()
     {
         if (FileList.Count == 0)
@@ -319,10 +364,10 @@ public partial class MainViewModel : BindableBase
         _transformViewModel.ApplyTo(options);
 
         int count = FileList.Count;
-        var result = await ImageConverterCore.ConvertAsync(FileList.ToList(), ExportFolder, options, i =>
+        var result = await ImageConverterCore.ConvertAsync(FileList.ToList(), ExportFolder, options, completed =>
         {
-            ConvertIndex = i - 1;
-            StatusBarRight = $"Converting {i} of {count}...";
+            ConvertIndex = completed - 1;
+            StatusBarRight = $"Converting {completed} of {count}...";
         });
 
         if (result.Width > 0 && result.Height == 0)
@@ -341,11 +386,17 @@ public partial class MainViewModel : BindableBase
         var files = SelectedFiles.ToList();
         SelectedFiles.Clear();
 
-        foreach (var file in files.Cast<ImageViewModel>())
-            FileList.Remove(file);
+        if (files.Count == FileList.Count)
+        {
+            FileList.Clear();
+        }
+        else
+        {
+            foreach (var file in files.Cast<ImageViewModel>())
+                FileList.Remove(file);
+        }
 
         UpdateStatusText();
         ResetProgress();
-        GC.Collect();
     }
 }

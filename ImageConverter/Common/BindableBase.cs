@@ -1,4 +1,7 @@
-﻿namespace ImageConverter;
+﻿using System.Collections.Concurrent;
+using System.Threading;
+
+namespace ImageConverter;
 
 /// <summary>
 /// Implementation of <see cref="INotifyPropertyChanged"/> to simplify models.
@@ -12,9 +15,9 @@ public partial class BindableBase : INotifyPropertyChanged, IDisposable
     /// Private data store that contains all of the properties access through GetProperty 
     /// method.
     /// </summary>
-    //readonly ConcurrentDictionary<String, Object> data = new ConcurrentDictionary<String, Object>();
-    private Dictionary<String, Object> __data_Store;
-    private Dictionary<String, Object> _data => __data_Store ??= [];
+    private ConcurrentDictionary<String, Object> __data_Store;
+    private ConcurrentDictionary<String, Object> _data =>
+        __data_Store ?? Interlocked.CompareExchange(ref __data_Store, new ConcurrentDictionary<String, Object>(), null) ?? __data_Store;
 
     /// <summary>
     /// When overridden, allows you to specify whether all standard SetProperty calls
@@ -228,10 +231,9 @@ public partial class BindableBase : INotifyPropertyChanged, IDisposable
     /// <param name="name"></param>
     protected void ResetValue(String name)
     {
-        if (_data.ContainsKey(name))
+        if (_data.TryRemove(name, out _))
         {
-            if (_data.Remove(name))
-                this.OnPropertyChanged(name);
+            this.OnPropertyChanged(name);
         }
     }
 

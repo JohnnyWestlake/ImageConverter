@@ -29,7 +29,6 @@ public sealed partial class MainPage : Page
         UdpateTitleBar();
 
         ViewModel = new MainViewModel();
-        ViewModel.PropertyChanged += ViewModel_PropertyChanged;
         SetThemeShadow(InputBackground, 40, OutputBackground);
     }
 
@@ -59,15 +58,6 @@ public sealed partial class MainPage : Page
             }
         }
         catch { }
-    }
-
-    private void ViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName == nameof(ViewModel.ConvertIndex))
-        {
-            FilesList.ScrollIntoView(
-                FilesList.Items[ViewModel.ConvertIndex], ScrollIntoViewAlignment.Default);
-        }
     }
 
     private void Output_DragOver(object sender, Microsoft.UI.Xaml.DragEventArgs e)
