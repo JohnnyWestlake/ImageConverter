@@ -15,6 +15,8 @@ public sealed partial class CodecSupport
 
     public bool HasRAWImageExtensions { get; set; }
 
+    public bool HasAV1VideoExtensions { get; set; }
+
     public bool IsMissingExtensions { get; set; }
 
     /// <summary>
@@ -32,11 +34,15 @@ public sealed partial class CodecSupport
 
     public static Uri RAWImageExtensionsStoreLink { get; } = new Uri("ms-windows-store://pdp/?ProductId=9nctdw2w1bh8");
 
+    public static Uri AV1VideoExtensionsStoreLink { get; } = new Uri("ms-windows-store://pdp/?ProductId=9mvzqvxjbq9v");
+
     public static Uri HEIFImageExtensionsWebLink { get; } = new Uri("https://www.microsoft.com/store/apps/9pmmsr1cgpwg");
 
     public static Uri WebPImageExtensionsWebLink { get; } = new Uri("https://www.microsoft.com/store/apps/9pg2dk419drg");
 
     public static Uri RAWImageExtensionsWebLink { get; } = new Uri("https://www.microsoft.com/store/apps/9nctdw2w1bh8");
+
+    public static Uri AV1VideoExtensionsWebLink { get; } = new Uri("https://www.microsoft.com/store/apps/9mvzqvxjbq9v");
 
     public static CodecSupport CreateSummary()
     {
@@ -52,9 +58,12 @@ public sealed partial class CodecSupport
                 summary.HasWebPImageExtensions = true;
             else if (info.CodecId == RAWImageExtensionsDecoderID)
                 summary.HasRAWImageExtensions = true;
+
+            if (info.FileExtensions.Any(e => string.Equals(e, ".avif", StringComparison.OrdinalIgnoreCase)))
+                summary.HasAV1VideoExtensions = true;
         }
 
-        if (!summary.HasHEIFImageExtensions || !summary.HasWebPImageExtensions || !summary.HasRAWImageExtensions)
+        if (!summary.HasHEIFImageExtensions || !summary.HasWebPImageExtensions || !summary.HasRAWImageExtensions || !summary.HasAV1VideoExtensions)
             summary.IsMissingExtensions = true;
 
         return summary;

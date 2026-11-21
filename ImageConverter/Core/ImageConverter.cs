@@ -92,6 +92,11 @@ public static class ImageConverterCore
                                                     .Distinct()
                                                     .Select(e => e.ToLower())
                                                     .ToHashSet();
+
+            if (decodeFormats.Any(f => f.CodecInfo.CodecId == BitmapDecoder.HeifDecoderId))
+            {
+                SupportedDecodeFileTypes.Add(".avif");
+            }
         }
 
         /* Creates a list of output formats (for store listings) */

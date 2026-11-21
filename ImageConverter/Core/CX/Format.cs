@@ -11,6 +11,7 @@ public enum Format
     Tiff,
     Dds,
     Heif,
+    Avif,
     WebP,
     RAW
 }
