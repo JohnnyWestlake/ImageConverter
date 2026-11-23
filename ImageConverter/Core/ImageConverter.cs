@@ -1,4 +1,5 @@
-﻿using ImageConverter.Core;
+﻿using System.Threading;
+using ImageConverter.Core;
 using ImageConverter.Core.CX;
 
 using Windows.Graphics.Imaging;
@@ -73,8 +74,6 @@ public static class ImageConverterCore
 
     public static List<ImageFormat> GetSupportedEncodingImageFormats()
     {
-        CodecSupport summary = CodecSupport.CreateSummary();
-
         List<ImageFormat> decodeFormats = BitmapDecoder.GetDecoderInformationEnumerator()
                                                        .Select(e => new ImageFormat(e))
                                                        .ToList();
@@ -93,6 +92,11 @@ public static class ImageConverterCore
                                                     .Distinct()
                                                     .Select(e => e.ToLower())
                                                     .ToHashSet();
+
+            if (decodeFormats.Any(f => f.CodecInfo.CodecId == BitmapDecoder.HeifDecoderId))
+            {
+                SupportedDecodeFileTypes.Add(".avif");
+            }
         }
 
         /* Creates a list of output formats (for store listings) */
@@ -114,44 +118,50 @@ public static class ImageConverterCore
             image.Status = image.ExtendedStatus = null;
         }
 
-        uint success = 0;
-        uint fail = 0;
+        int success = 0;
+        int fail = 0;
+        int completed = 0;
 
-        int i = 1;
-        foreach (var image in images)
+        var parallelOptions = new ParallelOptions
         {
-            progressCallback(i);
-            i++;
+            MaxDegreeOfParallelism = Math.Max(1, Environment.ProcessorCount)
+        };
+
+        await Parallel.ForEachAsync(images, parallelOptions, async (image, _) =>
+        {
             image.Status = "Converting...";
 
             try
             {
                 BitmapConversionResult result =
-                    await BitmapEncoderFactory.EncodeAsync(image.File, targetFolder, settings).AsTask().ConfigureAwait(false);
+                    await BitmapEncoderFactory.EncodeAsync(image.File, targetFolder, settings).ConfigureAwait(false);
 
                 if (result.Success)
                 {
                     image.Status = $"Converted ({result.ResultFileSize / 1024d / 1024d:0.00} MB)";
                     image.LastSuccess = true;
-                    success++;
+                    Interlocked.Increment(ref success);
                 }
                 else
                 {
                     image.Status = "Failed";
                     image.ExtendedStatus = result.Status;
                     image.LastSuccess = false;
-                    fail++;
+                    Interlocked.Increment(ref fail);
                 }
             }
             catch
             {
                 image.Status = "Failed";
                 image.ExtendedStatus = "Unspecified error";
-                fail++;
+                image.LastSuccess = false;
+                Interlocked.Increment(ref fail);
             }
-           
-        }
 
-        return new BitmapSize { Width = success, Height = fail };
+            int current = Interlocked.Increment(ref completed);
+            progressCallback?.Invoke(current);
+        }).ConfigureAwait(false);
+
+        return new BitmapSize { Width = (uint)success, Height = (uint)fail };
     }
 }

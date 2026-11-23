@@ -1,9 +1,9 @@
-﻿using Windows.UI.Xaml;
-using Windows.UI.Xaml.Controls;
+﻿using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 
 namespace ImageConverter.Common;
 
-public sealed class InfoBar : ContentControl
+public sealed partial class InfoBar : ContentControl
 {
     public FrameworkElement Icon
     {

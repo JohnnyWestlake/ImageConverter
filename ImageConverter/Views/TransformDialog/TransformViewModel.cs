@@ -1,6 +1,7 @@
 ﻿namespace ImageConverter.Views;
 
-public class TransformViewModel : BindableBase
+[WinRT.GeneratedBindableCustomProperty]
+public partial class TransformViewModel : BindableBase
 {
     public bool ConstrainWidth { get => GetV(false); set => Set(value); }
     public bool ConstrainHeight { get => GetV(false); set => Set(value); }

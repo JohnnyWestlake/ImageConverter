@@ -1,5 +1,5 @@
-﻿using Windows.UI.Xaml;
-using Windows.UI.Xaml.Controls;
+﻿using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 
 namespace ImageConverter.Views;
 
@@ -15,7 +15,11 @@ public sealed partial class TransformDialog : ContentDialog
 
     public static void Show(TransformViewModel viewModel)
     {
-        _ = (new TransformDialog(viewModel)).ShowAsync();
+        var dialog = new TransformDialog(viewModel)
+        {
+            XamlRoot = App.MainWindow?.Content?.XamlRoot
+        };
+        _ = dialog.ShowAsync();
     }
 
     public void Close()
@@ -26,8 +30,10 @@ public sealed partial class TransformDialog : ContentDialog
 
     private void ContentDialog_Loaded(object sender, RoutedEventArgs e)
     {
-        Border b = (Border)this.GetTemplateChild("BackgroundElement");
-        b.Margin = new Thickness(40);
+        if (this.GetTemplateChild("BackgroundElement") is Border b)
+        {
+            b.Margin = new Thickness(40);
+        }
     }
 
     private void TextBox_BeforeTextChanging(TextBox sender, TextBoxBeforeTextChangingEventArgs args)

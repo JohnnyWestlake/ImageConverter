@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" xmlns:desktop4="http://schemas.microsoft.com/appx/manifest/desktop/windows10/4" IgnorableNamespaces="uap mp">
+<Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" xmlns:desktop4="http://schemas.microsoft.com/appx/manifest/desktop/windows10/4" xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities" IgnorableNamespaces="uap mp rescap">
   <Identity Name="24532JohnnyWestlake.ImageConverter" Publisher="CN=BE189D46-7049-4D63-A83F-813D95941DC4" Version="2.5.2.0" />
   <mp:PhoneIdentity PhoneProductId="37f2ebd8-7be1-4043-9218-4ce51585695c" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
@@ -8,13 +8,13 @@
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
   <Dependencies>
-    <TargetDeviceFamily Name="Windows.Universal" MinVersion="10.0.0.0" MaxVersionTested="10.0.0.0" />
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0" MaxVersionTested="10.0.28000.0" />
   </Dependencies>
   <Resources>
     <Resource Language="x-generate" />
   </Resources>
   <Applications>
-    <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="ImageConverter.App" desktop4:SupportsMultipleInstances="true">
+    <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="$targetentrypoint$" desktop4:SupportsMultipleInstances="true">
       <uap:VisualElements DisplayName="Image Converter" Square150x150Logo="Assets\Square150x150Logo.png" Square44x44Logo="Assets\Square44x44Logo.png" Description="ImageConverter" BackgroundColor="transparent">
         <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" ShortName="Image Converter" Square310x310Logo="Assets\LargeTile.png" Square71x71Logo="Assets\SmallTile.png">
           <uap:ShowNameOnTiles>
@@ -25,9 +25,37 @@
         </uap:DefaultTile>
         <uap:SplashScreen Image="Assets\SplashScreen.png" BackgroundColor="black" a:Optional="true" xmlns:a="http://schemas.microsoft.com/appx/manifest/uap/windows10/5" />
       </uap:VisualElements>
+      <Extensions>
+        <uap:Extension Category="windows.fileTypeAssociation">
+          <uap:FileTypeAssociation Name="imageconverter.files">
+            <uap:DisplayName>Image File</uap:DisplayName>
+            <uap:SupportedFileTypes>
+              <uap:FileType>.jpg</uap:FileType>
+              <uap:FileType>.jpeg</uap:FileType>
+              <uap:FileType>.png</uap:FileType>
+              <uap:FileType>.bmp</uap:FileType>
+              <uap:FileType>.gif</uap:FileType>
+              <uap:FileType>.tif</uap:FileType>
+              <uap:FileType>.tiff</uap:FileType>
+              <uap:FileType>.jxr</uap:FileType>
+              <uap:FileType>.wdp</uap:FileType>
+              <uap:FileType>.dds</uap:FileType>
+              <uap:FileType>.heic</uap:FileType>
+              <uap:FileType>.heif</uap:FileType>
+              <uap:FileType>.avif</uap:FileType>
+              <uap:FileType>.webp</uap:FileType>
+              <uap:FileType>.cr2</uap:FileType>
+              <uap:FileType>.nef</uap:FileType>
+              <uap:FileType>.arw</uap:FileType>
+              <uap:FileType>.dng</uap:FileType>
+            </uap:SupportedFileTypes>
+          </uap:FileTypeAssociation>
+        </uap:Extension>
+      </Extensions>
     </Application>
   </Applications>
   <Capabilities>
     <!--<Capability Name="internetClient" />-->
+    <rescap:Capability Name="runFullTrust" />
   </Capabilities>
 </Package>

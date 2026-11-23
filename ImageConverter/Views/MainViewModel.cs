@@ -1,7 +1,7 @@
 ﻿using ImageConverter.Common;
+using System.Buffers;
 using System.Collections.ObjectModel;
 using System.Text;
-using Windows.ApplicationModel.ExtendedExecution;
 using Windows.Graphics.Imaging;
 using Windows.Storage;
 using Windows.Storage.Pickers;
@@ -9,7 +9,8 @@ using Windows.System;
 
 namespace ImageConverter.Views;
 
-public class MainViewModel : BindableBase
+[WinRT.GeneratedBindableCustomProperty]
+public partial class MainViewModel : BindableBase
 {
     public List<ImageFormat> ImageFormats { get; }
     private OptionsViewModel _optionsViewModel { get; } = new OptionsViewModel();
@@ -23,10 +24,19 @@ public class MainViewModel : BindableBase
     public bool IsProcessing        { get => GetV(false); private set => Set(value); }
     public bool IsOverwrite         { get => GetV(false); set => Set(value); }
     public bool CopyMetadata        { get => GetV(true); set => Set(value); }
-    public bool MultiframeSupport   { get => GetV(true); set => Set(value); }
+    public bool MultiframeSupport   { get => GetV(false); set => Set(value); }
+    public bool DeleteSourceFiles   { get => GetV(false); set => Set(value); }
     public bool HasSelectedItems    => SelectedFiles.Count > 0;
     public bool HasItems            => FileList.Count > 0;
-    public bool HasExportFolder     => ExportFolder != null;
+    public bool OutputToSourceFolder
+    {
+        get => GetV(false);
+        set => Set(value, nameof(OutputToSourceFolder), nameof(HasExportFolder), nameof(CanOpenExportFolder), nameof(OutputFolderDisplayText));
+    }
+
+    public bool HasExportFolder     => OutputToSourceFolder || ExportFolder != null;
+    public bool CanOpenExportFolder => !OutputToSourceFolder && ExportFolder != null;
+    public string OutputFolderDisplayText => OutputToSourceFolder ? "Source file folder" : (ExportFolder?.Path ?? "Click to choose");
     public bool HasOptions          => true;
 
     public string StatusBarLeft     { get => Get<string>(); private set => Set(value); }
@@ -35,7 +45,7 @@ public class MainViewModel : BindableBase
     public StorageFolder ExportFolder
     {
         get => Get<StorageFolder>();
-        private set => Set(value, nameof(ExportFolder), nameof(HasExportFolder));
+        private set => Set(value, nameof(ExportFolder), nameof(HasExportFolder), nameof(CanOpenExportFolder), nameof(OutputFolderDisplayText));
     }
 
     public ImageFormat SelectedFormat
@@ -127,7 +137,6 @@ public class MainViewModel : BindableBase
         FileList.Clear();
         UpdateStatusText();
         ResetProgress();
-        GC.Collect();
     }
 
     public void ConvertClick()
@@ -142,7 +151,29 @@ public class MainViewModel : BindableBase
 
     internal void ProcessDroppedFiles(IReadOnlyList<IStorageItem> items)
     {
-        _ = ProcessAddFilesAsync(items.OfType<StorageFile>().ToList());
+        _ = ProcessDroppedItemsAsync(items);
+    }
+
+    async Task ProcessDroppedItemsAsync(IReadOnlyList<IStorageItem> items)
+    {
+        if (items == null || items.Count == 0)
+            return;
+
+        var collectedFiles = new List<StorageFile>();
+        foreach (var item in items)
+        {
+            if (item is StorageFile file)
+            {
+                collectedFiles.Add(file);
+            }
+            else if (item is StorageFolder folder)
+            {
+                var folderFiles = await folder.GetFilesAsync();
+                collectedFiles.AddRange(folderFiles);
+            }
+        }
+
+        await ProcessAddFilesAsync(collectedFiles);
     }
 
 
@@ -153,6 +184,10 @@ public class MainViewModel : BindableBase
     async Task ChooseExportFolderAsync()
     {
         FolderPicker picker = new FolderPicker();
+        if (App.WindowHandle != IntPtr.Zero)
+        {
+            WinRT.Interop.InitializeWithWindow.Initialize(picker, App.WindowHandle);
+        }
         picker.FileTypeFilter.Add("*");
         var folder = await picker.PickSingleFolderAsync();
         ProcessExportFolder(folder);
@@ -163,6 +198,7 @@ public class MainViewModel : BindableBase
         if (folder == null ||string.IsNullOrWhiteSpace(folder.Path))
             return;
 
+        OutputToSourceFolder = false;
         ExportFolder = folder;
     }
 
@@ -181,6 +217,10 @@ public class MainViewModel : BindableBase
         {
             CommitButtonText = "Select"
         };
+        if (App.WindowHandle != IntPtr.Zero)
+        {
+            WinRT.Interop.InitializeWithWindow.Initialize(picker, App.WindowHandle);
+        }
 
         foreach (var type in ImageConverterCore.SupportedDecodeFileTypes)
             picker.FileTypeFilter.Add(type);
@@ -193,6 +233,13 @@ public class MainViewModel : BindableBase
 
     async Task ProcessAddFilesAsync(IEnumerable<StorageFile> files)
     {
+        if (files == null)
+        {
+            IsProcessing = false;
+            IsBusy = false;
+            return;
+        }
+
         IsBusy = true;
         IsProcessing = true;
 
@@ -200,10 +247,15 @@ public class MainViewModel : BindableBase
 
         List<StorageFile> heifImageSequence = new List<StorageFile>();
 
+        var existingPaths = new HashSet<string>(
+            FileList.Select(f => f.File.Path).Where(p => !string.IsNullOrEmpty(p)),
+            StringComparer.OrdinalIgnoreCase);
+
         List<StorageFile> _tooAdd = new List<StorageFile>();
         foreach (var file in files)
         {
-            if (!ImageConverterCore.SupportedDecodeFileTypes.Contains(file.FileType.ToLower()))
+            string fileType = file.FileType.ToLowerInvariant();
+            if (!ImageConverterCore.SupportedDecodeFileTypes.Contains(fileType))
                 continue;
 
             if (file.Attributes.HasFlag(Windows.Storage.FileAttributes.LocallyIncomplete))
@@ -213,25 +265,16 @@ public class MainViewModel : BindableBase
             }
 
             // We don't allow HEIC image sequences right now.
-            if (file.FileType == ".heic" || file.FileType == ".heif")
+            if (fileType is ".heic" or ".heif")
             {
-                using Stream s = await file.OpenStreamForReadAsync();
-                using StreamReader r = new StreamReader(s, Encoding.ASCII);
-                if (s.Length > 2048)
+                if (await IsHeifImageSequenceAsync(file))
                 {
-                    char[] buffer = new char[2048];
-                    r.Read(buffer, 0, 2048);
-
-                    var str = new String(buffer.Where(c => char.IsLetter(c)).ToArray());
-                    if (str.Contains("ImageSequencePictureHandler") || str.Contains("Derivedimage"))
-                    {
-                        heifImageSequence.Add(file);
-                        continue;
-                    }
+                    heifImageSequence.Add(file);
+                    continue;
                 }
             }
 
-            if (!FileList.Any(f => f.File.Path == file.Path))
+            if (string.IsNullOrEmpty(file.Path) || existingPaths.Add(file.Path))
             {
                 _tooAdd.Add(file);
             }
@@ -283,6 +326,55 @@ public class MainViewModel : BindableBase
         }
     }
 
+    private static async Task<bool> IsHeifImageSequenceAsync(StorageFile file)
+    {
+        using Stream s = !string.IsNullOrEmpty(file.Path)
+            ? new FileStream(file.Path, FileMode.Open, FileAccess.Read, FileShare.Read, 2048, FileOptions.SequentialScan | FileOptions.Asynchronous)
+            : await file.OpenStreamForReadAsync();
+
+        if (s.Length <= 2048)
+            return false;
+
+        byte[] buffer = ArrayPool<byte>.Shared.Rent(2048);
+        try
+        {
+            int totalRead = 0;
+            while (totalRead < 2048)
+            {
+                int read = await s.ReadAsync(buffer.AsMemory(totalRead, 2048 - totalRead)).ConfigureAwait(false);
+                if (read == 0)
+                    break;
+                totalRead += read;
+            }
+
+            char[] chars = ArrayPool<char>.Shared.Rent(totalRead);
+            try
+            {
+                int charCount = 0;
+                for (int i = 0; i < totalRead; i++)
+                {
+                    char c = (char)buffer[i];
+                    if (char.IsAsciiLetter(c))
+                    {
+                        chars[charCount++] = c;
+                    }
+                }
+
+                ReadOnlySpan<char> span = chars.AsSpan(0, charCount);
+                return span.Contains("ImageSequencePictureHandler", StringComparison.Ordinal)
+                    || span.Contains("Derivedimage", StringComparison.Ordinal);
+            }
+            finally
+            {
+                ArrayPool<char>.Shared.Return(chars);
+            }
+        }
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(buffer);
+        }
+    }
+
     async Task ConvertAsync()
     {
         if (FileList.Count == 0)
@@ -291,40 +383,70 @@ public class MainViewModel : BindableBase
         IsBusy = true;
         ConvertIndex = 0;
 
-        using (ExtendedExecutionSession ex = new ExtendedExecutionSession())
+        var options = new BitmapConversionSettings(
+            SelectedFormat.CodecInfo.CodecId,
+            _optionsViewModel.CurrentFileFormat,
+            _optionsViewModel.GetEffectiveOptions().Select(o => o.GetValue()).ToList())
         {
-            ex.Reason = ExtendedExecutionReason.Unspecified;
-            bool extended = await ex.RequestExtensionAsync() == ExtendedExecutionResult.Allowed;
+            CollisionOption = IsOverwrite ? CreationCollisionOption.ReplaceExisting : CreationCollisionOption.GenerateUniqueName,
+            CopyMetadata = CopyMetadata,
+            FrameHandling = MultiframeSupport ? BitmapFrameHandling.ExtractAllSeperately : BitmapFrameHandling.FirstFrameOnly
+        };
 
-            var options = new BitmapConversionSettings(
-                SelectedFormat.CodecInfo.CodecId,
-                _optionsViewModel.CurrentFileFormat,
-                _optionsViewModel.GetEffectiveOptions().Select(o => o.GetValue()).ToList())
+        _transformViewModel.ApplyTo(options);
+
+        var convertedItems = FileList.ToList();
+        int count = convertedItems.Count;
+        var result = await ImageConverterCore.ConvertAsync(convertedItems, OutputToSourceFolder ? null : ExportFolder, options, completed =>
+        {
+            ConvertIndex = completed - 1;
+            StatusBarRight = $"Converting {completed} of {count}...";
+        });
+
+        if (DeleteSourceFiles)
+        {
+            foreach (var item in convertedItems)
             {
-                CollisionOption = IsOverwrite ? CreationCollisionOption.ReplaceExisting : CreationCollisionOption.GenerateUniqueName,
-                CopyMetadata = CopyMetadata,
-                FrameHandling = MultiframeSupport ? BitmapFrameHandling.ExtractAllSeperately : BitmapFrameHandling.FirstFrameOnly
-            };
+                if (!item.LastSuccess)
+                    continue;
 
-            _transformViewModel.ApplyTo(options);
+                string sourceDir = !string.IsNullOrEmpty(item.File.Path) ? Path.GetDirectoryName(item.File.Path) : null;
+                string targetDir = OutputToSourceFolder ? sourceDir : ExportFolder?.Path;
+                bool sameFolder = OutputToSourceFolder || (
+                    !string.IsNullOrEmpty(sourceDir) &&
+                    !string.IsNullOrEmpty(targetDir) &&
+                    string.Equals(Path.TrimEndingDirectorySeparator(sourceDir), Path.TrimEndingDirectorySeparator(targetDir), StringComparison.OrdinalIgnoreCase));
 
-            int count = FileList.Count;
-            var result = await ImageConverterCore.ConvertAsync(FileList.ToList(), ExportFolder, options, i =>
-            {
-                ConvertIndex = i - 1;
-                StatusBarRight = $"Converting {i} of {count}...";
-                ex.PercentProgress = (uint)(i / count);
-            });
+                bool overwrittenInPlace = IsOverwrite
+                    && sameFolder
+                    && string.Equals(item.File.FileType, options.FileExtension, StringComparison.OrdinalIgnoreCase);
 
-            StringBuilder b = new StringBuilder();
-            if (result.Width > 0 && result.Height == 0)
-                StatusBarRight = $"Result: {result.Width} items converted";
-            else
-                StatusBarRight = $"Result: {result.Width} items converted, {result.Height} failed";
+                if (overwrittenInPlace)
+                    continue;
 
-            ex.PercentProgress = 100;
+                try
+                {
+                    if (!string.IsNullOrEmpty(item.File.Path))
+                        File.Delete(item.File.Path);
+                    else
+                        await item.File.DeleteAsync().AsTask();
+
+                    SelectedFiles.Remove(item);
+                    FileList.Remove(item);
+                }
+                catch
+                {
+                }
+            }
+
+            UpdateStatusText();
         }
-           
+
+        if (result.Width > 0 && result.Height == 0)
+            StatusBarRight = $"Result: {result.Width} items converted";
+        else
+            StatusBarRight = $"Result: {result.Width} items converted, {result.Height} failed";
+
         IsBusy = false;
     }
 
@@ -336,11 +458,17 @@ public class MainViewModel : BindableBase
         var files = SelectedFiles.ToList();
         SelectedFiles.Clear();
 
-        foreach (var file in files.Cast<ImageViewModel>())
-            FileList.Remove(file);
+        if (files.Count == FileList.Count)
+        {
+            FileList.Clear();
+        }
+        else
+        {
+            foreach (var file in files.Cast<ImageViewModel>())
+                FileList.Remove(file);
+        }
 
         UpdateStatusText();
         ResetProgress();
-        GC.Collect();
     }
 }

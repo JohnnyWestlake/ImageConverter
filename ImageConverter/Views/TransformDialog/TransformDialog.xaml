@@ -25,129 +25,18 @@
             <Setter Property="FontSize" Value="{StaticResource DefaultFontSize}" />
         </Style>
 
-        <Style TargetType="TextBox">
+        <Style BasedOn="{StaticResource DefaultTextBoxStyle}" TargetType="TextBox">
             <Setter Property="InputScope" Value="Number" />
             <Setter Property="MinHeight" Value="30" />
             <Setter Property="Margin" Value="0 2 0 4" />
             <Setter Property="MaxLength" Value="8" />
             <Setter Property="PlaceholderText" Value="Enter a number" />
             <Setter Property="FontSize" Value="{StaticResource DefaultFontSize}" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="TextBox">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="*" />
-                            </Grid.RowDefinitions>
-                            <Border x:Name="BorderElement"
-                                    Grid.Row="1"
-                                    Grid.RowSpan="1"
-                                    Grid.ColumnSpan="2"
-                                    Background="{TemplateBinding Background}"
-                                    BorderBrush="{TemplateBinding BorderBrush}"
-                                    BorderThickness="{TemplateBinding BorderThickness}" />
-                            <ScrollViewer x:Name="ContentElement"
-                                          Grid.Row="1"
-                                          Margin="{TemplateBinding BorderThickness}"
-                                          Padding="{TemplateBinding Padding}"
-                                          AutomationProperties.AccessibilityView="Raw"
-                                          HorizontalScrollBarVisibility="{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}"
-                                          HorizontalScrollMode="{TemplateBinding ScrollViewer.HorizontalScrollMode}"
-                                          IsDeferredScrollingEnabled="{TemplateBinding ScrollViewer.IsDeferredScrollingEnabled}"
-                                          IsHorizontalRailEnabled="{TemplateBinding ScrollViewer.IsHorizontalRailEnabled}"
-                                          IsTabStop="False"
-                                          IsVerticalRailEnabled="{TemplateBinding ScrollViewer.IsVerticalRailEnabled}"
-                                          VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}"
-                                          VerticalScrollMode="{TemplateBinding ScrollViewer.VerticalScrollMode}"
-                                          ZoomMode="Disabled" />
-                            <TextBlock x:Name="PlaceholderTextContentPresenter"
-                                       Grid.Row="1"
-                                       Grid.ColumnSpan="2"
-                                       Margin="{TemplateBinding BorderThickness}"
-                                       Padding="{TemplateBinding Padding}"
-                                       Foreground="{Binding PlaceholderForeground, RelativeSource={RelativeSource TemplatedParent}, TargetNullValue={ThemeResource TextControlPlaceholderForeground}}"
-                                       IsHitTestVisible="False"
-                                       Text="{TemplateBinding PlaceholderText}"
-                                       TextAlignment="{TemplateBinding TextAlignment}"
-                                       TextWrapping="{TemplateBinding TextWrapping}" />
-
-
-                            <VisualStateManager.VisualStateGroups>
-                                <VisualStateGroup x:Name="CommonStates">
-
-                                    <VisualState x:Name="Disabled">
-
-                                        <Storyboard>
-                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="BorderElement" Storyboard.TargetProperty="Background">
-                                                <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource TextControlBackgroundDisabled}" />
-                                            </ObjectAnimationUsingKeyFrames>
-                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="BorderElement" Storyboard.TargetProperty="BorderBrush">
-                                                <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource TextControlBorderBrushDisabled}" />
-                                            </ObjectAnimationUsingKeyFrames>
-                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentElement" Storyboard.TargetProperty="Foreground">
-                                                <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource TextControlForegroundDisabled}" />
-                                            </ObjectAnimationUsingKeyFrames>
-                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="PlaceholderTextContentPresenter" Storyboard.TargetProperty="Foreground">
-                                                <DiscreteObjectKeyFrame KeyTime="0" Value="{Binding PlaceholderForeground, RelativeSource={RelativeSource TemplatedParent}, TargetNullValue={ThemeResource TextControlPlaceholderForegroundDisabled}}" />
-                                            </ObjectAnimationUsingKeyFrames>
-                                        </Storyboard>
-                                    </VisualState>
-                                    <VisualState x:Name="Normal" />
-
-                                    <VisualState x:Name="PointerOver">
-
-                                        <Storyboard>
-                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="BorderElement" Storyboard.TargetProperty="BorderBrush">
-                                                <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource TextControlBorderBrushPointerOver}" />
-                                            </ObjectAnimationUsingKeyFrames>
-                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="BorderElement" Storyboard.TargetProperty="Background">
-                                                <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource TextControlBackgroundPointerOver}" />
-                                            </ObjectAnimationUsingKeyFrames>
-                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="PlaceholderTextContentPresenter" Storyboard.TargetProperty="Foreground">
-                                                <DiscreteObjectKeyFrame KeyTime="0" Value="{Binding PlaceholderForeground, RelativeSource={RelativeSource TemplatedParent}, TargetNullValue={ThemeResource TextControlPlaceholderForegroundPointerOver}}" />
-                                            </ObjectAnimationUsingKeyFrames>
-                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentElement" Storyboard.TargetProperty="Foreground">
-                                                <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource TextControlForegroundPointerOver}" />
-                                            </ObjectAnimationUsingKeyFrames>
-                                        </Storyboard>
-                                    </VisualState>
-                                    <VisualState x:Name="Focused">
-
-                                        <Storyboard>
-                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="PlaceholderTextContentPresenter" Storyboard.TargetProperty="Foreground">
-                                                <DiscreteObjectKeyFrame KeyTime="0" Value="{Binding PlaceholderForeground, RelativeSource={RelativeSource TemplatedParent}, TargetNullValue={ThemeResource TextControlPlaceholderForegroundFocused}}" />
-                                            </ObjectAnimationUsingKeyFrames>
-                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="BorderElement" Storyboard.TargetProperty="Background">
-                                                <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource TextControlBackgroundFocused}" />
-                                            </ObjectAnimationUsingKeyFrames>
-                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="BorderElement" Storyboard.TargetProperty="BorderBrush">
-                                                <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource TextControlBorderBrushFocused}" />
-                                            </ObjectAnimationUsingKeyFrames>
-                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentElement" Storyboard.TargetProperty="Foreground">
-                                                <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource TextControlForegroundFocused}" />
-                                            </ObjectAnimationUsingKeyFrames>
-                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentElement" Storyboard.TargetProperty="RequestedTheme">
-                                                <DiscreteObjectKeyFrame KeyTime="0" Value="Light" />
-                                            </ObjectAnimationUsingKeyFrames>
-                                        </Storyboard>
-                                    </VisualState>
-                                </VisualStateGroup>
-
-                            </VisualStateManager.VisualStateGroups>
-                        </Grid>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
         </Style>
 
     </FrameworkElement.Resources>
 
-    <Grid DataContext="{x:Bind}">
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -160,8 +49,7 @@
                     Background="Transparent"
                     Canvas.ZIndex="10"
                     Click="{x:Bind Close}"
-                    CornerRadius="0 8 0 0"
-                    Style="{StaticResource ButtonRevealStyle}">
+                    CornerRadius="0 8 0 0">
                 <SymbolIcon Symbol="Accept" />
             </Button>
             <TextBlock Margin="20 20 20 12"
@@ -181,7 +69,7 @@
                                       IsChecked="{x:Bind ViewModel.ConstrainWidth, Mode=TwoWay}" />
                             <TextBox BeforeTextChanging="TextBox_BeforeTextChanging"
                                      IsEnabled="{x:Bind ViewModel.ConstrainWidth, Mode=OneWay}"
-                                     Text="{Binding ViewModel.WidthConstraintText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                     Text="{x:Bind ViewModel.WidthConstraintText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         </StackPanel>
 
                     </common:OptionPresenter>
@@ -193,7 +81,7 @@
                                       IsChecked="{x:Bind ViewModel.ConstrainHeight, Mode=TwoWay}" />
                             <TextBox BeforeTextChanging="TextBox_BeforeTextChanging"
                                      IsEnabled="{x:Bind ViewModel.ConstrainHeight, Mode=OneWay}"
-                                     Text="{Binding ViewModel.HeightConstraintText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                     Text="{x:Bind ViewModel.HeightConstraintText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         </StackPanel>
 
                     </common:OptionPresenter>

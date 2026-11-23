@@ -2,7 +2,8 @@
 
 namespace ImageConverter.Views;
 
-public class OptionsViewModel : BindableBase
+[WinRT.GeneratedBindableCustomProperty]
+public partial class OptionsViewModel : BindableBase
 {
     private ImageFormat _format;
 
@@ -21,11 +22,11 @@ public class OptionsViewModel : BindableBase
     public bool SupportsProgressive     => false; // Doesn't work? ProgressiveModeOption.SupportedFormats.Contains(_format.Format);
     public bool SupportsInterlace       => InterlaceOptionOption.SupportedFormats.Contains(_format.Format);
 
-    public PngFilterMode[] PngOptions { get; } 
-        = Enum.GetValues(typeof(PngFilterMode)).Cast<PngFilterMode>().ToArray();
+    public PngFilterMode[] PngOptions { get; }
+        = Enum.GetValues<PngFilterMode>();
 
     public JpegSubsamplingMode[] ChromaOptions { get; }
-        = Enum.GetValues(typeof(JpegSubsamplingMode)).Cast<JpegSubsamplingMode>().ToArray();
+        = Enum.GetValues<JpegSubsamplingMode>();
 
     // Bindable Properties
 

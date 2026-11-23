@@ -10,51 +10,42 @@ global using System.Runtime.CompilerServices;
 global using ImageConverter.Core;
 global using ImageConverter.Core.CX;
 
-using Windows.ApplicationModel.Activation;
-using Windows.UI.Core;
-using Windows.UI.Xaml;
+using Microsoft.UI.Dispatching;
+using Microsoft.UI.Xaml;
 
 namespace ImageConverter;
 
 sealed partial class App : Application
 {
+    public static Window MainWindow { get; private set; }
+    public static IntPtr WindowHandle => MainWindow != null ? WinRT.Interop.WindowNative.GetWindowHandle(MainWindow) : IntPtr.Zero;
+    public static DispatcherQueue Dispatcher { get; private set; }
+
     public App()
     {
-        this.FocusVisualKind = FocusVisualKind.Reveal;
         this.InitializeComponent();
         this.UnhandledException += App_UnhandledException;
     }
 
-    private void App_UnhandledException(object sender, Windows.UI.Xaml.UnhandledExceptionEventArgs e)
+    private void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
     {
         e.Handled = true;
     }
-
-    public static CoreDispatcher Dispatcher { get; private set; }
 
     /// <summary>
     /// Invoked when the application is launched normally by the end user.  Other entry points
     /// will be used such as when the application is launched to open a specific file.
     /// </summary>
     /// <param name="e">Details about the launch request and process.</param>
-    protected override void OnLaunched(LaunchActivatedEventArgs e)
+    protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs e)
     {
-        // Do not repeat app initialization when the Window already has content,
-        // just ensure that the window is active
-        if (!(Window.Current.Content is MainPage page))
+        Dispatcher = DispatcherQueue.GetForCurrentThread();
+        MainWindow = new Window
         {
-            // Create a Frame to act as the navigation context and navigate to the first page
-            Dispatcher = Window.Current.Dispatcher;
-            page = new MainPage();
-
-            // Place the frame in the current Window
-            Window.Current.Content = page;
-        }
-
-        if (e.PrelaunchActivated == false)
-        {
-            Window.Current.Activate();
-        }
+            Title = "Image Converter"
+        };
+        MainWindow.Content = new MainPage();
+        MainWindow.Activate();
     }
 
 }

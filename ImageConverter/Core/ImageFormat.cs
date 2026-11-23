@@ -5,7 +5,8 @@ using Windows.Graphics.Imaging;
 namespace ImageConverter.Core;
 
 [DebuggerDisplay("{CodecInfo.FriendlyName}")]
-public class ImageFormat
+[WinRT.GeneratedBindableCustomProperty]
+public partial class ImageFormat
 {
     public BitmapCodecInformation CodecInfo { get; }
     public string DisplayName { get; }

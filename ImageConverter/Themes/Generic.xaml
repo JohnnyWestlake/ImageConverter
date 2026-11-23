@@ -59,7 +59,7 @@
     <Style TargetType="common:InfoBar">
         <Setter Property="Padding" Value="12 6" />
         <Setter Property="Foreground" Value="White" />
-        <Setter Property="Background" Value="{ThemeResource SystemColorControlAccentBrush}" />
+        <Setter Property="Background" Value="{ThemeResource SystemAccentColor}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="common:InfoBar">
